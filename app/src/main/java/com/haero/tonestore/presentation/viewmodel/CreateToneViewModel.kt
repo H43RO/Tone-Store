@@ -3,6 +3,7 @@ package com.haero.tonestore.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.haero.tonestore.domain.model.AmpSetting
+import com.haero.tonestore.domain.model.GenreTag
 import com.haero.tonestore.domain.model.GuitarSetting
 import com.haero.tonestore.domain.model.Knob
 import com.haero.tonestore.domain.model.Pedal
@@ -52,6 +53,7 @@ class CreateToneViewModel(
             is CreateToneIntent.UpdatePickupPosition -> updatePickupPosition(intent.position)
             is CreateToneIntent.UpdateGuitarTone -> updateGuitarTone(intent.value)
             is CreateToneIntent.UpdateGuitarVolume -> updateGuitarVolume(intent.value)
+            is CreateToneIntent.ToggleTag -> toggleTag(intent.tag)
             is CreateToneIntent.SaveToneSetting -> saveToneSetting()
             is CreateToneIntent.NavigationHandled -> clearNavigation()
         }
@@ -76,7 +78,8 @@ class CreateToneViewModel(
                             songName = setting.songName,
                             pedalBoard = setting.pedalBoard,
                             ampSetting = setting.ampSetting,
-                            guitarSetting = setting.guitarSetting
+                            guitarSetting = setting.guitarSetting,
+                            selectedTags = setting.tags
                         )
                     }
                 } else {
@@ -185,6 +188,18 @@ class CreateToneViewModel(
         _state.update { it.copy(guitarSetting = it.guitarSetting.copy(volumeKnob = value)) }
     }
     
+    private fun toggleTag(tag: GenreTag) {
+        _state.update { state ->
+            val currentTags = state.selectedTags
+            val updatedTags = if (currentTags.contains(tag)) {
+                currentTags - tag
+            } else {
+                currentTags + tag
+            }
+            state.copy(selectedTags = updatedTags)
+        }
+    }
+    
     private fun saveToneSetting() {
         val currentState = _state.value
         
@@ -205,7 +220,8 @@ class CreateToneViewModel(
                     updatedAt = now,
                     pedalBoard = currentState.pedalBoard,
                     ampSetting = currentState.ampSetting,
-                    guitarSetting = currentState.guitarSetting
+                    guitarSetting = currentState.guitarSetting,
+                    tags = currentState.selectedTags
                 )
                 saveToneSettingUseCase(toneSetting)
                 _state.update { it.copy(isSaving = false, navigateBack = true, showSaveSuccess = true) }

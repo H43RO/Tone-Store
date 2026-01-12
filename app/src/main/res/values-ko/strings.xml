@@ -15,6 +15,7 @@
     <string name="search_hint">곡 이름으로 검색</string>
     <string name="close_search">검색 닫기</string>
     <string name="no_search_results">검색 결과가 없습니다</string>
+    <string name="favorite">즐겨찾기</string>
     
     <!-- Create/Edit Screen -->
     <string name="create_tone_setting">새 톤 세팅</string>
@@ -45,6 +46,10 @@
     <string name="guitar_setting">기타 세팅</string>
     <string name="guitar_model_hint">기타 모델 (예: Fender Stratocaster)</string>
     <string name="pickup_selector">픽업 셀렉터</string>
+    
+    <!-- Tag Section -->
+    <string name="genre_tags">장르 태그</string>
+    <string name="select_tags_hint">이 톤에 맞는 장르를 선택하세요</string>
     
     <!-- Detail Screen -->
     <string name="edit">편집</string>

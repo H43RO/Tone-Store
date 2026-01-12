@@ -35,6 +35,7 @@ import com.haero.tonestore.R
 import com.haero.tonestore.presentation.ui.create.components.AmpSection
 import com.haero.tonestore.presentation.ui.create.components.GuitarSection
 import com.haero.tonestore.presentation.ui.create.components.PedalBoardSection
+import com.haero.tonestore.presentation.ui.create.components.TagSection
 import com.haero.tonestore.presentation.viewmodel.CreateToneViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -137,6 +138,14 @@ fun CreateToneScreen(
             )
             
             Spacer(modifier = Modifier.height(8.dp))
+            
+            // 태그 섹션
+            TagSection(
+                selectedTags = state.selectedTags,
+                onTagToggle = { tag ->
+                    viewModel.handleIntent(CreateToneIntent.ToggleTag(tag))
+                }
+            )
             
             // 페달보드 섹션
             PedalBoardSection(

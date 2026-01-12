@@ -24,4 +24,7 @@ sealed interface HomeIntent {
     
     /** 검색어 변경 */
     data class UpdateSearchQuery(val query: String) : HomeIntent
+    
+    /** 즐겨찾기 토글 */
+    data class ToggleFavorite(val id: String) : HomeIntent
 }

@@ -1,6 +1,7 @@
 package com.haero.tonestore.presentation.ui.create
 
 import com.haero.tonestore.domain.model.AmpSetting
+import com.haero.tonestore.domain.model.GenreTag
 import com.haero.tonestore.domain.model.GuitarSetting
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalBoard
@@ -18,6 +19,7 @@ data class CreateToneState(
     val pedalBoard: PedalBoard = PedalBoard(),
     val ampSetting: AmpSetting = AmpSetting(),
     val guitarSetting: GuitarSetting = GuitarSetting(),
+    val selectedTags: List<GenreTag> = emptyList(),
     
     // 프리셋 페달 목록
     val presetPedals: List<Pedal> = emptyList(),

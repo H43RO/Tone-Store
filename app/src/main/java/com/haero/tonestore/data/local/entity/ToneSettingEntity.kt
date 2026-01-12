@@ -16,5 +16,7 @@ data class ToneSettingEntity(
     val updatedAt: Long,
     val pedalBoardJson: String,
     val ampSettingJson: String,
-    val guitarSettingJson: String
+    val guitarSettingJson: String,
+    val isFavorite: Boolean = false,
+    val tagsJson: String = "[]"
 )

@@ -11,6 +11,8 @@ package com.haero.tonestore.domain.model
  * @property pedalBoard 이펙터 페달보드 세팅
  * @property ampSetting 앰프 세팅
  * @property guitarSetting 기타 본체 세팅
+ * @property isFavorite 즐겨찾기 여부
+ * @property tags 장르 태그 목록
  */
 data class ToneSetting(
     val id: String,
@@ -19,5 +21,7 @@ data class ToneSetting(
     val updatedAt: Long,
     val pedalBoard: PedalBoard,
     val ampSetting: AmpSetting,
-    val guitarSetting: GuitarSetting
+    val guitarSetting: GuitarSetting,
+    val isFavorite: Boolean = false,
+    val tags: List<GenreTag> = emptyList()
 )

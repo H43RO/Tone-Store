@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.haero.tonestore.data.local.entity.ToneSettingEntity
 import com.haero.tonestore.domain.model.AmpSetting
+import com.haero.tonestore.domain.model.GenreTag
 import com.haero.tonestore.domain.model.GuitarSetting
 import com.haero.tonestore.domain.model.PedalBoard
 import com.haero.tonestore.domain.model.ToneSetting
@@ -19,6 +20,16 @@ object ToneSettingMapper {
      * Entity를 Domain Model로 변환
      */
     fun ToneSettingEntity.toDomain(): ToneSetting {
+        val tagsType = object : TypeToken<List<String>>() {}.type
+        val tagStrings: List<String> = try {
+            gson.fromJson(tagsJson, tagsType) ?: emptyList()
+        } catch (e: Exception) {
+            emptyList()
+        }
+        val tags = tagStrings.mapNotNull { tagName ->
+            try { GenreTag.valueOf(tagName) } catch (e: Exception) { null }
+        }
+        
         return ToneSetting(
             id = id,
             songName = songName,
@@ -26,7 +37,9 @@ object ToneSettingMapper {
             updatedAt = updatedAt,
             pedalBoard = gson.fromJson(pedalBoardJson, PedalBoard::class.java),
             ampSetting = gson.fromJson(ampSettingJson, AmpSetting::class.java),
-            guitarSetting = gson.fromJson(guitarSettingJson, GuitarSetting::class.java)
+            guitarSetting = gson.fromJson(guitarSettingJson, GuitarSetting::class.java),
+            isFavorite = isFavorite,
+            tags = tags
         )
     }
     
@@ -34,6 +47,7 @@ object ToneSettingMapper {
      * Domain Model을 Entity로 변환
      */
     fun ToneSetting.toEntity(): ToneSettingEntity {
+        val tagStrings = tags.map { it.name }
         return ToneSettingEntity(
             id = id,
             songName = songName,
@@ -41,7 +55,9 @@ object ToneSettingMapper {
             updatedAt = updatedAt,
             pedalBoardJson = gson.toJson(pedalBoard),
             ampSettingJson = gson.toJson(ampSetting),
-            guitarSettingJson = gson.toJson(guitarSetting)
+            guitarSettingJson = gson.toJson(guitarSetting),
+            isFavorite = isFavorite,
+            tagsJson = gson.toJson(tagStrings)
         )
     }
 }

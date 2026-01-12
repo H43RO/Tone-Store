@@ -32,4 +32,8 @@ class ToneSettingRepositoryImpl(
     override suspend fun deleteToneSetting(id: String) {
         dao.deleteToneSettingById(id)
     }
+    
+    override suspend fun toggleFavorite(id: String) {
+        dao.toggleFavorite(id)
+    }
 }

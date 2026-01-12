@@ -1,5 +1,6 @@
 package com.haero.tonestore.presentation.ui.create
 
+import com.haero.tonestore.domain.model.GenreTag
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PickupPosition
 
@@ -52,6 +53,10 @@ sealed interface CreateToneIntent {
     
     /** 기타 볼륨 노브 업데이트 */
     data class UpdateGuitarVolume(val value: Float) : CreateToneIntent
+    
+    // 태그 관련
+    /** 태그 토글 */
+    data class ToggleTag(val tag: GenreTag) : CreateToneIntent
     
     // 저장
     /** 톤 세팅 저장 */

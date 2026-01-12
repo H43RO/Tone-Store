@@ -1,5 +1,9 @@
 package com.haero.tonestore.presentation.ui.components
 
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -11,15 +15,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -29,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
 
 /**
@@ -40,6 +46,7 @@ import kotlin.math.sin
  * @param modifier Modifier
  * @param size 노브 크기
  * @param enabled 활성화 여부
+ * @param steps 노브의 스텝 수 (햅틱 피드백용, 기본 20 = 0.5 단위)
  */
 @Composable
 fun RotaryKnob(
@@ -48,9 +55,22 @@ fun RotaryKnob(
     label: String,
     modifier: Modifier = Modifier,
     size: Dp = 64.dp,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    steps: Int = 20
 ) {
     val view = LocalView.current
+    val context = LocalContext.current
+    
+    // Vibrator 가져오기
+    val vibrator = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = context.getSystemService(VibratorManager::class.java)
+            vibratorManager?.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            context.getSystemService(Vibrator::class.java)
+        }
+    }
     
     // 노브 회전 각도 범위: -135° ~ +135° (총 270°)
     val startAngle = -135f
@@ -62,10 +82,24 @@ fun RotaryKnob(
     
     // 드래그 중 이전 각도 저장
     var previousAngle by remember { mutableFloatStateOf(0f) }
+    // 햅틱 피드백을 위한 이전 스텝 저장
+    var previousStep by remember { mutableIntStateOf((value * steps / 10f).roundToInt()) }
     
     val knobColor = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
     val trackColor = if (enabled) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
     val indicatorColor = if (enabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.outline
+    
+    // 드르륵 햅틱 피드백 함수
+    fun performTickHaptic() {
+        vibrator?.let { vib ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                vib.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+            } else {
+                @Suppress("DEPRECATION")
+                vib.vibrate(10L)
+            }
+        }
+    }
     
     Column(
         modifier = modifier,
@@ -86,6 +120,7 @@ fun RotaryKnob(
                                 offset.y - centerY,
                                 offset.x - centerX
                             ) * (180f / PI.toFloat())
+                            previousStep = (value * steps / 10f).roundToInt()
                         },
                         onDrag = { change, _ ->
                             change.consume()
@@ -107,9 +142,11 @@ fun RotaryKnob(
                             val sensitivity = 0.5f
                             val newValue = (value + delta * sensitivity / 27f).coerceIn(0f, 10f)
                             
-                            // 정수 단위 변경 시 햅틱 피드백
-                            if (newValue.toInt() != value.toInt()) {
-                                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                            // 스텝 기반 햅틱 피드백 (드르륵 느낌)
+                            val currentStep = (newValue * steps / 10f).roundToInt()
+                            if (currentStep != previousStep) {
+                                performTickHaptic()
+                                previousStep = currentStep
                             }
                             
                             onValueChange(newValue)

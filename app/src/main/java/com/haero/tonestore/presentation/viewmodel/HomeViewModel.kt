@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.haero.tonestore.domain.model.ToneSetting
 import com.haero.tonestore.domain.usecase.DeleteToneSettingUseCase
 import com.haero.tonestore.domain.usecase.GetAllToneSettingsUseCase
+import com.haero.tonestore.domain.usecase.ToggleFavoriteUseCase
 import com.haero.tonestore.presentation.ui.home.HomeIntent
 import com.haero.tonestore.presentation.ui.home.HomeState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,8 @@ import kotlinx.coroutines.launch
  */
 class HomeViewModel(
     private val getAllToneSettingsUseCase: GetAllToneSettingsUseCase,
-    private val deleteToneSettingUseCase: DeleteToneSettingUseCase
+    private val deleteToneSettingUseCase: DeleteToneSettingUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : ViewModel() {
     
     private val _state = MutableStateFlow(HomeState())
@@ -38,6 +40,7 @@ class HomeViewModel(
             is HomeIntent.NavigationHandled -> clearNavigation()
             is HomeIntent.SetSearchActive -> setSearchActive(intent.isActive)
             is HomeIntent.UpdateSearchQuery -> updateSearchQuery(intent.query)
+            is HomeIntent.ToggleFavorite -> toggleFavorite(intent.id)
         }
     }
     
@@ -101,6 +104,16 @@ class HomeViewModel(
         viewModelScope.launch {
             try {
                 deleteToneSettingUseCase(id)
+            } catch (e: Exception) {
+                _state.update { it.copy(error = e.message) }
+            }
+        }
+    }
+    
+    private fun toggleFavorite(id: String) {
+        viewModelScope.launch {
+            try {
+                toggleFavoriteUseCase(id)
             } catch (e: Exception) {
                 _state.update { it.copy(error = e.message) }
             }

@@ -190,6 +190,9 @@ fun HomeScreen(
                             },
                             onDelete = { id ->
                                 viewModel.handleIntent(HomeIntent.DeleteToneSetting(id))
+                            },
+                            onFavoriteClick = { id ->
+                                viewModel.handleIntent(HomeIntent.ToggleFavorite(id))
                             }
                         )
                     }
@@ -204,7 +207,8 @@ fun HomeScreen(
 private fun ToneSettingList(
     toneSettings: List<ToneSetting>,
     onItemClick: (String) -> Unit,
-    onDelete: (String) -> Unit
+    onDelete: (String) -> Unit,
+    onFavoriteClick: (String) -> Unit
 ) {
     var showDeleteDialog by remember { mutableStateOf<String?>(null) }
     
@@ -254,7 +258,8 @@ private fun ToneSettingList(
             ) {
                 ToneSettingCard(
                     toneSetting = toneSetting,
-                    onClick = { onItemClick(toneSetting.id) }
+                    onClick = { onItemClick(toneSetting.id) },
+                    onFavoriteClick = { onFavoriteClick(toneSetting.id) }
                 )
             }
         }

@@ -16,7 +16,9 @@ val databaseModule = module {
             androidContext(),
             ToneStoreDatabase::class.java,
             ToneStoreDatabase.DATABASE_NAME
-        ).build()
+        )
+            .addMigrations(ToneStoreDatabase.MIGRATION_1_2)
+            .build()
     }
     
     // DAO
