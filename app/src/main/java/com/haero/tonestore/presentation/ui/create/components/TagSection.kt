@@ -1,13 +1,14 @@
 package com.haero.tonestore.presentation.ui.create.components
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
@@ -29,7 +30,6 @@ import java.util.Locale
 /**
  * 장르 태그 선택 섹션 컴포넌트
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TagSection(
     selectedTags: List<GenreTag>,
@@ -42,7 +42,7 @@ fun TagSection(
     SectionHeader(
         title = stringResource(R.string.genre_tags),
         isExpanded = isExpanded,
-        onToggle = { isExpanded = !isExpanded },
+        onToggle = { isExpanded = isExpanded.not() },
         modifier = modifier
     ) {
         Column(
@@ -58,10 +58,11 @@ fun TagSection(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 GenreTag.entries.forEach { tag ->
                     val isSelected = selectedTags.contains(tag)
