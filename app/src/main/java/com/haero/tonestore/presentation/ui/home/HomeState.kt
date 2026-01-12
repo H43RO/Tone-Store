@@ -8,6 +8,9 @@ import com.haero.tonestore.domain.model.ToneSetting
 data class HomeState(
     val isLoading: Boolean = true,
     val toneSettings: List<ToneSetting> = emptyList(),
+    val filteredToneSettings: List<ToneSetting> = emptyList(),
+    val searchQuery: String = "",
+    val isSearchActive: Boolean = false,
     val error: String? = null,
     val navigateToDetail: String? = null,
     val navigateToCreate: Boolean = false

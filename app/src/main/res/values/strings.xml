@@ -11,6 +11,10 @@
     <string name="add_tone_setting">Add Tone Setting</string>
     <string name="empty_tone_settings">No tone settings yet.\nTap + to create your first one!</string>
     <string name="pedal_count">%d pedals</string>
+    <string name="search">Search</string>
+    <string name="search_hint">Search by song name</string>
+    <string name="close_search">Close search</string>
+    <string name="no_search_results">No results found</string>
     
     <!-- Create/Edit Screen -->
     <string name="create_tone_setting">New Tone Setting</string>

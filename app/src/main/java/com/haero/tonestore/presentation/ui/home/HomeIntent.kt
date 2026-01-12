@@ -18,4 +18,10 @@ sealed interface HomeIntent {
     
     /** 네비게이션 이벤트 소비 완료 */
     data object NavigationHandled : HomeIntent
+    
+    /** 검색창 활성화/비활성화 */
+    data class SetSearchActive(val isActive: Boolean) : HomeIntent
+    
+    /** 검색어 변경 */
+    data class UpdateSearchQuery(val query: String) : HomeIntent
 }

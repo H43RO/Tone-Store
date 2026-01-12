@@ -11,6 +11,10 @@
     <string name="add_tone_setting">톤 세팅 추가</string>
     <string name="empty_tone_settings">저장된 톤 세팅이 없습니다.\n+ 버튼을 눌러 첫 번째 톤 세팅을 만들어보세요!</string>
     <string name="pedal_count">%d개 페달</string>
+    <string name="search">검색</string>
+    <string name="search_hint">곡 이름으로 검색</string>
+    <string name="close_search">검색 닫기</string>
+    <string name="no_search_results">검색 결과가 없습니다</string>
     
     <!-- Create/Edit Screen -->
     <string name="create_tone_setting">새 톤 세팅</string>
