@@ -114,18 +114,6 @@ app/src/main/java/com/haero/tonestore/
   - Secondary: `#004E89` (이펙터 페달 케이스 딥 블루)
   - Background: `#1A1A1D` (다크 모드)
 
-## 🚀 빌드 & 실행
-
-```bash
-# 클론
-git clone https://github.com/H43RO/Tone-Store.git
-cd Tone-Store
-
-# 빌드
-./gradlew assembleDebug
-
-# 또는 Android Studio에서 열기
-```
 
 ## 📝 향후 개발 예정
 
