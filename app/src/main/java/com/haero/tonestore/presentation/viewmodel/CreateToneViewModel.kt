@@ -1,0 +1,221 @@
+package com.haero.tonestore.presentation.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.haero.tonestore.domain.model.AmpSetting
+import com.haero.tonestore.domain.model.GuitarSetting
+import com.haero.tonestore.domain.model.Knob
+import com.haero.tonestore.domain.model.Pedal
+import com.haero.tonestore.domain.model.PedalBoard
+import com.haero.tonestore.domain.model.PedalType
+import com.haero.tonestore.domain.model.ToneSetting
+import com.haero.tonestore.domain.usecase.GetPresetPedalsUseCase
+import com.haero.tonestore.domain.usecase.GetToneSettingByIdUseCase
+import com.haero.tonestore.domain.usecase.SaveToneSettingUseCase
+import com.haero.tonestore.presentation.ui.create.CreateToneIntent
+import com.haero.tonestore.presentation.ui.create.CreateToneState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.util.UUID
+
+/**
+ * Create/Edit 화면의 ViewModel (MVI 패턴)
+ */
+class CreateToneViewModel(
+    private val getToneSettingByIdUseCase: GetToneSettingByIdUseCase,
+    private val saveToneSettingUseCase: SaveToneSettingUseCase,
+    private val getPresetPedalsUseCase: GetPresetPedalsUseCase
+) : ViewModel() {
+    
+    private val _state = MutableStateFlow(CreateToneState())
+    val state: StateFlow<CreateToneState> = _state.asStateFlow()
+    
+    init {
+        loadPresetPedals()
+    }
+    
+    fun handleIntent(intent: CreateToneIntent) {
+        when (intent) {
+            is CreateToneIntent.LoadToneSetting -> loadToneSetting(intent.id)
+            is CreateToneIntent.UpdateSongName -> updateSongName(intent.name)
+            is CreateToneIntent.AddPresetPedal -> addPresetPedal(intent.pedal)
+            is CreateToneIntent.AddCustomPedal -> addCustomPedal(intent.name, intent.knobNames)
+            is CreateToneIntent.RemovePedal -> removePedal(intent.pedalId)
+            is CreateToneIntent.UpdatePedalKnob -> updatePedalKnob(intent.pedalId, intent.knobIndex, intent.value)
+            is CreateToneIntent.TogglePedalEnabled -> togglePedalEnabled(intent.pedalId)
+            is CreateToneIntent.UpdateAmpModel -> updateAmpModel(intent.model)
+            is CreateToneIntent.UpdateAmpKnob -> updateAmpKnob(intent.knobName, intent.value)
+            is CreateToneIntent.UpdateGuitarModel -> updateGuitarModel(intent.model)
+            is CreateToneIntent.UpdatePickupPosition -> updatePickupPosition(intent.position)
+            is CreateToneIntent.UpdateGuitarTone -> updateGuitarTone(intent.value)
+            is CreateToneIntent.UpdateGuitarVolume -> updateGuitarVolume(intent.value)
+            is CreateToneIntent.SaveToneSetting -> saveToneSetting()
+            is CreateToneIntent.NavigationHandled -> clearNavigation()
+        }
+    }
+    
+    private fun loadPresetPedals() {
+        val presets = getPresetPedalsUseCase()
+        _state.update { it.copy(presetPedals = presets) }
+    }
+    
+    private fun loadToneSetting(id: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            try {
+                val setting = getToneSettingByIdUseCase(id)
+                if (setting != null) {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            isEditMode = true,
+                            editingId = id,
+                            songName = setting.songName,
+                            pedalBoard = setting.pedalBoard,
+                            ampSetting = setting.ampSetting,
+                            guitarSetting = setting.guitarSetting
+                        )
+                    }
+                } else {
+                    _state.update { it.copy(isLoading = false, error = "톤 세팅을 찾을 수 없습니다") }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+    
+    private fun updateSongName(name: String) {
+        _state.update { it.copy(songName = name, songNameError = null) }
+    }
+    
+    private fun addPresetPedal(pedal: Pedal) {
+        val currentPedals = _state.value.pedalBoard.pedals
+        val newPedal = pedal.copy(
+            id = UUID.randomUUID().toString(),
+            order = currentPedals.size
+        )
+        _state.update {
+            it.copy(pedalBoard = PedalBoard(currentPedals + newPedal))
+        }
+    }
+    
+    private fun addCustomPedal(name: String, knobNames: List<String>) {
+        val currentPedals = _state.value.pedalBoard.pedals
+        val knobs = knobNames.map { knobName -> Knob(name = knobName, value = 5f) }
+        val newPedal = Pedal(
+            id = UUID.randomUUID().toString(),
+            name = name,
+            type = PedalType.CUSTOM,
+            knobs = knobs,
+            order = currentPedals.size
+        )
+        _state.update {
+            it.copy(pedalBoard = PedalBoard(currentPedals + newPedal))
+        }
+    }
+    
+    private fun removePedal(pedalId: String) {
+        val updatedPedals = _state.value.pedalBoard.pedals
+            .filter { it.id != pedalId }
+            .mapIndexed { index, pedal -> pedal.copy(order = index) }
+        _state.update { it.copy(pedalBoard = PedalBoard(updatedPedals)) }
+    }
+    
+    private fun updatePedalKnob(pedalId: String, knobIndex: Int, value: Float) {
+        val updatedPedals = _state.value.pedalBoard.pedals.map { pedal ->
+            if (pedal.id == pedalId) {
+                val updatedKnobs = pedal.knobs.mapIndexed { index, knob ->
+                    if (index == knobIndex) knob.copy(value = value) else knob
+                }
+                pedal.copy(knobs = updatedKnobs)
+            } else {
+                pedal
+            }
+        }
+        _state.update { it.copy(pedalBoard = PedalBoard(updatedPedals)) }
+    }
+    
+    private fun togglePedalEnabled(pedalId: String) {
+        val updatedPedals = _state.value.pedalBoard.pedals.map { pedal ->
+            if (pedal.id == pedalId) pedal.copy(isEnabled = !pedal.isEnabled) else pedal
+        }
+        _state.update { it.copy(pedalBoard = PedalBoard(updatedPedals)) }
+    }
+    
+    private fun updateAmpModel(model: String) {
+        _state.update { it.copy(ampSetting = it.ampSetting.copy(ampModel = model.ifBlank { null })) }
+    }
+    
+    private fun updateAmpKnob(knobName: String, value: Float) {
+        _state.update { state ->
+            val current = state.ampSetting
+            val updated = when (knobName) {
+                "gain" -> current.copy(gain = value)
+                "bass" -> current.copy(bass = value)
+                "middle" -> current.copy(middle = value)
+                "treble" -> current.copy(treble = value)
+                "presence" -> current.copy(presence = value)
+                "reverb" -> current.copy(reverb = value)
+                "masterVolume" -> current.copy(masterVolume = value)
+                else -> current
+            }
+            state.copy(ampSetting = updated)
+        }
+    }
+    
+    private fun updateGuitarModel(model: String) {
+        _state.update { 
+            it.copy(guitarSetting = it.guitarSetting.copy(guitarModel = model.ifBlank { null })) 
+        }
+    }
+    
+    private fun updatePickupPosition(position: com.haero.tonestore.domain.model.PickupPosition) {
+        _state.update { it.copy(guitarSetting = it.guitarSetting.copy(pickupSelector = position)) }
+    }
+    
+    private fun updateGuitarTone(value: Float) {
+        _state.update { it.copy(guitarSetting = it.guitarSetting.copy(toneKnob = value)) }
+    }
+    
+    private fun updateGuitarVolume(value: Float) {
+        _state.update { it.copy(guitarSetting = it.guitarSetting.copy(volumeKnob = value)) }
+    }
+    
+    private fun saveToneSetting() {
+        val currentState = _state.value
+        
+        // Validation
+        if (currentState.songName.isBlank()) {
+            _state.update { it.copy(songNameError = "곡 이름을 입력해주세요") }
+            return
+        }
+        
+        viewModelScope.launch {
+            _state.update { it.copy(isSaving = true) }
+            try {
+                val now = System.currentTimeMillis()
+                val toneSetting = ToneSetting(
+                    id = currentState.editingId ?: UUID.randomUUID().toString(),
+                    songName = currentState.songName,
+                    createdAt = if (currentState.isEditMode) now else now, // 편집시에도 createdAt 유지 필요시 수정
+                    updatedAt = now,
+                    pedalBoard = currentState.pedalBoard,
+                    ampSetting = currentState.ampSetting,
+                    guitarSetting = currentState.guitarSetting
+                )
+                saveToneSettingUseCase(toneSetting)
+                _state.update { it.copy(isSaving = false, navigateBack = true, showSaveSuccess = true) }
+            } catch (e: Exception) {
+                _state.update { it.copy(isSaving = false, error = e.message) }
+            }
+        }
+    }
+    
+    private fun clearNavigation() {
+        _state.update { it.copy(navigateBack = false, showSaveSuccess = false) }
+    }
+}

@@ -1,0 +1,53 @@
+<resources>
+    <!-- App -->
+    <string name="app_name">톤 스토어</string>
+    
+    <!-- Navigation -->
+    <string name="back">뒤로</string>
+    <string name="detail">상세</string>
+    
+    <!-- Home Screen -->
+    <string name="home_title">나의 톤 세팅</string>
+    <string name="add_tone_setting">톤 세팅 추가</string>
+    <string name="empty_tone_settings">저장된 톤 세팅이 없습니다.\n+ 버튼을 눌러 첫 번째 톤 세팅을 만들어보세요!</string>
+    <string name="pedal_count">%d개 페달</string>
+    
+    <!-- Create/Edit Screen -->
+    <string name="create_tone_setting">새 톤 세팅</string>
+    <string name="edit_tone_setting">톤 세팅 편집</string>
+    <string name="song_name">곡 이름</string>
+    <string name="song_name_hint">곡 이름을 입력하세요</string>
+    <string name="save">저장</string>
+    <string name="save_success">톤 세팅이 저장되었습니다!</string>
+    
+    <!-- Pedal Board Section -->
+    <string name="pedal_board">페달보드</string>
+    <string name="no_pedals">추가된 페달이 없습니다</string>
+    <string name="add_preset_pedal">프리셋 추가</string>
+    <string name="add_custom_pedal">커스텀</string>
+    <string name="select_preset_pedal">프리셋 페달 선택</string>
+    <string name="create_custom_pedal">커스텀 페달 만들기</string>
+    <string name="pedal_name">페달 이름</string>
+    <string name="knobs">노브</string>
+    <string name="add_knob">노브 추가</string>
+    <string name="create">만들기</string>
+    <string name="cancel">취소</string>
+    
+    <!-- Amp Section -->
+    <string name="amp_setting">앰프 세팅</string>
+    <string name="amp_model_hint">앰프 모델 (예: Fender Twin Reverb)</string>
+    
+    <!-- Guitar Section -->
+    <string name="guitar_setting">기타 세팅</string>
+    <string name="guitar_model_hint">기타 모델 (예: Fender Stratocaster)</string>
+    <string name="pickup_selector">픽업 셀렉터</string>
+    
+    <!-- Detail Screen -->
+    <string name="edit">편집</string>
+    <string name="delete">삭제</string>
+    <string name="delete_confirm_title">톤 세팅을 삭제할까요?</string>
+    <string name="delete_confirm_message">\"%1$s\"을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</string>
+    
+    <!-- Errors -->
+    <string name="error_occurred">오류가 발생했습니다</string>
+</resources>

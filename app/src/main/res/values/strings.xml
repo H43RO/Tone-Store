@@ -1,0 +1,53 @@
+<resources>
+    <!-- App -->
+    <string name="app_name">Tone Store</string>
+    
+    <!-- Navigation -->
+    <string name="back">Back</string>
+    <string name="detail">Detail</string>
+    
+    <!-- Home Screen -->
+    <string name="home_title">My Tone Settings</string>
+    <string name="add_tone_setting">Add Tone Setting</string>
+    <string name="empty_tone_settings">No tone settings yet.\nTap + to create your first one!</string>
+    <string name="pedal_count">%d pedals</string>
+    
+    <!-- Create/Edit Screen -->
+    <string name="create_tone_setting">New Tone Setting</string>
+    <string name="edit_tone_setting">Edit Tone Setting</string>
+    <string name="song_name">Song Name</string>
+    <string name="song_name_hint">Enter song name</string>
+    <string name="save">Save</string>
+    <string name="save_success">Tone setting saved successfully!</string>
+    
+    <!-- Pedal Board Section -->
+    <string name="pedal_board">Pedal Board</string>
+    <string name="no_pedals">No pedals added yet</string>
+    <string name="add_preset_pedal">Add Preset</string>
+    <string name="add_custom_pedal">Custom</string>
+    <string name="select_preset_pedal">Select Preset Pedal</string>
+    <string name="create_custom_pedal">Create Custom Pedal</string>
+    <string name="pedal_name">Pedal Name</string>
+    <string name="knobs">Knobs</string>
+    <string name="add_knob">Add Knob</string>
+    <string name="create">Create</string>
+    <string name="cancel">Cancel</string>
+    
+    <!-- Amp Section -->
+    <string name="amp_setting">Amp Setting</string>
+    <string name="amp_model_hint">Amp model (e.g., Fender Twin Reverb)</string>
+    
+    <!-- Guitar Section -->
+    <string name="guitar_setting">Guitar Setting</string>
+    <string name="guitar_model_hint">Guitar model (e.g., Fender Stratocaster)</string>
+    <string name="pickup_selector">Pickup Selector</string>
+    
+    <!-- Detail Screen -->
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="delete_confirm_title">Delete Tone Setting?</string>
+    <string name="delete_confirm_message">Are you sure you want to delete \"%1$s\"? This action cannot be undone.</string>
+    
+    <!-- Errors -->
+    <string name="error_occurred">An error occurred</string>
+</resources>
