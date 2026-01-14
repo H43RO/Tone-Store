@@ -12,6 +12,7 @@ import androidx.navigation.navArgument
 import com.haero.tonestore.presentation.ui.create.CreateToneScreen
 import com.haero.tonestore.presentation.ui.detail.DetailScreen
 import com.haero.tonestore.presentation.ui.home.HomeScreen
+import com.haero.tonestore.presentation.ui.pedalboard.PedalBoardScreen
 
 /**
  * 네비게이션 라우트 정의
@@ -25,6 +26,11 @@ sealed class Screen(val route: String) {
     }
     data object Detail : Screen("detail/{toneSettingId}") {
         fun createRoute(toneSettingId: String): String = "detail/$toneSettingId"
+    }
+    data object PedalBoard : Screen("pedalboard?editingId={editingId}") {
+        fun createRoute(editingId: String? = null): String {
+            return if (editingId != null) "pedalboard?editingId=$editingId" else "pedalboard"
+        }
     }
 }
 
@@ -63,6 +69,9 @@ fun ToneStoreNavGraph(
                 },
                 onNavigateToDetail = { id ->
                     navController.navigate(Screen.Detail.createRoute(id))
+                },
+                onNavigateToPedalBoard = {
+                    navController.navigate(Screen.PedalBoard.createRoute())
                 }
             )
         }
@@ -123,6 +132,36 @@ fun ToneStoreNavGraph(
                 onNavigateToEdit = { id ->
                     navController.navigate(Screen.Create.createRoute(id))
                 }
+            )
+        }
+        
+        // 페달보드 생성/편집 화면
+        composable(
+            route = Screen.PedalBoard.route,
+            arguments = listOf(
+                navArgument("editingId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            ),
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    tween(animationDuration)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    tween(animationDuration)
+                )
+            }
+        ) { backStackEntry ->
+            val editingId = backStackEntry.arguments?.getString("editingId")
+            PedalBoardScreen(
+                onNavigateBack = { navController.popBackStack() },
+                editingId = editingId
             )
         }
     }

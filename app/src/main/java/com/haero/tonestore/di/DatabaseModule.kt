@@ -17,10 +17,15 @@ val databaseModule = module {
             ToneStoreDatabase::class.java,
             ToneStoreDatabase.DATABASE_NAME
         )
-            .addMigrations(ToneStoreDatabase.MIGRATION_1_2)
+            .addMigrations(
+                ToneStoreDatabase.MIGRATION_1_2,
+                ToneStoreDatabase.MIGRATION_2_3,
+                ToneStoreDatabase.MIGRATION_3_4
+            )
             .build()
     }
     
     // DAO
     single { get<ToneStoreDatabase>().toneSettingDao() }
+    single { get<ToneStoreDatabase>().savedPedalBoardDao() }
 }

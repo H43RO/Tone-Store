@@ -27,6 +27,7 @@
     
     <!-- Pedal Board Section -->
     <string name="pedal_board">Pedal Board</string>
+    <string name="pedalboard">Pedal Board</string>
     <string name="no_pedals">No pedals added yet</string>
     <string name="add_preset_pedal">Add Preset</string>
     <string name="add_custom_pedal">Custom</string>
@@ -37,6 +38,17 @@
     <string name="add_knob">Add Knob</string>
     <string name="create">Create</string>
     <string name="cancel">Cancel</string>
+    
+    <!-- Pedal Board Management -->
+    <string name="create_pedalboard">New Pedal Board</string>
+    <string name="edit_pedalboard">Edit Pedal Board</string>
+    <string name="pedalboard_name">Pedal Board Name</string>
+    <string name="pedalboard_name_hint">Enter pedal board name</string>
+    <string name="pedalboard_save_success">Pedal board saved successfully!</string>
+    <string name="layout_size">Layout</string>
+    <string name="columns">Cols</string>
+    <string name="rows">Rows</string>
+    <string name="slots">slots</string>
     
     <!-- Amp Section -->
     <string name="amp_setting">Amp Setting</string>

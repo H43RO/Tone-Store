@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -60,6 +61,7 @@ import org.koin.androidx.compose.koinViewModel
 fun HomeScreen(
     onNavigateToCreate: () -> Unit,
     onNavigateToDetail: (String) -> Unit,
+    onNavigateToPedalBoard: () -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -85,6 +87,13 @@ fun HomeScreen(
                 TopAppBar(
                     title = { Text(stringResource(R.string.app_name)) },
                     actions = {
+                        // 페달보드 관리 버튼
+                        IconButton(onClick = onNavigateToPedalBoard) {
+                            Icon(
+                                imageVector = Icons.Outlined.Dashboard,
+                                contentDescription = stringResource(R.string.pedalboard)
+                            )
+                        }
                         IconButton(
                             onClick = { viewModel.handleIntent(HomeIntent.SetSearchActive(true)) }
                         ) {
