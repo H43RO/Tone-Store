@@ -49,6 +49,7 @@
     <string name="columns">열</string>
     <string name="rows">행</string>
     <string name="slots">슬롯</string>
+    <string name="load_saved_pedalboard">저장된 페달보드 불러오기</string>
     
     <!-- Amp Section -->
     <string name="amp_setting">앰프 세팅</string>

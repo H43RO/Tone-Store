@@ -49,6 +49,7 @@
     <string name="columns">Cols</string>
     <string name="rows">Rows</string>
     <string name="slots">slots</string>
+    <string name="load_saved_pedalboard">Load Saved Pedal Board</string>
     
     <!-- Amp Section -->
     <string name="amp_setting">Amp Setting</string>

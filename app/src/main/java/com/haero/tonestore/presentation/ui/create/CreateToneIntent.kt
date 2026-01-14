@@ -3,6 +3,7 @@ package com.haero.tonestore.presentation.ui.create
 import com.haero.tonestore.domain.model.GenreTag
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PickupPosition
+import com.haero.tonestore.domain.model.SavedPedalBoard
 
 /**
  * Create/Edit 화면의 사용자 인텐트
@@ -15,6 +16,9 @@ sealed interface CreateToneIntent {
     data class UpdateSongName(val name: String) : CreateToneIntent
     
     // 페달보드 관련
+    /** 저장된 페달보드 불러오기 */
+    data class LoadSavedPedalBoard(val pedalBoard: SavedPedalBoard) : CreateToneIntent
+    
     /** 프리셋 페달 추가 */
     data class AddPresetPedal(val pedal: Pedal) : CreateToneIntent
     

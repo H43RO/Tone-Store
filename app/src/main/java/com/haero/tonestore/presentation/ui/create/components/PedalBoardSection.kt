@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalBoard
+import com.haero.tonestore.domain.model.SavedPedalBoard
 import com.haero.tonestore.presentation.ui.components.SectionHeader
 
 /**
@@ -43,8 +45,10 @@ import com.haero.tonestore.presentation.ui.components.SectionHeader
 fun PedalBoardSection(
     pedalBoard: PedalBoard,
     presetPedals: List<Pedal>,
+    savedPedalBoards: List<SavedPedalBoard>,
     onAddPresetPedal: (Pedal) -> Unit,
     onAddCustomPedal: (name: String, knobNames: List<String>) -> Unit,
+    onLoadSavedPedalBoard: (SavedPedalBoard) -> Unit,
     onRemovePedal: (String) -> Unit,
     onKnobChange: (pedalId: String, knobIndex: Int, value: Float) -> Unit,
     onTogglePedalEnabled: (String) -> Unit,
@@ -54,6 +58,7 @@ fun PedalBoardSection(
     var isExpanded by remember { mutableStateOf(true) }
     var showPresetDialog by remember { mutableStateOf(false) }
     var showCustomDialog by remember { mutableStateOf(false) }
+    var showSavedPedalBoardDialog by remember { mutableStateOf(false) }
     
     SectionHeader(
         title = stringResource(R.string.pedal_board),
@@ -99,6 +104,20 @@ fun PedalBoardSection(
             // 이펙터 추가 버튼들
             if (isEditable) {
                 Spacer(modifier = Modifier.height(12.dp))
+                
+                // 저장된 페달보드 불러오기 버튼
+                if (savedPedalBoards.isNotEmpty()) {
+                    OutlinedButton(
+                        onClick = { showSavedPedalBoardDialog = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Outlined.Dashboard, contentDescription = null)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(stringResource(R.string.load_saved_pedalboard))
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -147,6 +166,18 @@ fun PedalBoardSection(
                 showCustomDialog = false
             },
             onDismiss = { showCustomDialog = false }
+        )
+    }
+    
+    // 저장된 페달보드 선택 다이얼로그
+    if (showSavedPedalBoardDialog) {
+        SavedPedalBoardDialog(
+            savedPedalBoards = savedPedalBoards,
+            onSelect = { pedalBoard ->
+                onLoadSavedPedalBoard(pedalBoard)
+                showSavedPedalBoardDialog = false
+            },
+            onDismiss = { showSavedPedalBoardDialog = false }
         )
     }
 }
@@ -245,6 +276,46 @@ private fun CustomPedalDialog(
                 Text(stringResource(R.string.create))
             }
         },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+private fun SavedPedalBoardDialog(
+    savedPedalBoards: List<SavedPedalBoard>,
+    onSelect: (SavedPedalBoard) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.load_saved_pedalboard)) },
+        text = {
+            Column {
+                savedPedalBoards.forEach { pedalBoard ->
+                    AssistChip(
+                        onClick = { onSelect(pedalBoard) },
+                        label = { 
+                            Column {
+                                Text(pedalBoard.name)
+                                Text(
+                                    text = "${pedalBoard.pedalCount} pedals",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                    )
+                }
+            }
+        },
+        confirmButton = {},
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.cancel))

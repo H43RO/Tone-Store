@@ -9,7 +9,9 @@ import com.haero.tonestore.domain.model.Knob
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalBoard
 import com.haero.tonestore.domain.model.PedalType
+import com.haero.tonestore.domain.model.SavedPedalBoard
 import com.haero.tonestore.domain.model.ToneSetting
+import com.haero.tonestore.domain.usecase.GetAllSavedPedalBoardsUseCase
 import com.haero.tonestore.domain.usecase.GetPresetPedalsUseCase
 import com.haero.tonestore.domain.usecase.GetToneSettingByIdUseCase
 import com.haero.tonestore.domain.usecase.SaveToneSettingUseCase
@@ -28,7 +30,8 @@ import java.util.UUID
 class CreateToneViewModel(
     private val getToneSettingByIdUseCase: GetToneSettingByIdUseCase,
     private val saveToneSettingUseCase: SaveToneSettingUseCase,
-    private val getPresetPedalsUseCase: GetPresetPedalsUseCase
+    private val getPresetPedalsUseCase: GetPresetPedalsUseCase,
+    private val getAllSavedPedalBoardsUseCase: GetAllSavedPedalBoardsUseCase
 ) : ViewModel() {
     
     private val _state = MutableStateFlow(CreateToneState())
@@ -36,12 +39,14 @@ class CreateToneViewModel(
     
     init {
         loadPresetPedals()
+        loadSavedPedalBoards()
     }
     
     fun handleIntent(intent: CreateToneIntent) {
         when (intent) {
             is CreateToneIntent.LoadToneSetting -> loadToneSetting(intent.id)
             is CreateToneIntent.UpdateSongName -> updateSongName(intent.name)
+            is CreateToneIntent.LoadSavedPedalBoard -> loadSavedPedalBoard(intent.pedalBoard)
             is CreateToneIntent.AddPresetPedal -> addPresetPedal(intent.pedal)
             is CreateToneIntent.AddCustomPedal -> addCustomPedal(intent.name, intent.knobNames)
             is CreateToneIntent.RemovePedal -> removePedal(intent.pedalId)
@@ -62,6 +67,18 @@ class CreateToneViewModel(
     private fun loadPresetPedals() {
         val presets = getPresetPedalsUseCase()
         _state.update { it.copy(presetPedals = presets) }
+    }
+    
+    private fun loadSavedPedalBoards() {
+        viewModelScope.launch {
+            getAllSavedPedalBoardsUseCase().collect { pedalBoards ->
+                _state.update { it.copy(savedPedalBoards = pedalBoards) }
+            }
+        }
+    }
+    
+    private fun loadSavedPedalBoard(savedPedalBoard: SavedPedalBoard) {
+        _state.update { it.copy(pedalBoard = savedPedalBoard.toPedalBoard()) }
     }
     
     private fun loadToneSetting(id: String) {

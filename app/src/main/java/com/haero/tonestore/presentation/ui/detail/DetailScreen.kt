@@ -140,8 +140,10 @@ fun DetailScreen(
                         PedalBoardSection(
                             pedalBoard = toneSetting.pedalBoard,
                             presetPedals = emptyList(),
+                            savedPedalBoards = emptyList(),
                             onAddPresetPedal = {},
                             onAddCustomPedal = { _, _ -> },
+                            onLoadSavedPedalBoard = {},
                             onRemovePedal = {},
                             onKnobChange = { _, _, _ -> },
                             onTogglePedalEnabled = {},

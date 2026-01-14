@@ -151,11 +151,15 @@ fun CreateToneScreen(
             PedalBoardSection(
                 pedalBoard = state.pedalBoard,
                 presetPedals = state.presetPedals,
+                savedPedalBoards = state.savedPedalBoards,
                 onAddPresetPedal = { pedal ->
                     viewModel.handleIntent(CreateToneIntent.AddPresetPedal(pedal))
                 },
                 onAddCustomPedal = { name, knobs ->
                     viewModel.handleIntent(CreateToneIntent.AddCustomPedal(name, knobs))
+                },
+                onLoadSavedPedalBoard = { pedalBoard ->
+                    viewModel.handleIntent(CreateToneIntent.LoadSavedPedalBoard(pedalBoard))
                 },
                 onRemovePedal = { pedalId ->
                     viewModel.handleIntent(CreateToneIntent.RemovePedal(pedalId))

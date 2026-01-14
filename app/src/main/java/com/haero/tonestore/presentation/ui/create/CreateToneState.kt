@@ -5,6 +5,7 @@ import com.haero.tonestore.domain.model.GenreTag
 import com.haero.tonestore.domain.model.GuitarSetting
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalBoard
+import com.haero.tonestore.domain.model.SavedPedalBoard
 
 /**
  * Create/Edit 화면의 상태
@@ -23,6 +24,9 @@ data class CreateToneState(
     
     // 프리셋 페달 목록
     val presetPedals: List<Pedal> = emptyList(),
+    
+    // 저장된 페달보드 목록
+    val savedPedalBoards: List<SavedPedalBoard> = emptyList(),
     
     // UI 상태
     val isSaving: Boolean = false,
