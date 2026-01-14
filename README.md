@@ -105,25 +105,6 @@ app/src/main/java/com/haero/tonestore/
 └── ToneStoreApp.kt             # Application (Koin 초기화)
 ```
 
-## 🎨 디자인 컨셉
-
-- **아날로그 감성 + 모던 UI**: 실제 기타 장비의 느낌을 살린 노브 UI
-- **다크 모드 기본**: 무대/연습실 환경에 적합
-- **컬러 팔레트**:
-  - Primary: `#FF6B35` (앰프 LED 연상 오렌지-레드)
-  - Secondary: `#004E89` (이펙터 페달 케이스 딥 블루)
-  - Background: `#1A1A1D` (다크 모드)
-
-
-## 📝 향후 개발 예정
-
-- [ ] 검색 기능 (곡 이름으로 검색)
-- [ ] 정렬 옵션 (최신순, 이름순, 생성일순)
-- [ ] 백업/복원 (JSON 파일로 내보내기/가져오기)
-- [ ] 이미지 첨부 (실제 장비 사진)
-- [ ] 즐겨찾기 기능
-- [ ] 태그 시스템 (장르별: Rock, Jazz, Blues 등)
-- [ ] Firebase Analytics / Crashlytics 연동
 
 ## 📄 License
 
