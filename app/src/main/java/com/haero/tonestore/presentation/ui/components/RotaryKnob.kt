@@ -6,7 +6,8 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
@@ -72,9 +73,11 @@ fun RotaryKnob(
         }
     }
     
-    // 노브 회전 각도 범위: -135° ~ +135° (총 270°)
-    val startAngle = -135f
-    val sweepAngle = 270f
+    // 노브 회전 각도 범위: 값 0일때 12시 방향
+    // Canvas에서 0°는 3시 방향, -90°가 12시 방향
+    // 값 0 -> 12시(-90°), 값 10 -> 거의 한바퀴 돌아서 (시계방향 300°)
+    val startAngle = -90f   // 12시 방향 (위쪽)
+    val sweepAngle = 300f   // 시계방향으로 300° 회전
     
     // 현재 값에 따른 각도 계산
     val normalizedValue = (value / 10f).coerceIn(0f, 1f)
@@ -82,12 +85,15 @@ fun RotaryKnob(
     
     // 드래그 중 이전 각도 저장
     var previousAngle by remember { mutableFloatStateOf(0f) }
+    // 드래그 중 누적 값 추적 (핵심!)
+    var accumulatedValue by remember { mutableFloatStateOf(value) }
     // 햅틱 피드백을 위한 이전 스텝 저장
     var previousStep by remember { mutableIntStateOf((value * steps / 10f).roundToInt()) }
     
     val knobColor = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
     val trackColor = if (enabled) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-    val indicatorColor = if (enabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.outline
+    // 포인터 색상: disabled 상태에서도 노브 몸체와 대비되도록 수정
+    val indicatorColor = if (enabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.surface
     
     // 드르륵 햅틱 피드백 함수
     fun performTickHaptic() {
@@ -112,47 +118,54 @@ fun RotaryKnob(
                 .pointerInput(enabled) {
                     if (!enabled) return@pointerInput
                     
-                    detectDragGestures(
-                        onDragStart = { offset ->
-                            val centerX = this.size.width / 2f
-                            val centerY = this.size.height / 2f
-                            previousAngle = atan2(
-                                offset.y - centerY,
-                                offset.x - centerX
-                            ) * (180f / PI.toFloat())
-                            previousStep = (value * steps / 10f).roundToInt()
-                        },
-                        onDrag = { change, _ ->
-                            change.consume()
-                            
-                            val centerX = this.size.width / 2f
-                            val centerY = this.size.height / 2f
-                            val currentDragAngle = atan2(
-                                change.position.y - centerY,
-                                change.position.x - centerX
-                            ) * (180f / PI.toFloat())
-                            
-                            var delta = currentDragAngle - previousAngle
-                            
-                            // 각도 점프 처리 (180° 경계)
-                            if (delta > 180) delta -= 360
-                            if (delta < -180) delta += 360
-                            
-                            // 민감도 조절
-                            val sensitivity = 0.5f
-                            val newValue = (value + delta * sensitivity / 27f).coerceIn(0f, 10f)
-                            
-                            // 스텝 기반 햅틱 피드백 (드르륵 느낌)
-                            val currentStep = (newValue * steps / 10f).roundToInt()
-                            if (currentStep != previousStep) {
-                                performTickHaptic()
-                                previousStep = currentStep
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        down.consume()
+                        
+                        val centerX = this@pointerInput.size.width / 2f
+                        val centerY = this@pointerInput.size.height / 2f
+                        previousAngle = atan2(
+                            down.position.y - centerY,
+                            down.position.x - centerX
+                        ) * (180f / PI.toFloat())
+                        // 드래그 시작 시 현재 value로 초기화
+                        accumulatedValue = value
+                        previousStep = (value * steps / 10f).roundToInt()
+                        
+                        do {
+                            val event = awaitPointerEvent()
+                            event.changes.forEach { change ->
+                                if (change.pressed) {
+                                    change.consume()
+                                    
+                                    val currentDragAngle = atan2(
+                                        change.position.y - centerY,
+                                        change.position.x - centerX
+                                    ) * (180f / PI.toFloat())
+                                    
+                                    var delta = currentDragAngle - previousAngle
+                                    
+                                    // 각도 점프 처리 (180° 경계)
+                                    if (delta > 180) delta -= 360
+                                    if (delta < -180) delta += 360
+                                    
+                                    // 민감도 조절 - 누적값 사용!
+                                    val sensitivity = 0.5f
+                                    accumulatedValue = (accumulatedValue + delta * sensitivity / 27f).coerceIn(0f, 10f)
+                                    
+                                    // 스텝 기반 햅틱 피드백 (드르륵 느낌)
+                                    val currentStep = (accumulatedValue * steps / 10f).roundToInt()
+                                    if (currentStep != previousStep) {
+                                        performTickHaptic()
+                                        previousStep = currentStep
+                                    }
+                                    
+                                    onValueChange(accumulatedValue)
+                                    previousAngle = currentDragAngle
+                                }
                             }
-                            
-                            onValueChange(newValue)
-                            previousAngle = currentDragAngle
-                        }
-                    )
+                        } while (event.changes.any { it.pressed })
+                    }
                 }
         ) {
             val strokeWidth = size.toPx() * 0.12f
