@@ -54,12 +54,12 @@ fun DetailScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var showDeleteDialog by remember { mutableStateOf(false) }
-    
+
     // 데이터 로드
     LaunchedEffect(toneSettingId) {
         viewModel.handleIntent(DetailIntent.LoadToneSetting(toneSettingId))
     }
-    
+
     // 네비게이션 처리
     LaunchedEffect(state.navigateToEdit) {
         if (state.navigateToEdit) {
@@ -67,14 +67,14 @@ fun DetailScreen(
             viewModel.handleIntent(DetailIntent.NavigationHandled)
         }
     }
-    
+
     LaunchedEffect(state.navigateBack) {
         if (state.navigateBack) {
             onNavigateBack()
             viewModel.handleIntent(DetailIntent.NavigationHandled)
         }
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -128,14 +128,14 @@ fun DetailScreen(
                 }
                 state.toneSetting != null -> {
                     val toneSetting = state.toneSetting!!
-                    
+
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(rememberScrollState())
                     ) {
                         Spacer(modifier = Modifier.height(16.dp))
-                        
+
                         // 페달보드 섹션 (읽기 전용)
                         PedalBoardSection(
                             pedalBoard = toneSetting.pedalBoard,
@@ -149,7 +149,7 @@ fun DetailScreen(
                             onTogglePedalEnabled = {},
                             isEditable = false
                         )
-                        
+
                         // 앰프 섹션 (읽기 전용)
                         AmpSection(
                             ampSetting = toneSetting.ampSetting,
@@ -157,7 +157,7 @@ fun DetailScreen(
                             onKnobChange = { _, _ -> },
                             isEditable = false
                         )
-                        
+
                         // 기타 섹션 (읽기 전용)
                         GuitarSection(
                             guitarSetting = toneSetting.guitarSetting,
@@ -167,7 +167,7 @@ fun DetailScreen(
                             onVolumeChange = {},
                             isEditable = false
                         )
-                        
+
                         Spacer(modifier = Modifier.height(32.dp))
                     }
                 }
@@ -181,7 +181,7 @@ fun DetailScreen(
             }
         }
     }
-    
+
     // 삭제 확인 다이얼로그
     if (showDeleteDialog) {
         AlertDialog(

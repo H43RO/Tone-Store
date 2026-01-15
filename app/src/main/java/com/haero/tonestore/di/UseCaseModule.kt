@@ -16,7 +16,7 @@ import org.koin.dsl.module
  * UseCase 관련 Koin Module
  */
 val useCaseModule = module {
-    
+
     // ToneSetting UseCases
     factory { GetAllToneSettingsUseCase(get()) }
     factory { GetToneSettingByIdUseCase(get()) }
@@ -24,7 +24,7 @@ val useCaseModule = module {
     factory { DeleteToneSettingUseCase(get()) }
     factory { GetPresetPedalsUseCase() }
     factory { ToggleFavoriteUseCase(get()) }
-    
+
     // SavedPedalBoard UseCases
     factory { GetAllSavedPedalBoardsUseCase(get()) }
     factory { GetSavedPedalBoardByIdUseCase(get()) }

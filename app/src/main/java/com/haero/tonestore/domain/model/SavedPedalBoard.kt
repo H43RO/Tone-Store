@@ -31,7 +31,7 @@ data class SavedPedalBoard(
             }
         )
     }
-    
+
     /**
      * 페달 개수
      */

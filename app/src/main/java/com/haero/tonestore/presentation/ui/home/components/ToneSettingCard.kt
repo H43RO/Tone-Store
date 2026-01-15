@@ -55,7 +55,7 @@ fun ToneSettingCard(
     val pedalCount = toneSetting.pedalBoard.pedals.size
     val configuration = LocalConfiguration.current
     val isKorean = configuration.locales[0].language == "ko"
-    
+
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
@@ -77,9 +77,9 @@ fun ToneSettingCard(
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(36.dp)
             )
-            
+
             Spacer(modifier = Modifier.width(12.dp))
-            
+
             // 정보
             Column(modifier = Modifier.weight(1f)) {
                 Row(
@@ -94,9 +94,9 @@ fun ToneSettingCard(
                         modifier = Modifier.weight(1f, fill = false)
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.height(2.dp))
-                
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -106,7 +106,7 @@ fun ToneSettingCard(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -124,7 +124,7 @@ fun ToneSettingCard(
                         )
                     }
                 }
-                
+
                 // 태그 표시
                 if (toneSetting.tags.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(6.dp))
@@ -135,11 +135,11 @@ fun ToneSettingCard(
                         toneSetting.tags.take(3).forEach { tag ->
                             AssistChip(
                                 onClick = { },
-                                label = { 
+                                label = {
                                     Text(
                                         text = if (isKorean) tag.displayNameKo else tag.displayName,
                                         fontSize = 10.sp
-                                    ) 
+                                    )
                                 },
                                 modifier = Modifier.height(24.dp),
                                 colors = AssistChipDefaults.assistChipColors(
@@ -158,7 +158,7 @@ fun ToneSettingCard(
                     }
                 }
             }
-            
+
             // 즐겨찾기 버튼
             IconButton(
                 onClick = onFavoriteClick

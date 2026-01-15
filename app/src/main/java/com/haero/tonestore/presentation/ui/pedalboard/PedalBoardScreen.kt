@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.Pedal
-import com.haero.tonestore.domain.model.SavedPedalBoard
 import com.haero.tonestore.presentation.ui.pedalboard.components.PedalBoardGrid
 import com.haero.tonestore.presentation.ui.pedalboard.components.PedalEditorBottomSheet
 import com.haero.tonestore.presentation.viewmodel.PedalBoardViewModel
@@ -68,22 +67,22 @@ fun PedalBoardScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    
+
     // 바텀 시트 상태
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    
+
     // 페달 추가 다이얼로그 상태
     var showAddPedalDialog by remember { mutableStateOf(false) }
     var addingToSlotIndex by remember { mutableStateOf<Int?>(null) }
     var showCustomPedalDialog by remember { mutableStateOf(false) }
-    
+
     // 편집 모드일 경우 데이터 로드
     LaunchedEffect(editingId) {
         editingId?.let {
             viewModel.handleIntent(PedalBoardIntent.LoadPedalBoard(it))
         }
     }
-    
+
     // 네비게이션 처리
     LaunchedEffect(state.navigateBack) {
         if (state.navigateBack) {
@@ -91,7 +90,7 @@ fun PedalBoardScreen(
             viewModel.handleIntent(PedalBoardIntent.NavigationHandled)
         }
     }
-    
+
     // 성공 메시지
     val saveSuccessMessage = stringResource(R.string.pedalboard_save_success)
     LaunchedEffect(state.showSaveSuccess) {
@@ -99,14 +98,17 @@ fun PedalBoardScreen(
             snackbarHostState.showSnackbar(saveSuccessMessage)
         }
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        if (state.isEditMode) stringResource(R.string.edit_pedalboard)
-                        else stringResource(R.string.create_pedalboard)
+                        if (state.isEditMode) {
+                            stringResource(R.string.edit_pedalboard)
+                        } else {
+                            stringResource(R.string.create_pedalboard)
+                        }
                     )
                 },
                 navigationIcon = {
@@ -119,7 +121,7 @@ fun PedalBoardScreen(
                 },
                 actions = {
                     if (state.isEditMode) {
-                        IconButton(onClick = { 
+                        IconButton(onClick = {
                             viewModel.handleIntent(PedalBoardIntent.DeletePedalBoard)
                         }) {
                             Icon(
@@ -171,13 +173,13 @@ fun PedalBoardScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             // 레이아웃 크기 설정
             var columnsText by remember(state.columns) { mutableStateOf(state.columns.toString()) }
             var rowsText by remember(state.rows) { mutableStateOf(state.rows.toString()) }
-            
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -190,7 +192,7 @@ fun PedalBoardScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.width(80.dp)
                 )
-                
+
                 OutlinedTextField(
                     value = columnsText,
                     onValueChange = { value ->
@@ -205,9 +207,9 @@ fun PedalBoardScreen(
                     singleLine = true,
                     modifier = Modifier.weight(1f)
                 )
-                
+
                 Text("×", style = MaterialTheme.typography.titleLarge)
-                
+
                 OutlinedTextField(
                     value = rowsText,
                     onValueChange = { value ->
@@ -223,9 +225,9 @@ fun PedalBoardScreen(
                     modifier = Modifier.weight(1f)
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             // 페달 개수 표시
             Text(
                 text = stringResource(R.string.pedal_count, state.pedalCount) + " / ${state.totalSlots} " + stringResource(R.string.slots),
@@ -233,9 +235,9 @@ fun PedalBoardScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             // 페달보드 그리드
             PedalBoardGrid(
                 slots = state.slots,
@@ -250,17 +252,17 @@ fun PedalBoardScreen(
                 },
                 isEditable = true
             )
-            
+
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
-    
+
     // 페달 편집 바텀 시트
     if (state.editingSlotIndex != null && state.editingPedal != null) {
         val availableSlots = state.slots.take(state.totalSlots).mapIndexedNotNull { index, pedal ->
             if (pedal == null && index != state.editingSlotIndex) index else null
         }
-        
+
         PedalEditorBottomSheet(
             pedal = state.editingPedal!!,
             slotIndex = state.editingSlotIndex!!,
@@ -279,7 +281,7 @@ fun PedalBoardScreen(
             availableSlots = availableSlots
         )
     }
-    
+
     // 페달 추가 다이얼로그
     if (showAddPedalDialog && addingToSlotIndex != null) {
         AddPedalDialog(
@@ -299,7 +301,7 @@ fun PedalBoardScreen(
             }
         )
     }
-    
+
     // 커스텀 페달 생성 다이얼로그
     if (showCustomPedalDialog && addingToSlotIndex != null) {
         CustomPedalDialog(
@@ -339,9 +341,9 @@ private fun AddPedalDialog(
                             .padding(vertical = 4.dp)
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 AssistChip(
                     onClick = onCreateCustom,
                     label = { Text(stringResource(R.string.add_custom_pedal)) },
@@ -359,13 +361,10 @@ private fun AddPedalDialog(
 }
 
 @Composable
-private fun CustomPedalDialog(
-    onConfirm: (name: String, knobs: List<String>) -> Unit,
-    onDismiss: () -> Unit
-) {
+private fun CustomPedalDialog(onConfirm: (name: String, knobs: List<String>) -> Unit, onDismiss: () -> Unit) {
     var pedalName by remember { mutableStateOf("") }
     val knobNames = remember { mutableStateListOf("Knob 1") }
-    
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.create_custom_pedal)) },
@@ -378,14 +377,14 @@ private fun CustomPedalDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 Text(
                     text = stringResource(R.string.knobs),
                     style = MaterialTheme.typography.labelLarge
                 )
-                
+
                 knobNames.forEachIndexed { index, name ->
                     OutlinedTextField(
                         value = name,
@@ -397,7 +396,7 @@ private fun CustomPedalDialog(
                             .padding(vertical = 4.dp)
                     )
                 }
-                
+
                 if (knobNames.size < 6) {
                     TextButton(onClick = { knobNames.add("Knob ${knobNames.size + 1}") }) {
                         Text(stringResource(R.string.add_knob))

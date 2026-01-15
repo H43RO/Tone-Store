@@ -13,19 +13,19 @@ import kotlinx.coroutines.flow.Flow
  */
 @Dao
 interface SavedPedalBoardDao {
-    
+
     @Query("SELECT * FROM saved_pedal_boards ORDER BY updatedAt DESC")
     fun getAllPedalBoards(): Flow<List<SavedPedalBoardEntity>>
-    
+
     @Query("SELECT * FROM saved_pedal_boards WHERE id = :id")
     suspend fun getPedalBoardById(id: String): SavedPedalBoardEntity?
-    
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPedalBoard(pedalBoard: SavedPedalBoardEntity)
-    
+
     @Delete
     suspend fun deletePedalBoard(pedalBoard: SavedPedalBoardEntity)
-    
+
     @Query("DELETE FROM saved_pedal_boards WHERE id = :id")
     suspend fun deletePedalBoardById(id: String)
 }

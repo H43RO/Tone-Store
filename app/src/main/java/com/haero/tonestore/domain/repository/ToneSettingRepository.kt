@@ -26,7 +26,7 @@ interface ToneSettingRepository {
      * ID로 톤 세팅 삭제
      */
     suspend fun deleteToneSetting(id: String)
-    
+
     /**
      * 즐겨찾기 토글
      */

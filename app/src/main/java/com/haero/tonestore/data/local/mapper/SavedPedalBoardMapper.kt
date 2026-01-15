@@ -12,7 +12,7 @@ import com.haero.tonestore.domain.model.SavedPedalBoard
 object SavedPedalBoardMapper {
     private val gson = Gson()
     private val pedalListType = object : TypeToken<List<Pedal?>>() {}.type
-    
+
     fun toEntity(domain: SavedPedalBoard): SavedPedalBoardEntity {
         return SavedPedalBoardEntity(
             id = domain.id,
@@ -24,14 +24,14 @@ object SavedPedalBoardMapper {
             updatedAt = domain.updatedAt
         )
     }
-    
+
     fun toDomain(entity: SavedPedalBoardEntity): SavedPedalBoard {
         val slots: List<Pedal?> = try {
             gson.fromJson(entity.slotsJson, pedalListType)
         } catch (e: Exception) {
             List(entity.columns * entity.rows) { null }
         }
-        
+
         return SavedPedalBoard(
             id = entity.id,
             name = entity.name,

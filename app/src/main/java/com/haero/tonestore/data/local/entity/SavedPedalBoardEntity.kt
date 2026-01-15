@@ -13,7 +13,7 @@ data class SavedPedalBoardEntity(
     val name: String,
     val columns: Int,
     val rows: Int,
-    val slotsJson: String,  // List<Pedal?> JSON
+    val slotsJson: String, // List<Pedal?> JSON
     val createdAt: Long,
     val updatedAt: Long
 )

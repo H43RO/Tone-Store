@@ -39,7 +39,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,10 +67,10 @@ fun PedalBoardListScreen(
     viewModel: PedalBoardListViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    
+
     var showDeleteDialog by remember { mutableStateOf(false) }
     var pedalBoardToDelete by remember { mutableStateOf<SavedPedalBoard?>(null) }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -146,7 +145,7 @@ fun PedalBoardListScreen(
                                     false
                                 }
                             )
-                            
+
                             SwipeToDismissBox(
                                 state = dismissState,
                                 backgroundContent = {
@@ -184,7 +183,7 @@ fun PedalBoardListScreen(
             }
         }
     }
-    
+
     // 삭제 확인 다이얼로그
     if (showDeleteDialog && pedalBoardToDelete != null) {
         AlertDialog(
@@ -233,14 +232,10 @@ fun PedalBoardListScreen(
  * 페달보드 목록 카드
  */
 @Composable
-private fun PedalBoardListCard(
-    pedalBoard: SavedPedalBoard,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+private fun PedalBoardListCard(pedalBoard: SavedPedalBoard, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val pedalCount = pedalBoard.slots.count { it != null }
     val totalSlots = pedalBoard.columns * pedalBoard.rows
-    
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -264,9 +259,9 @@ private fun PedalBoardListCard(
                 modifier = Modifier.size(40.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
-            
+
             Spacer(modifier = Modifier.width(16.dp))
-            
+
             // 정보
             Column(modifier = Modifier.weight(1f)) {
                 Text(

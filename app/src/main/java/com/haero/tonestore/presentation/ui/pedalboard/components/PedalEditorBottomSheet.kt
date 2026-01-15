@@ -78,18 +78,18 @@ fun PedalEditorBottomSheet(
                     Icon(Icons.Default.Close, contentDescription = "닫기")
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             // 슬롯 위치 표시
             Text(
                 text = "슬롯 ${slotIndex + 1}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             // 노브 UI (읽기 전용 - 라벨 포함)
             if (pedal.knobs.isNotEmpty()) {
                 Text(
@@ -97,9 +97,9 @@ fun PedalEditorBottomSheet(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
+
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
@@ -107,18 +107,18 @@ fun PedalEditorBottomSheet(
                 ) {
                     pedal.knobs.forEach { knob ->
                         RotaryKnob(
-                            value = 5f,  // 기본값 중간으로 표시
-                            onValueChange = { },  // 읽기 전용
+                            value = 5f, // 기본값 중간으로 표시
+                            onValueChange = { }, // 읽기 전용
                             label = knob.name,
                             size = 56.dp,
-                            enabled = false  // 비활성화하여 조작 불가
+                            enabled = false // 비활성화하여 조작 불가
                         )
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
             }
-            
+
             // 이동 가능한 슬롯이 있으면 표시
             if (availableSlots.isNotEmpty()) {
                 Text(
@@ -126,9 +126,9 @@ fun PedalEditorBottomSheet(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
+
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -145,10 +145,10 @@ fun PedalEditorBottomSheet(
                         }
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
             }
-            
+
             // 삭제 버튼
             Button(
                 onClick = onRemove,

@@ -10,7 +10,7 @@ import org.koin.dsl.module
  * Repository 관련 Koin Module
  */
 val repositoryModule = module {
-    
+
     single<ToneSettingRepository> { ToneSettingRepositoryImpl(get()) }
     single<SavedPedalBoardRepository> { SavedPedalBoardRepositoryImpl(get()) }
 }

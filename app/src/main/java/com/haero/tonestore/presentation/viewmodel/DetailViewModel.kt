@@ -19,12 +19,12 @@ class DetailViewModel(
     private val getToneSettingByIdUseCase: GetToneSettingByIdUseCase,
     private val deleteToneSettingUseCase: DeleteToneSettingUseCase
 ) : ViewModel() {
-    
+
     private val _state = MutableStateFlow(DetailState())
     val state: StateFlow<DetailState> = _state.asStateFlow()
-    
+
     private var currentId: String? = null
-    
+
     fun handleIntent(intent: DetailIntent) {
         when (intent) {
             is DetailIntent.LoadToneSetting -> loadToneSetting(intent.id)
@@ -33,26 +33,26 @@ class DetailViewModel(
             is DetailIntent.NavigationHandled -> clearNavigation()
         }
     }
-    
+
     private fun loadToneSetting(id: String) {
         currentId = id
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             try {
                 val setting = getToneSettingByIdUseCase(id)
-                _state.update { 
-                    it.copy(isLoading = false, toneSetting = setting, error = null) 
+                _state.update {
+                    it.copy(isLoading = false, toneSetting = setting, error = null)
                 }
             } catch (e: Exception) {
                 _state.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }
-    
+
     private fun navigateToEdit() {
         _state.update { it.copy(navigateToEdit = true) }
     }
-    
+
     private fun deleteToneSetting() {
         val id = currentId ?: return
         viewModelScope.launch {
@@ -64,7 +64,7 @@ class DetailViewModel(
             }
         }
     }
-    
+
     private fun clearNavigation() {
         _state.update { it.copy(navigateToEdit = false, navigateBack = false) }
     }

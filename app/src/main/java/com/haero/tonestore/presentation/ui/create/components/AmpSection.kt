@@ -19,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
@@ -43,7 +42,7 @@ fun AmpSection(
     isEditable: Boolean = true
 ) {
     var isExpanded by remember { mutableStateOf(true) }
-    
+
     SectionHeader(
         title = stringResource(R.string.amp_setting),
         isExpanded = isExpanded,
@@ -73,7 +72,7 @@ fun AmpSection(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
-            
+
             // 앰프 노브 패널 (앰프 헤드 스타일)
             Box(
                 modifier = Modifier
@@ -95,7 +94,7 @@ fun AmpSection(
                         size = 60.dp,
                         enabled = isEditable
                     )
-                    
+
                     // Bass
                     RotaryKnob(
                         value = ampSetting.bass,
@@ -104,7 +103,7 @@ fun AmpSection(
                         size = 60.dp,
                         enabled = isEditable
                     )
-                    
+
                     // Middle
                     RotaryKnob(
                         value = ampSetting.middle,
@@ -113,7 +112,7 @@ fun AmpSection(
                         size = 60.dp,
                         enabled = isEditable
                     )
-                    
+
                     // Treble
                     RotaryKnob(
                         value = ampSetting.treble,
@@ -122,7 +121,7 @@ fun AmpSection(
                         size = 60.dp,
                         enabled = isEditable
                     )
-                    
+
                     // Presence
                     RotaryKnob(
                         value = ampSetting.presence,
@@ -131,7 +130,7 @@ fun AmpSection(
                         size = 60.dp,
                         enabled = isEditable
                     )
-                    
+
                     // Reverb
                     RotaryKnob(
                         value = ampSetting.reverb,
@@ -140,7 +139,7 @@ fun AmpSection(
                         size = 60.dp,
                         enabled = isEditable
                     )
-                    
+
                     // Master Volume
                     RotaryKnob(
                         value = ampSetting.masterVolume,
@@ -151,7 +150,7 @@ fun AmpSection(
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
         }
     }

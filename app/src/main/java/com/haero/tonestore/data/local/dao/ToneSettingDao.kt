@@ -13,22 +13,22 @@ import kotlinx.coroutines.flow.Flow
  */
 @Dao
 interface ToneSettingDao {
-    
+
     @Query("SELECT * FROM tone_settings ORDER BY isFavorite DESC, updatedAt DESC")
     fun getAllToneSettings(): Flow<List<ToneSettingEntity>>
-    
+
     @Query("SELECT * FROM tone_settings WHERE id = :id")
     suspend fun getToneSettingById(id: String): ToneSettingEntity?
-    
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertToneSetting(setting: ToneSettingEntity)
-    
+
     @Delete
     suspend fun deleteToneSetting(setting: ToneSettingEntity)
-    
+
     @Query("DELETE FROM tone_settings WHERE id = :id")
     suspend fun deleteToneSettingById(id: String)
-    
+
     @Query("UPDATE tone_settings SET isFavorite = NOT isFavorite WHERE id = :id")
     suspend fun toggleFavorite(id: String)
 }

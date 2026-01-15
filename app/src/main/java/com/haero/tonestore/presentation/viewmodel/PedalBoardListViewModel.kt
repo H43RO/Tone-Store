@@ -27,18 +27,18 @@ class PedalBoardListViewModel(
     private val getAllSavedPedalBoardsUseCase: GetAllSavedPedalBoardsUseCase,
     private val deleteSavedPedalBoardUseCase: DeleteSavedPedalBoardUseCase
 ) : ViewModel() {
-    
+
     private val _state = MutableStateFlow(PedalBoardListState())
     val state: StateFlow<PedalBoardListState> = _state.asStateFlow()
-    
+
     init {
         loadPedalBoards()
     }
-    
+
     private fun loadPedalBoards() {
         viewModelScope.launch {
             getAllSavedPedalBoardsUseCase().collect { pedalBoards ->
-                _state.update { 
+                _state.update {
                     it.copy(
                         pedalBoards = pedalBoards,
                         isLoading = false
@@ -47,7 +47,7 @@ class PedalBoardListViewModel(
             }
         }
     }
-    
+
     fun delete(pedalBoard: SavedPedalBoard) {
         viewModelScope.launch {
             deleteSavedPedalBoardUseCase(pedalBoard.id)

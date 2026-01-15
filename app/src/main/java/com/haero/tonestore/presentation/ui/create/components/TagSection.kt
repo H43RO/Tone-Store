@@ -31,14 +31,10 @@ import java.util.Locale
  * 장르 태그 선택 섹션 컴포넌트
  */
 @Composable
-fun TagSection(
-    selectedTags: List<GenreTag>,
-    onTagToggle: (GenreTag) -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun TagSection(selectedTags: List<GenreTag>, onTagToggle: (GenreTag) -> Unit, modifier: Modifier = Modifier) {
     var isExpanded by remember { mutableStateOf(true) }
     val isKorean = LocalConfiguration.current.locales[0].language == Locale.KOREAN.language
-    
+
     SectionHeader(
         title = stringResource(R.string.genre_tags),
         isExpanded = isExpanded,
@@ -55,9 +51,9 @@ fun TagSection(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            
+
             Spacer(modifier = Modifier.height(12.dp))
-            
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -82,7 +78,7 @@ fun TagSection(
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
         }
     }

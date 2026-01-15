@@ -20,20 +20,21 @@ import com.haero.tonestore.data.local.entity.ToneSettingEntity
 abstract class ToneStoreDatabase : RoomDatabase() {
     abstract fun toneSettingDao(): ToneSettingDao
     abstract fun savedPedalBoardDao(): SavedPedalBoardDao
-    
+
     companion object {
         const val DATABASE_NAME = "tone_store_db"
-        
+
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE tone_settings ADD COLUMN isFavorite INTEGER NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE tone_settings ADD COLUMN tagsJson TEXT NOT NULL DEFAULT '[]'")
             }
         }
-        
+
         val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS saved_pedal_boards (
                         id TEXT NOT NULL PRIMARY KEY,
                         name TEXT NOT NULL,
@@ -41,10 +42,11 @@ abstract class ToneStoreDatabase : RoomDatabase() {
                         createdAt INTEGER NOT NULL,
                         updatedAt INTEGER NOT NULL
                     )
-                """.trimIndent())
+                    """.trimIndent()
+                )
             }
         }
-        
+
         val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 // columns, rows 컬럼 추가 (기본값 5x2)

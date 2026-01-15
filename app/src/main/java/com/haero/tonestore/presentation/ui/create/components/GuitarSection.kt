@@ -30,7 +30,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.GuitarSetting
 import com.haero.tonestore.domain.model.PickupPosition
@@ -51,7 +50,7 @@ fun GuitarSection(
     isEditable: Boolean = true
 ) {
     var isExpanded by remember { mutableStateOf(true) }
-    
+
     SectionHeader(
         title = stringResource(R.string.guitar_setting),
         isExpanded = isExpanded,
@@ -81,7 +80,7 @@ fun GuitarSection(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
-            
+
             // 픽업 셀렉터
             Text(
                 text = stringResource(R.string.pickup_selector),
@@ -89,15 +88,15 @@ fun GuitarSection(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             PickupSelector(
                 selectedPosition = guitarSetting.pickupSelector,
                 onPositionChange = onPickupPositionChange,
                 enabled = isEditable
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             // 톤/볼륨 노브
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -110,7 +109,7 @@ fun GuitarSection(
                     size = 72.dp,
                     enabled = isEditable
                 )
-                
+
                 RotaryKnob(
                     value = guitarSetting.toneKnob,
                     onValueChange = { if (isEditable) onToneChange(it) },
@@ -119,7 +118,7 @@ fun GuitarSection(
                     enabled = isEditable
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
@@ -142,7 +141,7 @@ private fun PickupSelector(
         PickupPosition.MIDDLE_BRIDGE to "M+B",
         PickupPosition.BRIDGE to "B"
     )
-    
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -154,7 +153,7 @@ private fun PickupSelector(
     ) {
         positions.forEach { (position, label) ->
             val isSelected = selectedPosition == position
-            
+
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -167,13 +166,19 @@ private fun PickupSelector(
                         .size(32.dp)
                         .clip(CircleShape)
                         .background(
-                            if (isSelected) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.surface
+                            if (isSelected) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.surface
+                            }
                         )
                         .border(
                             width = 2.dp,
-                            color = if (isSelected) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.outline,
+                            color = if (isSelected) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.outline
+                            },
                             shape = CircleShape
                         ),
                     contentAlignment = Alignment.Center
@@ -187,15 +192,18 @@ private fun PickupSelector(
                         )
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(4.dp))
-                
+
                 Text(
                     text = label,
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isSelected) MaterialTheme.colorScheme.primary 
-                           else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (isSelected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
                     textAlign = TextAlign.Center
                 )
             }

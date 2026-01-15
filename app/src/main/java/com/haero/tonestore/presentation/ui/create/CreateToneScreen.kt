@@ -51,14 +51,14 @@ fun CreateToneScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    
+
     // 편집 모드일 경우 데이터 로드
     LaunchedEffect(editingId) {
         editingId?.let {
             viewModel.handleIntent(CreateToneIntent.LoadToneSetting(it))
         }
     }
-    
+
     // 네비게이션 처리
     LaunchedEffect(state.navigateBack) {
         if (state.navigateBack) {
@@ -66,7 +66,7 @@ fun CreateToneScreen(
             viewModel.handleIntent(CreateToneIntent.NavigationHandled)
         }
     }
-    
+
     // 성공 메시지
     val saveSuccessMessage = stringResource(R.string.save_success)
     LaunchedEffect(state.showSaveSuccess) {
@@ -74,14 +74,17 @@ fun CreateToneScreen(
             snackbarHostState.showSnackbar(saveSuccessMessage)
         }
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        if (state.isEditMode) stringResource(R.string.edit_tone_setting)
-                        else stringResource(R.string.create_tone_setting)
+                        if (state.isEditMode) {
+                            stringResource(R.string.edit_tone_setting)
+                        } else {
+                            stringResource(R.string.create_tone_setting)
+                        }
                     )
                 },
                 navigationIcon = {
@@ -136,9 +139,9 @@ fun CreateToneScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             // 태그 섹션
             TagSection(
                 selectedTags = state.selectedTags,
@@ -146,7 +149,7 @@ fun CreateToneScreen(
                     viewModel.handleIntent(CreateToneIntent.ToggleTag(tag))
                 }
             )
-            
+
             // 페달보드 섹션
             PedalBoardSection(
                 pedalBoard = state.pedalBoard,
@@ -171,7 +174,7 @@ fun CreateToneScreen(
                     viewModel.handleIntent(CreateToneIntent.TogglePedalEnabled(pedalId))
                 }
             )
-            
+
             // 앰프 섹션
             AmpSection(
                 ampSetting = state.ampSetting,
@@ -180,7 +183,7 @@ fun CreateToneScreen(
                     viewModel.handleIntent(CreateToneIntent.UpdateAmpKnob(knobName, value))
                 }
             )
-            
+
             // 기타 섹션
             GuitarSection(
                 guitarSetting = state.guitarSetting,
@@ -189,7 +192,7 @@ fun CreateToneScreen(
                 onToneChange = { viewModel.handleIntent(CreateToneIntent.UpdateGuitarTone(it)) },
                 onVolumeChange = { viewModel.handleIntent(CreateToneIntent.UpdateGuitarVolume(it)) }
             )
-            
+
             Spacer(modifier = Modifier.height(32.dp))
         }
     }

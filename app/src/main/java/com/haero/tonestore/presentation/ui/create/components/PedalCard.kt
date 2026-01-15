@@ -30,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalType
@@ -61,13 +60,13 @@ fun PedalCard(
     } else {
         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
     }
-    
+
     val borderColor = when {
         !pedal.isEnabled -> MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
         pedal.type == PedalType.PRESET -> MaterialTheme.colorScheme.primary
         else -> MaterialTheme.colorScheme.secondary
     }
-    
+
     Card(
         modifier = modifier
             .padding(4.dp)
@@ -97,7 +96,7 @@ fun PedalCard(
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     }
                 )
-                
+
                 if (isEditable) {
                     IconButton(
                         onClick = onRemove,
@@ -136,7 +135,7 @@ fun PedalCard(
                     )
                 }
             }
-            
+
             // 전원 버튼 (Footswitch)
             if (isEditable) {
                 Box(

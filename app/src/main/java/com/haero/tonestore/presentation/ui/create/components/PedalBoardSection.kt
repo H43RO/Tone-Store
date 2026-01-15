@@ -59,7 +59,7 @@ fun PedalBoardSection(
     var showPresetDialog by remember { mutableStateOf(false) }
     var showCustomDialog by remember { mutableStateOf(false) }
     var showSavedPedalBoardDialog by remember { mutableStateOf(false) }
-    
+
     SectionHeader(
         title = stringResource(R.string.pedal_board),
         isExpanded = isExpanded,
@@ -100,11 +100,11 @@ fun PedalBoardSection(
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
             }
-            
+
             // 이펙터 추가 버튼들
             if (isEditable) {
                 Spacer(modifier = Modifier.height(12.dp))
-                
+
                 // 저장된 페달보드 불러오기 버튼
                 if (savedPedalBoards.isNotEmpty()) {
                     OutlinedButton(
@@ -117,7 +117,7 @@ fun PedalBoardSection(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
-                
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -130,7 +130,7 @@ fun PedalBoardSection(
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(stringResource(R.string.add_preset_pedal))
                     }
-                    
+
                     OutlinedButton(
                         onClick = { showCustomDialog = true },
                         modifier = Modifier.weight(1f)
@@ -141,11 +141,11 @@ fun PedalBoardSection(
                     }
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
-    
+
     // 프리셋 페달 선택 다이얼로그
     if (showPresetDialog) {
         PresetPedalDialog(
@@ -157,7 +157,7 @@ fun PedalBoardSection(
             onDismiss = { showPresetDialog = false }
         )
     }
-    
+
     // 커스텀 페달 생성 다이얼로그
     if (showCustomDialog) {
         CustomPedalDialog(
@@ -168,7 +168,7 @@ fun PedalBoardSection(
             onDismiss = { showCustomDialog = false }
         )
     }
-    
+
     // 저장된 페달보드 선택 다이얼로그
     if (showSavedPedalBoardDialog) {
         SavedPedalBoardDialog(
@@ -183,11 +183,7 @@ fun PedalBoardSection(
 }
 
 @Composable
-private fun PresetPedalDialog(
-    presetPedals: List<Pedal>,
-    onSelect: (Pedal) -> Unit,
-    onDismiss: () -> Unit
-) {
+private fun PresetPedalDialog(presetPedals: List<Pedal>, onSelect: (Pedal) -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.select_preset_pedal)) },
@@ -214,13 +210,10 @@ private fun PresetPedalDialog(
 }
 
 @Composable
-private fun CustomPedalDialog(
-    onConfirm: (name: String, knobs: List<String>) -> Unit,
-    onDismiss: () -> Unit
-) {
+private fun CustomPedalDialog(onConfirm: (name: String, knobs: List<String>) -> Unit, onDismiss: () -> Unit) {
     var pedalName by remember { mutableStateOf("") }
     val knobNames = remember { mutableStateListOf("Knob 1") }
-    
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.create_custom_pedal)) },
@@ -233,14 +226,14 @@ private fun CustomPedalDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 Text(
                     text = stringResource(R.string.knobs),
                     style = MaterialTheme.typography.labelLarge
                 )
-                
+
                 knobNames.forEachIndexed { index, name ->
                     OutlinedTextField(
                         value = name,
@@ -252,7 +245,7 @@ private fun CustomPedalDialog(
                             .padding(vertical = 4.dp)
                     )
                 }
-                
+
                 if (knobNames.size < 6) {
                     TextButton(
                         onClick = { knobNames.add("Knob ${knobNames.size + 1}") },
@@ -298,7 +291,7 @@ private fun SavedPedalBoardDialog(
                 savedPedalBoards.forEach { pedalBoard ->
                     AssistChip(
                         onClick = { onSelect(pedalBoard) },
-                        label = { 
+                        label = {
                             Column {
                                 Text(pedalBoard.name)
                                 Text(

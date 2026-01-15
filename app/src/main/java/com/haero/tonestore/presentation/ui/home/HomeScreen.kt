@@ -63,7 +63,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    
+
     // 네비게이션 처리
     LaunchedEffect(state.navigateToCreate) {
         if (state.navigateToCreate) {
@@ -71,14 +71,14 @@ fun HomeScreen(
             viewModel.handleIntent(HomeIntent.NavigationHandled)
         }
     }
-    
+
     LaunchedEffect(state.navigateToDetail) {
         state.navigateToDetail?.let { id ->
             onNavigateToDetail(id)
             viewModel.handleIntent(HomeIntent.NavigationHandled)
         }
     }
-    
+
     Scaffold(
         topBar = {
             if (!state.isSearchActive) {
@@ -151,7 +151,7 @@ fun HomeScreen(
                     )
                 ) { }
             }
-            
+
             // 컨텐츠
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
@@ -211,7 +211,7 @@ private fun ToneSettingList(
     onFavoriteClick: (String) -> Unit
 ) {
     var showDeleteDialog by remember { mutableStateOf<String?>(null) }
-    
+
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -228,7 +228,7 @@ private fun ToneSettingList(
                     false
                 }
             )
-            
+
             SwipeToDismissBox(
                 state = dismissState,
                 backgroundContent = {
@@ -264,20 +264,20 @@ private fun ToneSettingList(
             }
         }
     }
-    
+
     // 삭제 확인 다이얼로그
     showDeleteDialog?.let { id ->
         val toneSetting = toneSettings.find { it.id == id }
         AlertDialog(
             onDismissRequest = { showDeleteDialog = null },
             title = { Text(stringResource(R.string.delete_confirm_title)) },
-            text = { 
+            text = {
                 Text(
                     stringResource(
-                        R.string.delete_confirm_message, 
+                        R.string.delete_confirm_message,
                         toneSetting?.songName ?: ""
                     )
-                ) 
+                )
             },
             confirmButton = {
                 TextButton(

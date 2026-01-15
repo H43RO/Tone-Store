@@ -58,7 +58,7 @@ fun SectionHeader(
                 tint = MaterialTheme.colorScheme.primary
             )
         }
-        
+
         AnimatedVisibility(
             visible = isExpanded,
             enter = expandVertically(),

@@ -10,22 +10,22 @@ data class PedalBoardState(
     val isLoading: Boolean = false,
     val isEditMode: Boolean = false,
     val editingId: String? = null,
-    
+
     // 페달보드 데이터
     val name: String = "",
     val columns: Int = SavedPedalBoard.DEFAULT_COLUMNS,
     val rows: Int = SavedPedalBoard.DEFAULT_ROWS,
     val slots: List<Pedal?> = List(SavedPedalBoard.DEFAULT_COLUMNS * SavedPedalBoard.DEFAULT_ROWS) { null },
-    
+
     // 프리셋 페달 목록
     val presetPedals: List<Pedal> = emptyList(),
-    
+
     // 페달 편집 상태
     val editingSlotIndex: Int? = null,
-    
+
     // 드래그 상태
     val draggingSlotIndex: Int? = null,
-    
+
     // UI 상태
     val isSaving: Boolean = false,
     val error: String? = null,

@@ -2,9 +2,7 @@ package com.haero.tonestore.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.haero.tonestore.domain.model.AmpSetting
 import com.haero.tonestore.domain.model.GenreTag
-import com.haero.tonestore.domain.model.GuitarSetting
 import com.haero.tonestore.domain.model.Knob
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalBoard
@@ -17,12 +15,12 @@ import com.haero.tonestore.domain.usecase.GetToneSettingByIdUseCase
 import com.haero.tonestore.domain.usecase.SaveToneSettingUseCase
 import com.haero.tonestore.presentation.ui.create.CreateToneIntent
 import com.haero.tonestore.presentation.ui.create.CreateToneState
+import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 /**
  * Create/Edit 화면의 ViewModel (MVI 패턴)
@@ -33,15 +31,15 @@ class CreateToneViewModel(
     private val getPresetPedalsUseCase: GetPresetPedalsUseCase,
     private val getAllSavedPedalBoardsUseCase: GetAllSavedPedalBoardsUseCase
 ) : ViewModel() {
-    
+
     private val _state = MutableStateFlow(CreateToneState())
     val state: StateFlow<CreateToneState> = _state.asStateFlow()
-    
+
     init {
         loadPresetPedals()
         loadSavedPedalBoards()
     }
-    
+
     fun handleIntent(intent: CreateToneIntent) {
         when (intent) {
             is CreateToneIntent.LoadToneSetting -> loadToneSetting(intent.id)
@@ -63,12 +61,12 @@ class CreateToneViewModel(
             is CreateToneIntent.NavigationHandled -> clearNavigation()
         }
     }
-    
+
     private fun loadPresetPedals() {
         val presets = getPresetPedalsUseCase()
         _state.update { it.copy(presetPedals = presets) }
     }
-    
+
     private fun loadSavedPedalBoards() {
         viewModelScope.launch {
             getAllSavedPedalBoardsUseCase().collect { pedalBoards ->
@@ -76,11 +74,11 @@ class CreateToneViewModel(
             }
         }
     }
-    
+
     private fun loadSavedPedalBoard(savedPedalBoard: SavedPedalBoard) {
         _state.update { it.copy(pedalBoard = savedPedalBoard.toPedalBoard()) }
     }
-    
+
     private fun loadToneSetting(id: String) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
@@ -107,11 +105,11 @@ class CreateToneViewModel(
             }
         }
     }
-    
+
     private fun updateSongName(name: String) {
         _state.update { it.copy(songName = name, songNameError = null) }
     }
-    
+
     private fun addPresetPedal(pedal: Pedal) {
         val currentPedals = _state.value.pedalBoard.pedals
         val newPedal = pedal.copy(
@@ -122,7 +120,7 @@ class CreateToneViewModel(
             it.copy(pedalBoard = PedalBoard(currentPedals + newPedal))
         }
     }
-    
+
     private fun addCustomPedal(name: String, knobNames: List<String>) {
         val currentPedals = _state.value.pedalBoard.pedals
         val knobs = knobNames.map { knobName -> Knob(name = knobName, value = 5f) }
@@ -137,14 +135,14 @@ class CreateToneViewModel(
             it.copy(pedalBoard = PedalBoard(currentPedals + newPedal))
         }
     }
-    
+
     private fun removePedal(pedalId: String) {
         val updatedPedals = _state.value.pedalBoard.pedals
             .filter { it.id != pedalId }
             .mapIndexed { index, pedal -> pedal.copy(order = index) }
         _state.update { it.copy(pedalBoard = PedalBoard(updatedPedals)) }
     }
-    
+
     private fun updatePedalKnob(pedalId: String, knobIndex: Int, value: Float) {
         val updatedPedals = _state.value.pedalBoard.pedals.map { pedal ->
             if (pedal.id == pedalId) {
@@ -158,18 +156,18 @@ class CreateToneViewModel(
         }
         _state.update { it.copy(pedalBoard = PedalBoard(updatedPedals)) }
     }
-    
+
     private fun togglePedalEnabled(pedalId: String) {
         val updatedPedals = _state.value.pedalBoard.pedals.map { pedal ->
             if (pedal.id == pedalId) pedal.copy(isEnabled = !pedal.isEnabled) else pedal
         }
         _state.update { it.copy(pedalBoard = PedalBoard(updatedPedals)) }
     }
-    
+
     private fun updateAmpModel(model: String) {
         _state.update { it.copy(ampSetting = it.ampSetting.copy(ampModel = model.ifBlank { null })) }
     }
-    
+
     private fun updateAmpKnob(knobName: String, value: Float) {
         _state.update { state ->
             val current = state.ampSetting
@@ -186,25 +184,25 @@ class CreateToneViewModel(
             state.copy(ampSetting = updated)
         }
     }
-    
+
     private fun updateGuitarModel(model: String) {
-        _state.update { 
-            it.copy(guitarSetting = it.guitarSetting.copy(guitarModel = model.ifBlank { null })) 
+        _state.update {
+            it.copy(guitarSetting = it.guitarSetting.copy(guitarModel = model.ifBlank { null }))
         }
     }
-    
+
     private fun updatePickupPosition(position: com.haero.tonestore.domain.model.PickupPosition) {
         _state.update { it.copy(guitarSetting = it.guitarSetting.copy(pickupSelector = position)) }
     }
-    
+
     private fun updateGuitarTone(value: Float) {
         _state.update { it.copy(guitarSetting = it.guitarSetting.copy(toneKnob = value)) }
     }
-    
+
     private fun updateGuitarVolume(value: Float) {
         _state.update { it.copy(guitarSetting = it.guitarSetting.copy(volumeKnob = value)) }
     }
-    
+
     private fun toggleTag(tag: GenreTag) {
         _state.update { state ->
             val currentTags = state.selectedTags
@@ -216,16 +214,16 @@ class CreateToneViewModel(
             state.copy(selectedTags = updatedTags)
         }
     }
-    
+
     private fun saveToneSetting() {
         val currentState = _state.value
-        
+
         // Validation
         if (currentState.songName.isBlank()) {
             _state.update { it.copy(songNameError = "곡 이름을 입력해주세요") }
             return
         }
-        
+
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
             try {
@@ -247,7 +245,7 @@ class CreateToneViewModel(
             }
         }
     }
-    
+
     private fun clearNavigation() {
         _state.update { it.copy(navigateBack = false, showSaveSuccess = false) }
     }

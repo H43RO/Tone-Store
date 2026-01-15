@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
 sealed class Screen(val route: String) {
     // 탭 화면들
     data object Main : Screen("main")
-    
+
     // 상세 화면들
     data object Create : Screen("create?editingId={editingId}") {
         fun createRoute(editingId: String? = null): String {
@@ -89,11 +89,9 @@ private val bottomNavTabs = listOf(
  * 앱 네비게이션 그래프
  */
 @Composable
-fun ToneStoreNavGraph(
-    navController: NavHostController = rememberNavController()
-) {
+fun ToneStoreNavGraph(navController: NavHostController = rememberNavController()) {
     val animationDuration = 300
-    
+
     NavHost(
         navController = navController,
         startDestination = Screen.Main.route
@@ -115,7 +113,7 @@ fun ToneStoreNavGraph(
                 }
             )
         }
-        
+
         // 생성/편집 화면
         composable(
             route = Screen.Create.route,
@@ -157,7 +155,7 @@ fun ToneStoreNavGraph(
                 editingId = editingId
             )
         }
-        
+
         // 상세 화면
         composable(
             route = Screen.Detail.route,
@@ -198,7 +196,7 @@ fun ToneStoreNavGraph(
                 }
             )
         }
-        
+
         // 페달보드 생성/편집 화면
         composable(
             route = Screen.PedalBoardEdit.route,
@@ -255,7 +253,7 @@ private fun MainTabScreen(
 ) {
     val pagerState = rememberPagerState(pageCount = { bottomNavTabs.size })
     val scope = rememberCoroutineScope()
-    
+
     Scaffold(
         bottomBar = {
             NavigationBar {

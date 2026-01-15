@@ -23,14 +23,14 @@ class HomeViewModel(
     private val deleteToneSettingUseCase: DeleteToneSettingUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : ViewModel() {
-    
+
     private val _state = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state.asStateFlow()
-    
+
     init {
         handleIntent(HomeIntent.LoadToneSettings)
     }
-    
+
     fun handleIntent(intent: HomeIntent) {
         when (intent) {
             is HomeIntent.LoadToneSettings -> loadToneSettings()
@@ -43,7 +43,7 @@ class HomeViewModel(
             is HomeIntent.ToggleFavorite -> toggleFavorite(intent.id)
         }
     }
-    
+
     private fun loadToneSettings() {
         viewModelScope.launch {
             getAllToneSettingsUseCase()
@@ -62,10 +62,10 @@ class HomeViewModel(
                 }
         }
     }
-    
+
     private fun setSearchActive(isActive: Boolean) {
         _state.update { state ->
-            if (!isActive) {
+            if (isActive.not()) {
                 // 검색 비활성화 시 검색어 초기화
                 state.copy(
                     isSearchActive = false,
@@ -77,7 +77,7 @@ class HomeViewModel(
             }
         }
     }
-    
+
     private fun updateSearchQuery(query: String) {
         _state.update { state ->
             state.copy(
@@ -86,20 +86,20 @@ class HomeViewModel(
             )
         }
     }
-    
+
     private fun filterToneSettings(settings: List<ToneSetting>, query: String): List<ToneSetting> {
         if (query.isBlank()) return settings
         return settings.filter { it.songName.contains(query, ignoreCase = true) }
     }
-    
+
     private fun navigateToDetail(id: String) {
         _state.update { it.copy(navigateToDetail = id) }
     }
-    
+
     private fun navigateToCreate() {
         _state.update { it.copy(navigateToCreate = true) }
     }
-    
+
     private fun deleteToneSetting(id: String) {
         viewModelScope.launch {
             try {
@@ -109,7 +109,7 @@ class HomeViewModel(
             }
         }
     }
-    
+
     private fun toggleFavorite(id: String) {
         viewModelScope.launch {
             try {
@@ -119,7 +119,7 @@ class HomeViewModel(
             }
         }
     }
-    
+
     private fun clearNavigation() {
         _state.update { it.copy(navigateToDetail = null, navigateToCreate = false) }
     }

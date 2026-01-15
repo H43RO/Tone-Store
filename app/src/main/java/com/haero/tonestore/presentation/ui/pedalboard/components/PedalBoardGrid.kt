@@ -27,13 +27,13 @@ fun PedalBoardGrid(
     isEditable: Boolean = true
 ) {
     val totalSlots = columns * rows
-    require(slots.size >= totalSlots) { 
-        "slots must have at least $totalSlots elements (got ${slots.size})" 
+    require(slots.size >= totalSlots) {
+        "slots must have at least $totalSlots elements (got ${slots.size})"
     }
-    
+
     // 페달 슬롯 너비
     val slotWidth = 72.dp
-    
+
     Column(
         modifier = modifier
             .fillMaxWidth()

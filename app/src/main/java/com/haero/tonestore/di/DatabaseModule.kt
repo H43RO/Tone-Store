@@ -9,7 +9,7 @@ import org.koin.dsl.module
  * Database 관련 Koin Module
  */
 val databaseModule = module {
-    
+
     // Room Database 싱글톤
     single {
         Room.databaseBuilder(
@@ -24,7 +24,7 @@ val databaseModule = module {
             )
             .build()
     }
-    
+
     // DAO
     single { get<ToneStoreDatabase>().toneSettingDao() }
     single { get<ToneStoreDatabase>().savedPedalBoardDao() }

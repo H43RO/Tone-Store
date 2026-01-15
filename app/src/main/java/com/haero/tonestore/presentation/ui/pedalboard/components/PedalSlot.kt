@@ -119,15 +119,12 @@ fun PedalSlot(
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun MiniPedalCard(
-    pedal: Pedal,
-    modifier: Modifier = Modifier
-) {
+private fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
     val borderColor = when (pedal.type) {
         PedalType.PRESET -> MaterialTheme.colorScheme.primary
         else -> MaterialTheme.colorScheme.secondary
     }
-    
+
     Column(
         modifier = modifier
             .border(2.dp, borderColor, RoundedCornerShape(8.dp))
@@ -148,7 +145,7 @@ private fun MiniPedalCard(
         )
 
         Spacer(modifier = Modifier.weight(1f))
-        
+
         // 노브 UI
         FlowRow(
             modifier = Modifier
@@ -169,24 +166,22 @@ private fun MiniPedalCard(
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun MiniKnobIndicator(
-    size: Dp = 18.dp
-) {
+private fun MiniKnobIndicator(size: Dp = 18.dp) {
     val knobColor = MaterialTheme.colorScheme.primary
     val trackColor = MaterialTheme.colorScheme.surfaceVariant
     val indicatorColor = MaterialTheme.colorScheme.onPrimary
-    
+
     // 기본값 5.0 (중간)으로 표시
     val normalizedValue = 0.5f
     val startAngle = -90f
     val sweepAngle = 300f
     val currentAngle = startAngle + (normalizedValue * sweepAngle)
-    
+
     Canvas(modifier = Modifier.size(size)) {
         val strokeWidth = size.toPx() * 0.12f
         val radius = (size.toPx() - strokeWidth) / 2f
         val center = Offset(size.toPx() / 2f, size.toPx() / 2f)
-        
+
         drawArc(
             color = trackColor,
             startAngle = startAngle,
@@ -196,7 +191,7 @@ private fun MiniKnobIndicator(
             topLeft = Offset(strokeWidth / 2f, strokeWidth / 2f),
             size = androidx.compose.ui.geometry.Size(radius * 2f, radius * 2f)
         )
-        
+
         drawArc(
             color = knobColor,
             startAngle = startAngle,
@@ -206,14 +201,14 @@ private fun MiniKnobIndicator(
             topLeft = Offset(strokeWidth / 2f, strokeWidth / 2f),
             size = androidx.compose.ui.geometry.Size(radius * 2f, radius * 2f)
         )
-        
+
         // 중앙 원 (노브 몸체)
         drawCircle(
             color = knobColor,
             radius = radius * 0.6f,
             center = center
         )
-        
+
         // 포인터
         val pointerAngle = currentAngle * (PI.toFloat() / 180f)
         val pointerLength = radius * 0.4f

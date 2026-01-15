@@ -13,9 +13,9 @@ import com.haero.tonestore.domain.model.ToneSetting
  * Entity와 Domain Model 간의 변환을 담당하는 Mapper
  */
 object ToneSettingMapper {
-    
+
     private val gson = Gson()
-    
+
     /**
      * Entity를 Domain Model로 변환
      */
@@ -27,9 +27,13 @@ object ToneSettingMapper {
             emptyList()
         }
         val tags = tagStrings.mapNotNull { tagName ->
-            try { GenreTag.valueOf(tagName) } catch (e: Exception) { null }
+            try {
+                GenreTag.valueOf(tagName)
+            } catch (e: Exception) {
+                null
+            }
         }
-        
+
         return ToneSetting(
             id = id,
             songName = songName,
@@ -42,7 +46,7 @@ object ToneSettingMapper {
             tags = tags
         )
     }
-    
+
     /**
      * Domain Model을 Entity로 변환
      */

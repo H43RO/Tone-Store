@@ -10,7 +10,7 @@ import java.util.UUID
  * 일반적인 기타 이펙터 페달을 기본값과 함께 제공
  */
 object PresetPedals {
-    
+
     fun getPresetPedals(): List<Pedal> = listOf(
         createOverdrive(),
         createDistortion(),

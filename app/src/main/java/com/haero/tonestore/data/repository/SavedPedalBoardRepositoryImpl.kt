@@ -13,21 +13,21 @@ import kotlinx.coroutines.flow.map
 class SavedPedalBoardRepositoryImpl(
     private val dao: SavedPedalBoardDao
 ) : SavedPedalBoardRepository {
-    
+
     override fun getAllPedalBoards(): Flow<List<SavedPedalBoard>> {
         return dao.getAllPedalBoards().map { entities ->
             entities.map { SavedPedalBoardMapper.toDomain(it) }
         }
     }
-    
+
     override suspend fun getPedalBoardById(id: String): SavedPedalBoard? {
         return dao.getPedalBoardById(id)?.let { SavedPedalBoardMapper.toDomain(it) }
     }
-    
+
     override suspend fun savePedalBoard(pedalBoard: SavedPedalBoard) {
         dao.insertPedalBoard(SavedPedalBoardMapper.toEntity(pedalBoard))
     }
-    
+
     override suspend fun deletePedalBoard(id: String) {
         dao.deletePedalBoardById(id)
     }

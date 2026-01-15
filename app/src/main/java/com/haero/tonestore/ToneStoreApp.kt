@@ -12,10 +12,10 @@ import org.koin.core.logger.Level
  * Koin DI 초기화
  */
 class ToneStoreApp : Application() {
-    
+
     override fun onCreate() {
         super.onCreate()
-        
+
         startKoin {
             androidLogger(Level.ERROR)
             androidContext(this@ToneStoreApp)

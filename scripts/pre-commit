@@ -1,0 +1,18 @@
+#!/bin/bash
+
+echo "Running ktlint format before commit..."
+
+# Run ktlint format
+./gradlew ktlintFormat --quiet
+
+# Check if ktlint format was successful
+if [ $? -ne 0 ]; then
+    echo "❌ ktlint format failed. Please fix the issues and try again."
+    exit 1
+fi
+
+# Add any files that were modified by ktlint
+git add -u
+
+echo "✅ ktlint format completed successfully."
+exit 0

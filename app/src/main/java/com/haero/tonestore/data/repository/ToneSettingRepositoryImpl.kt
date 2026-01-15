@@ -14,25 +14,25 @@ import kotlinx.coroutines.flow.map
 class ToneSettingRepositoryImpl(
     private val dao: ToneSettingDao
 ) : ToneSettingRepository {
-    
+
     override fun getAllToneSettings(): Flow<List<ToneSetting>> {
         return dao.getAllToneSettings().map { entities ->
             entities.map { it.toDomain() }
         }
     }
-    
+
     override suspend fun getToneSettingById(id: String): ToneSetting? {
         return dao.getToneSettingById(id)?.toDomain()
     }
-    
+
     override suspend fun saveToneSetting(setting: ToneSetting) {
         dao.insertToneSetting(setting.toEntity())
     }
-    
+
     override suspend fun deleteToneSetting(id: String) {
         dao.deleteToneSettingById(id)
     }
-    
+
     override suspend fun toggleFavorite(id: String) {
         dao.toggleFavorite(id)
     }
