@@ -175,6 +175,9 @@ fun PedalBoardScreen(
             Spacer(modifier = Modifier.height(8.dp))
             
             // 레이아웃 크기 설정
+            var columnsText by remember(state.columns) { mutableStateOf(state.columns.toString()) }
+            var rowsText by remember(state.rows) { mutableStateOf(state.rows.toString()) }
+            
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -189,10 +192,13 @@ fun PedalBoardScreen(
                 )
                 
                 OutlinedTextField(
-                    value = state.columns.toString(),
+                    value = columnsText,
                     onValueChange = { value ->
-                        val newColumns = value.toIntOrNull() ?: state.columns
-                        viewModel.handleIntent(PedalBoardIntent.UpdateLayout(newColumns, state.rows))
+                        columnsText = value.filter { it.isDigit() }
+                        val newColumns = columnsText.toIntOrNull()
+                        if (newColumns != null) {
+                            viewModel.handleIntent(PedalBoardIntent.UpdateLayout(newColumns, state.rows))
+                        }
                     },
                     label = { Text(stringResource(R.string.columns)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -203,10 +209,13 @@ fun PedalBoardScreen(
                 Text("×", style = MaterialTheme.typography.titleLarge)
                 
                 OutlinedTextField(
-                    value = state.rows.toString(),
+                    value = rowsText,
                     onValueChange = { value ->
-                        val newRows = value.toIntOrNull() ?: state.rows
-                        viewModel.handleIntent(PedalBoardIntent.UpdateLayout(state.columns, newRows))
+                        rowsText = value.filter { it.isDigit() }
+                        val newRows = rowsText.toIntOrNull()
+                        if (newRows != null) {
+                            viewModel.handleIntent(PedalBoardIntent.UpdateLayout(state.columns, newRows))
+                        }
                     },
                     label = { Text(stringResource(R.string.rows)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -257,14 +266,6 @@ fun PedalBoardScreen(
             slotIndex = state.editingSlotIndex!!,
             sheetState = sheetState,
             onDismiss = { viewModel.handleIntent(PedalBoardIntent.ClosePedalEditor) },
-            onKnobChange = { knobIndex, value ->
-                viewModel.handleIntent(
-                    PedalBoardIntent.UpdatePedalKnob(state.editingSlotIndex!!, knobIndex, value)
-                )
-            },
-            onToggleEnabled = {
-                viewModel.handleIntent(PedalBoardIntent.TogglePedalEnabled(state.editingSlotIndex!!))
-            },
             onRemove = {
                 viewModel.handleIntent(PedalBoardIntent.RemovePedalFromSlot(state.editingSlotIndex!!))
                 scope.launch { sheetState.hide() }

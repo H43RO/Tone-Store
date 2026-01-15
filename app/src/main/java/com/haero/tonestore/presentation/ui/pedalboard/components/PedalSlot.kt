@@ -6,6 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,14 +27,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalType
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
+import androidx.compose.foundation.Canvas
 
 /**
  * 페달보드 그리드의 슬롯 컴포넌트
@@ -110,127 +120,126 @@ fun PedalSlot(
 }
 
 /**
- * 미니 페달 카드 - 실제 PedalCard 스타일을 따르되 노브 이름 생략
+ * 미니 페달 카드 - 페달 이름과 노브 개수만 표시 (노브 모양 UI로)
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun MiniPedalCard(
     pedal: Pedal,
     modifier: Modifier = Modifier
 ) {
-    val cardColor = if (pedal.isEnabled) {
-        MaterialTheme.colorScheme.surface
-    } else {
-        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-    }
-    
-    val borderColor = when {
-        !pedal.isEnabled -> MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-        pedal.type == PedalType.PRESET -> MaterialTheme.colorScheme.primary
+    val borderColor = when (pedal.type) {
+        PedalType.PRESET -> MaterialTheme.colorScheme.primary
         else -> MaterialTheme.colorScheme.secondary
     }
     
     Column(
         modifier = modifier
             .border(2.dp, borderColor, RoundedCornerShape(8.dp))
-            .background(cardColor, RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
             .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // 페달 이름
+        // 페달 이름 (최대 2줄)
         Text(
             text = pedal.name,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
-            color = if (pedal.isEnabled) {
-                MaterialTheme.colorScheme.onSurface
-            } else {
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            },
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
-            maxLines = 1,
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
         
         Spacer(modifier = Modifier.height(4.dp))
         
-        // 미니 노브들 (값만 표시, 이름 생략)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
+        // 노브 모양 UI (FlowRow로 자동 줄바꿈)
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            pedal.knobs.take(4).forEach { knob ->
-                MiniKnob(
-                    value = knob.value,
-                    enabled = pedal.isEnabled,
-                    modifier = Modifier.padding(horizontal = 2.dp)
-                )
-            }
-        }
-        
-        // 노브가 4개 초과면 두 번째 줄
-        if (pedal.knobs.size > 4) {
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                pedal.knobs.drop(4).take(4).forEach { knob ->
-                    MiniKnob(
-                        value = knob.value,
-                        enabled = pedal.isEnabled,
-                        modifier = Modifier.padding(horizontal = 2.dp)
-                    )
-                }
+            pedal.knobs.forEach { _ ->
+                MiniKnobIndicator()
             }
         }
         
         Spacer(modifier = Modifier.weight(1f))
-        
-        // 전원 LED
-        Box(
-            modifier = Modifier
-                .size(10.dp)
-                .clip(CircleShape)
-                .background(
-                    if (pedal.isEnabled) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.outline
-                    }
-                )
-        )
     }
 }
 
 /**
- * 미니 노브 - 값을 시각적으로 표현 (노브 이름 생략)
+ * 미니 노브 표시용 UI - RotaryKnob과 동일한 모양 (라벨/값 없이)
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun MiniKnob(
-    value: Float,
-    enabled: Boolean,
-    modifier: Modifier = Modifier
+private fun MiniKnobIndicator(
+    size: Dp = 18.dp
 ) {
-    val knobColor = if (enabled) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.outline
-    }
+    val knobColor = MaterialTheme.colorScheme.primary
+    val trackColor = MaterialTheme.colorScheme.surfaceVariant
+    val indicatorColor = MaterialTheme.colorScheme.onPrimary
     
-    Box(
-        modifier = modifier
-            .size(20.dp)
-            .clip(CircleShape)
-            .background(knobColor.copy(alpha = 0.2f))
-            .border(1.5.dp, knobColor, CircleShape),
-        contentAlignment = Alignment.Center
-    ) {
-        // 값 텍스트 (소수점 없이)
-        Text(
-            text = value.toInt().toString(),
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
-            fontWeight = FontWeight.Bold,
-            color = knobColor
+    // 기본값 5.0 (중간)으로 표시
+    val normalizedValue = 0.5f
+    val startAngle = -90f
+    val sweepAngle = 300f
+    val currentAngle = startAngle + (normalizedValue * sweepAngle)
+    
+    Canvas(modifier = Modifier.size(size)) {
+        val strokeWidth = size.toPx() * 0.12f
+        val radius = (size.toPx() - strokeWidth) / 2f
+        val center = Offset(size.toPx() / 2f, size.toPx() / 2f)
+        
+        // 배경 트랙
+        drawArc(
+            color = trackColor,
+            startAngle = startAngle,
+            sweepAngle = sweepAngle,
+            useCenter = false,
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+            topLeft = Offset(strokeWidth / 2f, strokeWidth / 2f),
+            size = androidx.compose.ui.geometry.Size(radius * 2f, radius * 2f)
+        )
+        
+        // 활성 트랙
+        drawArc(
+            color = knobColor,
+            startAngle = startAngle,
+            sweepAngle = normalizedValue * sweepAngle,
+            useCenter = false,
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+            topLeft = Offset(strokeWidth / 2f, strokeWidth / 2f),
+            size = androidx.compose.ui.geometry.Size(radius * 2f, radius * 2f)
+        )
+        
+        // 중앙 원 (노브 몸체)
+        drawCircle(
+            color = knobColor,
+            radius = radius * 0.6f,
+            center = center
+        )
+        
+        // 포인터
+        val pointerAngle = currentAngle * (PI.toFloat() / 180f)
+        val pointerLength = radius * 0.4f
+        val pointerStart = Offset(
+            center.x + cos(pointerAngle) * (radius * 0.2f),
+            center.y + sin(pointerAngle) * (radius * 0.2f)
+        )
+        val pointerEnd = Offset(
+            center.x + cos(pointerAngle) * pointerLength,
+            center.y + sin(pointerAngle) * pointerLength
+        )
+        drawLine(
+            color = indicatorColor,
+            start = pointerStart,
+            end = pointerEnd,
+            strokeWidth = strokeWidth * 0.4f,
+            cap = StrokeCap.Round
         )
     }
 }

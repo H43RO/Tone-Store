@@ -1,9 +1,6 @@
 package com.haero.tonestore.presentation.ui.pedalboard.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -14,12 +11,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Power
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -43,7 +37,8 @@ import com.haero.tonestore.presentation.ui.components.RotaryKnob
 
 /**
  * 페달 편집 바텀 시트
- * 페달 슬롯을 탭하면 노브 조절, 활성화 토글, 삭제 등을 할 수 있음
+ * 페달보드 템플릿에서는 노브 확인, 슬롯 이동, 삭제만 가능
+ * (노브 값/ON-OFF는 곡별 설정에서 조절)
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -52,8 +47,6 @@ fun PedalEditorBottomSheet(
     slotIndex: Int,
     sheetState: SheetState,
     onDismiss: () -> Unit,
-    onKnobChange: (knobIndex: Int, value: Float) -> Unit,
-    onToggleEnabled: () -> Unit,
     onRemove: () -> Unit,
     onMoveToSlot: (toIndex: Int) -> Unit,
     availableSlots: List<Int>,
@@ -76,27 +69,11 @@ fun PedalEditorBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // 전원 LED
-                    Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .clip(CircleShape)
-                            .background(
-                                if (pedal.isEnabled) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.outline
-                                }
-                            )
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = pedal.name,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Text(
+                    text = pedal.name,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
                 IconButton(onClick = onDismiss) {
                     Icon(Icons.Default.Close, contentDescription = "닫기")
                 }
@@ -111,34 +88,36 @@ fun PedalEditorBottomSheet(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // 노브 섹션
-            Text(
-                text = stringResource(R.string.knobs),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            
             Spacer(modifier = Modifier.height(16.dp))
             
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                pedal.knobs.forEachIndexed { index, knob ->
-                    RotaryKnob(
-                        value = knob.value,
-                        onValueChange = { onKnobChange(index, it) },
-                        label = knob.name,
-                        size = 72.dp,
-                        enabled = pedal.isEnabled
-                    )
+            // 노브 UI (읽기 전용 - 라벨 포함)
+            if (pedal.knobs.isNotEmpty()) {
+                Text(
+                    text = stringResource(R.string.knobs),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    pedal.knobs.forEach { knob ->
+                        RotaryKnob(
+                            value = 5f,  // 기본값 중간으로 표시
+                            onValueChange = { },  // 읽기 전용
+                            label = knob.name,
+                            size = 56.dp,
+                            enabled = false  // 비활성화하여 조작 불가
+                        )
+                    }
                 }
+                
+                Spacer(modifier = Modifier.height(24.dp))
             }
-            
-            Spacer(modifier = Modifier.height(24.dp))
             
             // 이동 가능한 슬롯이 있으면 표시
             if (availableSlots.isNotEmpty()) {
@@ -170,41 +149,21 @@ fun PedalEditorBottomSheet(
                 Spacer(modifier = Modifier.height(24.dp))
             }
             
-            // 액션 버튼들
-            Row(
+            // 삭제 버튼
+            Button(
+                onClick = onRemove,
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                )
             ) {
-                // 전원 토글 버튼
-                OutlinedButton(
-                    onClick = onToggleEnabled,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(
-                        Icons.Default.Power,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(if (pedal.isEnabled) "끄기" else "켜기")
-                }
-                
-                // 삭제 버튼
-                Button(
-                    onClick = onRemove,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.delete))
-                }
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(R.string.delete))
             }
         }
     }
