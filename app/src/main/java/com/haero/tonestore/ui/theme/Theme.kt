@@ -56,11 +56,11 @@ fun ToneStoreTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composa
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     val view = LocalView.current
-    if (!view.isInEditMode) {
+    if (view.isInEditMode.not()) {
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.primaryContainer.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme.not()
         }
     }
 

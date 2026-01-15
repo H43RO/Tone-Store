@@ -63,7 +63,7 @@ fun PedalBoardSection(
     SectionHeader(
         title = stringResource(R.string.pedal_board),
         isExpanded = isExpanded,
-        onToggle = { isExpanded = !isExpanded },
+        onToggle = { isExpanded = isExpanded.not() },
         modifier = modifier
     ) {
         Column(

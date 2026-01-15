@@ -82,8 +82,9 @@ class CreateToneViewModel(
     private fun loadToneSetting(id: String) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            try {
-                val setting = getToneSettingByIdUseCase(id)
+            runCatching {
+                getToneSettingByIdUseCase(id)
+            }.onSuccess { setting ->
                 if (setting != null) {
                     _state.update {
                         it.copy(
@@ -100,7 +101,7 @@ class CreateToneViewModel(
                 } else {
                     _state.update { it.copy(isLoading = false, error = "톤 세팅을 찾을 수 없습니다") }
                 }
-            } catch (e: Exception) {
+            }.onFailure { e ->
                 _state.update { it.copy(isLoading = false, error = e.message) }
             }
         }
@@ -159,7 +160,7 @@ class CreateToneViewModel(
 
     private fun togglePedalEnabled(pedalId: String) {
         val updatedPedals = _state.value.pedalBoard.pedals.map { pedal ->
-            if (pedal.id == pedalId) pedal.copy(isEnabled = !pedal.isEnabled) else pedal
+            if (pedal.id == pedalId) pedal.copy(isEnabled = pedal.isEnabled.not()) else pedal
         }
         _state.update { it.copy(pedalBoard = PedalBoard(updatedPedals)) }
     }
@@ -226,21 +227,22 @@ class CreateToneViewModel(
 
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
-            try {
-                val now = System.currentTimeMillis()
-                val toneSetting = ToneSetting(
-                    id = currentState.editingId ?: UUID.randomUUID().toString(),
-                    songName = currentState.songName,
-                    createdAt = if (currentState.isEditMode) now else now, // 편집시에도 createdAt 유지 필요시 수정
-                    updatedAt = now,
-                    pedalBoard = currentState.pedalBoard,
-                    ampSetting = currentState.ampSetting,
-                    guitarSetting = currentState.guitarSetting,
-                    tags = currentState.selectedTags
-                )
+            val now = System.currentTimeMillis()
+            val toneSetting = ToneSetting(
+                id = currentState.editingId ?: UUID.randomUUID().toString(),
+                songName = currentState.songName,
+                createdAt = if (currentState.isEditMode) now else now,
+                updatedAt = now,
+                pedalBoard = currentState.pedalBoard,
+                ampSetting = currentState.ampSetting,
+                guitarSetting = currentState.guitarSetting,
+                tags = currentState.selectedTags
+            )
+            runCatching {
                 saveToneSettingUseCase(toneSetting)
+            }.onSuccess {
                 _state.update { it.copy(isSaving = false, navigateBack = true, showSaveSuccess = true) }
-            } catch (e: Exception) {
+            }.onFailure { e ->
                 _state.update { it.copy(isSaving = false, error = e.message) }
             }
         }

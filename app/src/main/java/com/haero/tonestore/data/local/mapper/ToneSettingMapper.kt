@@ -21,17 +21,12 @@ object ToneSettingMapper {
      */
     fun ToneSettingEntity.toDomain(): ToneSetting {
         val tagsType = object : TypeToken<List<String>>() {}.type
-        val tagStrings: List<String> = try {
-            gson.fromJson(tagsJson, tagsType) ?: emptyList()
-        } catch (e: Exception) {
-            emptyList()
-        }
+        val tagStrings: List<String> = runCatching {
+            gson.fromJson<List<String>>(tagsJson, tagsType) ?: emptyList()
+        }.getOrElse { emptyList() }
+
         val tags = tagStrings.mapNotNull { tagName ->
-            try {
-                GenreTag.valueOf(tagName)
-            } catch (e: Exception) {
-                null
-            }
+            runCatching { GenreTag.valueOf(tagName) }.getOrNull()
         }
 
         return ToneSetting(

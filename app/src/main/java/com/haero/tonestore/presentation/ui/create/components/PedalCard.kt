@@ -62,7 +62,7 @@ fun PedalCard(
     }
 
     val borderColor = when {
-        !pedal.isEnabled -> MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        pedal.isEnabled.not() -> MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
         pedal.type == PedalType.PRESET -> MaterialTheme.colorScheme.primary
         else -> MaterialTheme.colorScheme.secondary
     }

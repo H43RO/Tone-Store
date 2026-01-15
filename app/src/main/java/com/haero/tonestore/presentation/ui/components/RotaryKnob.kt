@@ -121,7 +121,7 @@ fun RotaryKnob(
             modifier = Modifier
                 .size(size)
                 .pointerInput(enabled) {
-                    if (!enabled) return@pointerInput
+                    if (enabled.not()) return@pointerInput
 
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)

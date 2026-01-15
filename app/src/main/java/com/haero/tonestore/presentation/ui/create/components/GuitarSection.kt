@@ -54,7 +54,7 @@ fun GuitarSection(
     SectionHeader(
         title = stringResource(R.string.guitar_setting),
         isExpanded = isExpanded,
-        onToggle = { isExpanded = !isExpanded },
+        onToggle = { isExpanded = isExpanded.not() },
         modifier = modifier
     ) {
         Column(
@@ -72,7 +72,7 @@ fun GuitarSection(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-            } else if (!guitarSetting.guitarModel.isNullOrBlank()) {
+            } else if (guitarSetting.guitarModel.isNullOrBlank().not()) {
                 Text(
                     text = guitarSetting.guitarModel,
                     style = MaterialTheme.typography.titleSmall,

@@ -26,9 +26,9 @@ object SavedPedalBoardMapper {
     }
 
     fun toDomain(entity: SavedPedalBoardEntity): SavedPedalBoard {
-        val slots: List<Pedal?> = try {
-            gson.fromJson(entity.slotsJson, pedalListType)
-        } catch (e: Exception) {
+        val slots: List<Pedal?> = runCatching {
+            gson.fromJson<List<Pedal?>>(entity.slotsJson, pedalListType)
+        }.getOrElse {
             List(entity.columns * entity.rows) { null }
         }
 

@@ -38,12 +38,13 @@ class DetailViewModel(
         currentId = id
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            try {
-                val setting = getToneSettingByIdUseCase(id)
+            runCatching {
+                getToneSettingByIdUseCase(id)
+            }.onSuccess { setting ->
                 _state.update {
                     it.copy(isLoading = false, toneSetting = setting, error = null)
                 }
-            } catch (e: Exception) {
+            }.onFailure { e ->
                 _state.update { it.copy(isLoading = false, error = e.message) }
             }
         }
@@ -56,10 +57,11 @@ class DetailViewModel(
     private fun deleteToneSetting() {
         val id = currentId ?: return
         viewModelScope.launch {
-            try {
+            runCatching {
                 deleteToneSettingUseCase(id)
+            }.onSuccess {
                 _state.update { it.copy(navigateBack = true) }
-            } catch (e: Exception) {
+            }.onFailure { e ->
                 _state.update { it.copy(error = e.message) }
             }
         }

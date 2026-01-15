@@ -102,9 +102,9 @@ class HomeViewModel(
 
     private fun deleteToneSetting(id: String) {
         viewModelScope.launch {
-            try {
+            runCatching {
                 deleteToneSettingUseCase(id)
-            } catch (e: Exception) {
+            }.onFailure { e ->
                 _state.update { it.copy(error = e.message) }
             }
         }
@@ -112,9 +112,9 @@ class HomeViewModel(
 
     private fun toggleFavorite(id: String) {
         viewModelScope.launch {
-            try {
+            runCatching {
                 toggleFavoriteUseCase(id)
-            } catch (e: Exception) {
+            }.onFailure { e ->
                 _state.update { it.copy(error = e.message) }
             }
         }

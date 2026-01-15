@@ -81,7 +81,7 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-            if (!state.isSearchActive) {
+            if (state.isSearchActive.not()) {
                 TopAppBar(
                     title = { Text(stringResource(R.string.app_name)) },
                     actions = {

@@ -72,8 +72,9 @@ class PedalBoardViewModel(
     private fun loadPedalBoard(id: String) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            try {
-                val pedalBoard = getSavedPedalBoardByIdUseCase(id)
+            runCatching {
+                getSavedPedalBoardByIdUseCase(id)
+            }.onSuccess { pedalBoard ->
                 if (pedalBoard != null) {
                     _state.update {
                         it.copy(
@@ -89,7 +90,7 @@ class PedalBoardViewModel(
                 } else {
                     _state.update { it.copy(isLoading = false, error = "페달보드를 찾을 수 없습니다") }
                 }
-            } catch (e: Exception) {
+            }.onFailure { e ->
                 _state.update { it.copy(isLoading = false, error = e.message) }
             }
         }
@@ -212,7 +213,7 @@ class PedalBoardViewModel(
         if (slotIndex !in 0 until _state.value.totalSlots) return
 
         val pedal = _state.value.slots[slotIndex] ?: return
-        val updatedPedal = pedal.copy(isEnabled = !pedal.isEnabled)
+        val updatedPedal = pedal.copy(isEnabled = pedal.isEnabled.not())
         val updatedSlots = _state.value.slots.toMutableList()
         updatedSlots[slotIndex] = updatedPedal
         _state.update { it.copy(slots = updatedSlots) }
@@ -238,20 +239,21 @@ class PedalBoardViewModel(
 
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
-            try {
-                val now = System.currentTimeMillis()
-                val pedalBoard = SavedPedalBoard(
-                    id = currentState.editingId ?: UUID.randomUUID().toString(),
-                    name = currentState.name,
-                    columns = currentState.columns,
-                    rows = currentState.rows,
-                    slots = currentState.slots,
-                    createdAt = now,
-                    updatedAt = now
-                )
+            val now = System.currentTimeMillis()
+            val pedalBoard = SavedPedalBoard(
+                id = currentState.editingId ?: UUID.randomUUID().toString(),
+                name = currentState.name,
+                columns = currentState.columns,
+                rows = currentState.rows,
+                slots = currentState.slots,
+                createdAt = now,
+                updatedAt = now
+            )
+            runCatching {
                 savePedalBoardUseCase(pedalBoard)
+            }.onSuccess {
                 _state.update { it.copy(isSaving = false, navigateBack = true, showSaveSuccess = true) }
-            } catch (e: Exception) {
+            }.onFailure { e ->
                 _state.update { it.copy(isSaving = false, error = e.message) }
             }
         }
@@ -261,10 +263,11 @@ class PedalBoardViewModel(
         val editingId = _state.value.editingId ?: return
 
         viewModelScope.launch {
-            try {
+            runCatching {
                 deleteSavedPedalBoardUseCase(editingId)
+            }.onSuccess {
                 _state.update { it.copy(navigateBack = true) }
-            } catch (e: Exception) {
+            }.onFailure { e ->
                 _state.update { it.copy(error = e.message) }
             }
         }

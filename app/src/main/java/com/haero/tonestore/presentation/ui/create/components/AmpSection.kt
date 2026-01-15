@@ -46,7 +46,7 @@ fun AmpSection(
     SectionHeader(
         title = stringResource(R.string.amp_setting),
         isExpanded = isExpanded,
-        onToggle = { isExpanded = !isExpanded },
+        onToggle = { isExpanded = isExpanded.not() },
         modifier = modifier
     ) {
         Column(
@@ -64,7 +64,7 @@ fun AmpSection(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-            } else if (!ampSetting.ampModel.isNullOrBlank()) {
+            } else if (ampSetting.ampModel.isNullOrBlank().not()) {
                 Text(
                     text = ampSetting.ampModel,
                     style = MaterialTheme.typography.titleSmall,
