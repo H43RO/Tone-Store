@@ -31,10 +31,7 @@ fun PedalBoardGrid(
         "slots must have at least $totalSlots elements (got ${slots.size})" 
     }
     
-    // 첫 번째 빈 슬롯 찾기 (+ 버튼 표시용)
-    val firstEmptyIndex = slots.take(totalSlots).indexOfFirst { it == null }.takeIf { it >= 0 }
-    
-    // 페달 슬롯 너비 (실제 페달 비율 - 세로가 더 김)
+    // 페달 슬롯 너비
     val slotWidth = 72.dp
     
     Column(
@@ -52,10 +49,11 @@ fun PedalBoardGrid(
             ) {
                 for (col in 0 until columns) {
                     val index = row * columns + col
+                    val pedal = slots.getOrNull(index)
                     PedalSlot(
                         index = index,
-                        pedal = slots.getOrNull(index),
-                        showAddButton = (index == firstEmptyIndex),
+                        pedal = pedal,
+                        showAddButton = (pedal == null),
                         onAddClick = { onAddClick(index) },
                         onPedalClick = { onSlotClick(index) },
                         isEditable = isEditable,

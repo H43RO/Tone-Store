@@ -36,19 +36,9 @@ data class SavedPedalBoard(
      * 페달 개수
      */
     val pedalCount: Int get() = slots.count { it != null }
-    
-    /**
-     * 총 슬롯 개수
-     */
-    val totalSlots: Int get() = columns * rows
-    
-    /**
-     * 첫 번째 빈 슬롯 인덱스
-     */
-    val firstEmptySlotIndex: Int? get() = slots.indexOfFirst { it == null }.takeIf { it >= 0 }
-    
+
     companion object {
-        const val DEFAULT_COLUMNS = 5
+        const val DEFAULT_COLUMNS = 4
         const val DEFAULT_ROWS = 2
         const val MIN_COLUMNS = 2
         const val MAX_COLUMNS = 8

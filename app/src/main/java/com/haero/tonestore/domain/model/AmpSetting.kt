@@ -2,7 +2,6 @@ package com.haero.tonestore.domain.model
 
 /**
  * 앰프 세팅을 나타내는 모델
- * 일반적인 기타 앰프의 노브 구성을 반영
  *
  * @property ampModel 앰프 모델명 (예: Fender Twin Reverb, Marshall JCM800)
  * @property gain 게인/드라이브 (0-10)

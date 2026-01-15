@@ -46,7 +46,6 @@ import androidx.compose.foundation.Canvas
 
 /**
  * 페달보드 그리드의 슬롯 컴포넌트
- * 실제 이펙터 페달 모양을 모방 (세로로 긴 직사각형)
  */
 @Composable
 fun PedalSlot(
@@ -120,7 +119,7 @@ fun PedalSlot(
 }
 
 /**
- * 미니 페달 카드 - 페달 이름과 노브 개수만 표시 (노브 모양 UI로)
+ * 미니 페달 카드
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -172,7 +171,7 @@ private fun MiniPedalCard(
 }
 
 /**
- * 미니 노브 표시용 UI - RotaryKnob과 동일한 모양 (라벨/값 없이)
+ * 미니 노브 표시용 UI
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
