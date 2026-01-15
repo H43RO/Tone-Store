@@ -5,6 +5,8 @@
     <!-- Navigation -->
     <string name="back">뒤로</string>
     <string name="detail">상세</string>
+    <string name="tab_home">홈</string>
+    <string name="tab_pedalboard">페달보드</string>
     
     <!-- Home Screen -->
     <string name="home_title">나의 톤 세팅</string>
@@ -50,6 +52,8 @@
     <string name="rows">행</string>
     <string name="slots">슬롯</string>
     <string name="load_saved_pedalboard">저장된 페달보드 불러오기</string>
+    <string name="empty_pedalboards">저장된 페달보드가 없습니다.\n+ 버튼을 눌러 첫 번째 페달보드를 만들어보세요!</string>
+    <string name="pedalboard_list_title">나의 페달보드</string>
     
     <!-- Amp Section -->
     <string name="amp_setting">앰프 세팅</string>
@@ -69,6 +73,8 @@
     <string name="delete">삭제</string>
     <string name="delete_confirm_title">톤 세팅을 삭제할까요?</string>
     <string name="delete_confirm_message">\"%1$s\"을(를) 삭제할까요? 이 작업은 되돌릴 수 없어요.</string>
+    <string name="delete_pedalboard_confirm_title">페달보드를 삭제할까요?</string>
+    <string name="delete_pedalboard_confirm_message">\"%1$s\"을(를) 삭제할까요? 이 작업은 되돌릴 수 없어요.</string>
     
     <!-- Errors -->
     <string name="error_occurred">오류가 발생했습니다</string>

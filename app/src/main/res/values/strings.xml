@@ -5,6 +5,8 @@
     <!-- Navigation -->
     <string name="back">Back</string>
     <string name="detail">Detail</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_pedalboard">Pedal Board</string>
     
     <!-- Home Screen -->
     <string name="home_title">My Tone Settings</string>
@@ -50,6 +52,8 @@
     <string name="rows">Rows</string>
     <string name="slots">slots</string>
     <string name="load_saved_pedalboard">Load Saved Pedal Board</string>
+    <string name="empty_pedalboards">No pedal boards yet.\nTap + to create your first one!</string>
+    <string name="pedalboard_list_title">My Pedal Boards</string>
     
     <!-- Amp Section -->
     <string name="amp_setting">Amp Setting</string>
@@ -69,6 +73,8 @@
     <string name="delete">Delete</string>
     <string name="delete_confirm_title">Delete Tone Setting?</string>
     <string name="delete_confirm_message">Are you sure you want to delete \"%1$s\"? This action cannot be undone.</string>
+    <string name="delete_pedalboard_confirm_title">Delete Pedal Board?</string>
+    <string name="delete_pedalboard_confirm_message">Are you sure you want to delete \"%1$s\"? This action cannot be undone.</string>
     
     <!-- Errors -->
     <string name="error_occurred">An error occurred</string>

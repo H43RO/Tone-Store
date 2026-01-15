@@ -1,5 +1,6 @@
 package com.haero.tonestore.presentation.ui.pedalboard.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -8,15 +9,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -36,13 +34,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalType
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
-import androidx.compose.foundation.Canvas
 
 /**
  * 페달보드 그리드의 슬롯 컴포넌트
@@ -136,7 +132,7 @@ private fun MiniPedalCard(
         modifier = modifier
             .border(2.dp, borderColor, RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
-            .padding(8.dp),
+            .padding(horizontal = 8.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -150,10 +146,10 @@ private fun MiniPedalCard(
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
+
+        Spacer(modifier = Modifier.weight(1f))
         
-        Spacer(modifier = Modifier.height(4.dp))
-        
-        // 노브 모양 UI (FlowRow로 자동 줄바꿈)
+        // 노브 UI
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
@@ -165,13 +161,11 @@ private fun MiniPedalCard(
                 MiniKnobIndicator()
             }
         }
-        
-        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
 /**
- * 미니 노브 표시용 UI
+ * 노브 표시용 UI
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -193,7 +187,6 @@ private fun MiniKnobIndicator(
         val radius = (size.toPx() - strokeWidth) / 2f
         val center = Offset(size.toPx() / 2f, size.toPx() / 2f)
         
-        // 배경 트랙
         drawArc(
             color = trackColor,
             startAngle = startAngle,
@@ -204,7 +197,6 @@ private fun MiniKnobIndicator(
             size = androidx.compose.ui.geometry.Size(radius * 2f, radius * 2f)
         )
         
-        // 활성 트랙
         drawArc(
             color = knobColor,
             startAngle = startAngle,
