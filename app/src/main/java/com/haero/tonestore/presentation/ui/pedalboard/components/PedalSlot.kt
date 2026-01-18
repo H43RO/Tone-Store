@@ -69,6 +69,7 @@ fun PedalSlot(
 
     Box(
         modifier = modifier
+            .fillMaxSize()
             .height(120.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(backgroundColor)
