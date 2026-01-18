@@ -6,7 +6,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -327,35 +326,39 @@ private fun DetailTabBar(
 }
 
 /**
- * 페달보드 상세 콘텐츠
+ * 페달보드 상세 콘텐츠 (그리드 형태)
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun DetailPedalBoardContent(
     pedalBoard: PedalBoard
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-    ) {
-        if (pedalBoard.pedals.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.no_pedals),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        } else {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+    if (pedalBoard.pedals.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.no_pedals),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+        ) {
+            // 2열 그리드 형태로 표시
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                maxItemsInEachRow = 2
             ) {
                 pedalBoard.pedals.forEach { pedal ->
                     PedalCard(
@@ -364,8 +367,12 @@ private fun DetailPedalBoardContent(
                         onToggleEnabled = {},
                         onRemove = {},
                         isEditable = false,
-                        modifier = Modifier.width(180.dp)
+                        modifier = Modifier.weight(1f)
                     )
+                }
+                // 홀수 개일 때 빈 공간 채우기
+                if (pedalBoard.pedals.size % 2 == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
