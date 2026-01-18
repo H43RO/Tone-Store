@@ -250,6 +250,9 @@ fun PedalBoardScreen(
                     addingToSlotIndex = slotIndex
                     showAddPedalDialog = true
                 },
+                onSwapSlots = { fromIndex, toIndex ->
+                    viewModel.handleIntent(PedalBoardIntent.SwapSlots(fromIndex, toIndex))
+                },
                 isEditable = true
             )
 

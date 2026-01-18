@@ -51,21 +51,36 @@ fun PedalSlot(
     onAddClick: () -> Unit,
     onPedalClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isEditable: Boolean = true
+    isEditable: Boolean = true,
+    isDragging: Boolean = false,
+    isDropTarget: Boolean = false
 ) {
+    val borderColor = when {
+        isDropTarget -> MaterialTheme.colorScheme.primary
+        isDragging -> MaterialTheme.colorScheme.tertiary
+        else -> Color.Transparent
+    }
+    val borderWidth = if (isDropTarget || isDragging) 3.dp else 0.dp
+    val backgroundColor = when {
+        isDropTarget -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        pedal != null -> Color.Transparent
+        else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+    }
+
     Box(
         modifier = modifier
             .height(120.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(
-                if (pedal != null) {
-                    Color.Transparent
+            .background(backgroundColor)
+            .then(
+                if (borderWidth > 0.dp) {
+                    Modifier.border(borderWidth, borderColor, RoundedCornerShape(8.dp))
                 } else {
-                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                    Modifier
                 }
             )
             .then(
-                if (pedal != null) {
+                if (pedal != null && isDragging.not()) {
                     Modifier.clickable(enabled = isEditable) { onPedalClick() }
                 } else if (showAddButton && isEditable) {
                     Modifier
