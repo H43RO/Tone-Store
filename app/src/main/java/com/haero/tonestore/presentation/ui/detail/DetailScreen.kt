@@ -222,7 +222,7 @@ private fun DetailHeader(
         Surface(
             onClick = onBackClick,
             shape = CircleShape,
-            color = MaterialTheme.colorScheme.surfaceVariant,
+            color = Color.Transparent,
             modifier = Modifier.size(44.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -250,7 +250,6 @@ private fun DetailHeader(
         Surface(
             onClick = onEditClick,
             shape = CircleShape,
-            color = MaterialTheme.colorScheme.primaryContainer,
             modifier = Modifier.size(44.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -268,7 +267,6 @@ private fun DetailHeader(
         Surface(
             onClick = onDeleteClick,
             shape = CircleShape,
-            color = MaterialTheme.colorScheme.errorContainer,
             modifier = Modifier.size(44.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {

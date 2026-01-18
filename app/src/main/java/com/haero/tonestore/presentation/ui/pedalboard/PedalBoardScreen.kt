@@ -45,6 +45,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -301,7 +302,7 @@ private fun PedalBoardEditHeader(
         Surface(
             onClick = onCloseClick,
             shape = CircleShape,
-            color = MaterialTheme.colorScheme.surfaceVariant,
+            color = Color.Transparent,
             modifier = Modifier.size(44.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -328,14 +329,13 @@ private fun PedalBoardEditHeader(
             Surface(
                 onClick = onDeleteClick,
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.errorContainer,
                 modifier = Modifier.size(44.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = stringResource(R.string.delete),
-                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -346,7 +346,6 @@ private fun PedalBoardEditHeader(
         Surface(
             onClick = onSaveClick,
             shape = CircleShape,
-            color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(44.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -360,7 +359,7 @@ private fun PedalBoardEditHeader(
                     Icon(
                         imageVector = Icons.Default.Save,
                         contentDescription = stringResource(R.string.save),
-                        tint = MaterialTheme.colorScheme.onPrimary,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(20.dp)
                     )
                 }
