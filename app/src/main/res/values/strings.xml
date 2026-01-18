@@ -83,4 +83,13 @@
     
     <!-- Errors -->
     <string name="error_occurred">An error occurred</string>
+
+    <!-- Stepper -->
+    <string name="step_song_info">Song Info</string>
+    <string name="step_pedal_board">Pedals</string>
+    <string name="step_amp">Amp</string>
+    <string name="step_guitar">Guitar</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+    <string name="step_indicator">Step %1$d of %2$d</string>
 </resources>

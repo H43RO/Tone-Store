@@ -83,4 +83,13 @@
     
     <!-- Errors -->
     <string name="error_occurred">오류가 발생했습니다</string>
+
+    <!-- Stepper -->
+    <string name="step_song_info">곡 정보</string>
+    <string name="step_pedal_board">페달</string>
+    <string name="step_amp">앰프</string>
+    <string name="step_guitar">기타</string>
+    <string name="next">다음</string>
+    <string name="previous">이전</string>
+    <string name="step_indicator">%2$d단계 중 %1$d단계</string>
 </resources>
