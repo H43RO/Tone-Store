@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalType
+import com.haero.tonestore.presentation.ui.components.PedalColorUtils
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -147,7 +148,7 @@ private fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
     }
 
     // 배경색 밝기에 따라 텍스트/노브 색상 결정
-    val isLightBackground = isLightColor(pedal.color)
+    val isLightBackground = PedalColorUtils.isLightColor(pedal.color)
     val contentColor = if (pedal.color != null) {
         if (isLightBackground) Color.Black else Color.White
     } else {
@@ -155,7 +156,7 @@ private fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
     }
 
     // 입체감을 위한 Border 색상 계산
-    val borderColor = calculateBorderColor(backgroundColor)
+    val borderColor = PedalColorUtils.calculateBorderColor(backgroundColor)
 
     Column(
         modifier = modifier
@@ -194,55 +195,6 @@ private fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
 }
 
 /**
- * 입체감을 위한 Border 색상 계산
- * - 밝은 색상: 약간 어둡게
- * - 어두운 색상: 약간 밝게 (회색 계열)
- * - 극단적인 색상(흰색/검정): 회색 계열
- */
-private fun calculateBorderColor(backgroundColor: Color): Color {
-    val r = backgroundColor.red
-    val g = backgroundColor.green
-    val b = backgroundColor.blue
-
-    // 밝기 계산
-    val luminance = 0.299f * r + 0.587f * g + 0.114f * b
-
-    return when {
-        // 매우 밝은 색 (흰색에 가까움) -> 회색 border
-        luminance > 0.9f -> Color(0xFF9E9E9E)
-        // 매우 어두운 색 (검정에 가까움) -> 밝은 회색 border
-        luminance < 0.1f -> Color(0xFF616161)
-        // 밝은 색상 -> 더 진하게 (20% 어둡게)
-        luminance > 0.5f -> Color(
-            red = (r * 0.75f).coerceIn(0f, 1f),
-            green = (g * 0.75f).coerceIn(0f, 1f),
-            blue = (b * 0.75f).coerceIn(0f, 1f),
-            alpha = 1f
-        )
-        // 어두운 색상 -> 약간 밝게 (30% 밝게)
-        else -> Color(
-            red = (r + (1f - r) * 0.3f).coerceIn(0f, 1f),
-            green = (g + (1f - g) * 0.3f).coerceIn(0f, 1f),
-            blue = (b + (1f - b) * 0.3f).coerceIn(0f, 1f),
-            alpha = 1f
-        )
-    }
-}
-
-/**
- * 밝은 색상인지 판단 (텍스트 색상 결정용)
- */
-private fun isLightColor(color: Long?): Boolean {
-    if (color == null) return true
-    val r = ((color shr 16) and 0xFF).toFloat()
-    val g = ((color shr 8) and 0xFF).toFloat()
-    val b = (color and 0xFF).toFloat()
-    // 상대 휘도 계산
-    val luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-    return luminance > 0.5
-}
-
-/**
  * 노브 표시용 UI
  */
 @Composable
@@ -252,7 +204,7 @@ private fun MiniKnobIndicator(
 ) {
     val knobColor = contentColor
     val trackColor = contentColor.copy(alpha = 0.3f)
-    val indicatorColor = if (isLightColor(contentColor.value.toLong() or (0xFFL shl 56))) {
+    val indicatorColor = if (PedalColorUtils.isLightColor(contentColor)) {
         Color.White
     } else {
         Color.Black

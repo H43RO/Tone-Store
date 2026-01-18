@@ -29,10 +29,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalType
+import com.haero.tonestore.presentation.ui.components.PedalColorUtils
 import com.haero.tonestore.presentation.ui.components.RotaryKnob
 
 /**
@@ -55,16 +57,43 @@ fun PedalCard(
     modifier: Modifier = Modifier,
     isEditable: Boolean = true
 ) {
-    val cardColor = if (pedal.isEnabled) {
-        MaterialTheme.colorScheme.surface
+    // 사용자 지정 색상이 있으면 사용, 없으면 타입에 따른 기본 색상
+    val backgroundColor = if (pedal.color != null) {
+        Color(pedal.color)
     } else {
-        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+        when (pedal.type) {
+            PedalType.PRESET -> MaterialTheme.colorScheme.primaryContainer
+            else -> MaterialTheme.colorScheme.secondaryContainer
+        }
     }
 
-    val borderColor = when {
-        pedal.isEnabled.not() -> MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-        pedal.type == PedalType.PRESET -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.secondary
+    // 비활성화 시 색상 조정
+    val adjustedBackgroundColor = if (pedal.isEnabled) {
+        backgroundColor
+    } else {
+        backgroundColor.copy(alpha = 0.5f)
+    }
+
+    // 배경색 밝기에 따라 텍스트 색상 결정
+    val isLightBackground = PedalColorUtils.isLightColor(pedal.color)
+    val contentColor = if (pedal.color != null) {
+        if (isLightBackground) Color.Black else Color.White
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+
+    // 비활성화 시 콘텐츠 색상 조정
+    val adjustedContentColor = if (pedal.isEnabled) {
+        contentColor
+    } else {
+        contentColor.copy(alpha = 0.5f)
+    }
+
+    // 입체감을 위한 Border 색상 계산
+    val borderColor = if (pedal.isEnabled) {
+        PedalColorUtils.calculateBorderColor(backgroundColor)
+    } else {
+        PedalColorUtils.calculateBorderColor(backgroundColor).copy(alpha = 0.3f)
     }
 
     Card(
@@ -72,7 +101,7 @@ fun PedalCard(
             .padding(4.dp)
             .border(2.dp, borderColor, RoundedCornerShape(12.dp)),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = cardColor),
+        colors = CardDefaults.cardColors(containerColor = adjustedBackgroundColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
@@ -90,11 +119,7 @@ fun PedalCard(
                     text = pedal.name,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.ExtraBold,
-                    color = if (pedal.isEnabled) {
-                        MaterialTheme.colorScheme.onSurface
-                    } else {
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    }
+                    color = adjustedContentColor
                 )
 
                 if (isEditable) {
@@ -105,7 +130,11 @@ fun PedalCard(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "삭제",
-                            tint = MaterialTheme.colorScheme.error,
+                            tint = if (isLightBackground) {
+                                Color(0xFFB71C1C)
+                            } else {
+                                Color(0xFFFF8A80)
+                            },
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -131,25 +160,31 @@ fun PedalCard(
                         label = knob.name,
                         size = 56.dp,
                         enabled = pedal.isEnabled && isEditable,
-                        modifier = Modifier.padding(horizontal = 4.dp)
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                        knobColor = adjustedContentColor,
+                        labelColor = adjustedContentColor
                     )
                 }
             }
 
             // 전원 버튼 (Footswitch)
             if (isEditable) {
+                val powerButtonColor = if (pedal.isEnabled) {
+                    if (isLightBackground && pedal.color != null) {
+                        Color(0xFF1B5E20) // 어두운 초록
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    }
+                } else {
+                    contentColor.copy(alpha = 0.3f)
+                }
+
                 Box(
                     modifier = Modifier
                         .padding(top = 12.dp)
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(
-                            if (pedal.isEnabled) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.surfaceVariant
-                            }
-                        )
+                        .background(powerButtonColor)
                         .clickable { onToggleEnabled() },
                     contentAlignment = Alignment.Center
                 ) {
@@ -157,9 +192,9 @@ fun PedalCard(
                         imageVector = Icons.Default.Power,
                         contentDescription = if (pedal.isEnabled) "끄기" else "켜기",
                         tint = if (pedal.isEnabled) {
-                            MaterialTheme.colorScheme.onPrimary
+                            Color.White
                         } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
+                            contentColor.copy(alpha = 0.5f)
                         },
                         modifier = Modifier.size(20.dp)
                     )

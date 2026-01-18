@@ -47,6 +47,8 @@ import kotlin.math.sin
  * @param size 노브 크기
  * @param enabled 활성화 여부
  * @param steps 노브의 스텝 수 (햅틱 피드백용, 기본 20 = 0.5 단위)
+ * @param knobColor 노브 색상 (null이면 기본 테마 색상 사용)
+ * @param labelColor 레이블 색상 (null이면 기본 테마 색상 사용)
  */
 @Composable
 fun RotaryKnob(
@@ -56,7 +58,9 @@ fun RotaryKnob(
     modifier: Modifier = Modifier,
     size: Dp = 64.dp,
     enabled: Boolean = true,
-    steps: Int = 20
+    steps: Int = 20,
+    knobColor: androidx.compose.ui.graphics.Color? = null,
+    labelColor: androidx.compose.ui.graphics.Color? = null
 ) {
     val view = LocalView.current
     val context = LocalContext.current
@@ -89,16 +93,34 @@ fun RotaryKnob(
     // 햅틱 피드백을 위한 이전 스텝 저장
     var previousStep by remember { mutableIntStateOf((value * steps / 10f).roundToInt()) }
 
-    val knobColor = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-    val trackColor = if (enabled) {
-        MaterialTheme.colorScheme.surfaceVariant
+    val actualKnobColor = knobColor ?: if (enabled) {
+        MaterialTheme.colorScheme.primary
     } else {
-        MaterialTheme.colorScheme.surfaceVariant.copy(
-            alpha = 0.5f
-        )
+        MaterialTheme.colorScheme.outline
     }
-    // 포인터 색상: disabled 상태에서도 노브 몸체와 대비되도록 수정
-    val indicatorColor = if (enabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.surface
+    val trackColor = if (enabled) {
+        actualKnobColor.copy(alpha = 0.3f)
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    }
+    // 포인터 색상: 노브 색상에 따라 대비되는 색상 사용
+    val indicatorColor = if (knobColor != null) {
+        if (PedalColorUtils.isLightColor(knobColor)) {
+            androidx.compose.ui.graphics.Color.White
+        } else {
+            androidx.compose.ui.graphics.Color.Black
+        }
+    } else if (enabled) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
+
+    val actualLabelColor = labelColor ?: if (enabled) {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    } else {
+        MaterialTheme.colorScheme.outline
+    }
 
     // 드르륵 햅틱 피드백 함수
     fun performTickHaptic() {
@@ -190,7 +212,7 @@ fun RotaryKnob(
 
             // 활성 트랙 (현재 값까지)
             drawArc(
-                color = knobColor,
+                color = actualKnobColor,
                 startAngle = startAngle,
                 sweepAngle = normalizedValue * sweepAngle,
                 useCenter = false,
@@ -201,7 +223,7 @@ fun RotaryKnob(
 
             // 중앙 원 (노브 몸체)
             drawCircle(
-                color = knobColor,
+                color = actualKnobColor,
                 radius = radius * 0.6f,
                 center = center
             )
@@ -231,14 +253,18 @@ fun RotaryKnob(
             text = String.format("%.1f", value),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
-            color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline
+            color = labelColor ?: if (enabled) {
+                MaterialTheme.colorScheme.onSurface
+            } else {
+                MaterialTheme.colorScheme.outline
+            }
         )
 
         // 레이블
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-            color = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.outline,
+            color = actualLabelColor,
             textAlign = TextAlign.Center,
             maxLines = 1
         )
