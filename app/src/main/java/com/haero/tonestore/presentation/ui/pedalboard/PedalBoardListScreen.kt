@@ -5,7 +5,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,18 +16,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,8 +39,6 @@ import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -50,13 +48,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.SavedPedalBoard
@@ -64,7 +65,7 @@ import com.haero.tonestore.presentation.viewmodel.PedalBoardListViewModel
 import org.koin.androidx.compose.koinViewModel
 
 /**
- * 페달보드 목록 화면
+ * 페달보드 목록 화면 (2025 트렌드 디자인)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,7 +77,6 @@ fun PedalBoardListScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
 
-    // 스크롤 시 FAB 축소 여부 결정
     val isScrolling by remember {
         derivedStateOf { listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 100 }
     }
@@ -85,15 +85,6 @@ fun PedalBoardListScreen(
     var pedalBoardToDelete by remember { mutableStateOf<SavedPedalBoard?>(null) }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.pedalboard_list_title)) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        },
         floatingActionButton = {
             TrendyExtendedFab(
                 expanded = !isScrolling,
@@ -101,94 +92,43 @@ fun PedalBoardListScreen(
                 icon = Icons.Default.Add,
                 text = stringResource(R.string.create_pedalboard)
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when {
-                state.isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-                state.pedalBoards.isEmpty() -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Dashboard,
-                            contentDescription = null,
-                            modifier = Modifier.size(64.dp),
-                            tint = MaterialTheme.colorScheme.outline
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = stringResource(R.string.empty_pedalboards),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.outline,
-                            textAlign = TextAlign.Center
+            // 헤더
+            PedalBoardHeader(
+                totalCount = state.pedalBoards.size
+            )
+
+            // 컨텐츠
+            Box(modifier = Modifier.fillMaxSize()) {
+                when {
+                    state.isLoading -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center),
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
-                }
-                else -> {
-                    LazyColumn(
-                        state = listState,
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(
-                            items = state.pedalBoards,
-                            key = { it.id }
-                        ) { pedalBoard ->
-                            val dismissState = rememberSwipeToDismissBoxState(
-                                confirmValueChange = { dismissValue ->
-                                    if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
-                                        pedalBoardToDelete = pedalBoard
-                                        showDeleteDialog = true
-                                    }
-                                    false
-                                }
-                            )
-
-                            SwipeToDismissBox(
-                                state = dismissState,
-                                backgroundContent = {
-                                    val color by animateColorAsState(
-                                        when (dismissState.targetValue) {
-                                            SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
-                                            else -> Color.Transparent
-                                        },
-                                        label = "swipe_color"
-                                    )
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .background(color, RoundedCornerShape(12.dp))
-                                            .padding(horizontal = 20.dp),
-                                        contentAlignment = Alignment.CenterEnd
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = stringResource(R.string.delete),
-                                            tint = MaterialTheme.colorScheme.onError
-                                        )
-                                    }
-                                },
-                                enableDismissFromStartToEnd = false
-                            ) {
-                                PedalBoardListCard(
-                                    pedalBoard = pedalBoard,
-                                    onClick = { onNavigateToEdit(pedalBoard.id) }
-                                )
+                    state.pedalBoards.isEmpty() -> {
+                        EmptyPedalBoardState(
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                    else -> {
+                        PedalBoardList(
+                            pedalBoards = state.pedalBoards,
+                            listState = listState,
+                            onItemClick = onNavigateToEdit,
+                            onDeleteRequest = { pedalBoard ->
+                                pedalBoardToDelete = pedalBoard
+                                showDeleteDialog = true
                             }
-                        }
+                        )
                     }
                 }
             }
@@ -240,22 +180,166 @@ fun PedalBoardListScreen(
 }
 
 /**
- * 페달보드 목록 카드
+ * 페달보드 헤더
  */
 @Composable
-private fun PedalBoardListCard(pedalBoard: SavedPedalBoard, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val pedalCount = pedalBoard.slots.count { it != null }
-    val totalSlots = pedalBoard.columns * pedalBoard.rows
-
-    Card(
+private fun PedalBoardHeader(
+    totalCount: Int,
+    modifier: Modifier = Modifier
+) {
+    Column(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .statusBarsPadding()
+            .padding(horizontal = 20.dp)
+            .padding(top = 16.dp, bottom = 8.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.pedalboard_list_title),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        if (totalCount > 0) {
+            Text(
+                text = stringResource(R.string.pedalboards_saved_count, totalCount),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/**
+ * 빈 상태
+ */
+@Composable
+private fun EmptyPedalBoardState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
+            modifier = Modifier.size(120.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Outlined.Dashboard,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(56.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = stringResource(R.string.empty_pedalboard_title),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.empty_pedalboard_subtitle),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            lineHeight = 22.sp
+        )
+    }
+}
+
+/**
+ * 페달보드 목록
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PedalBoardList(
+    pedalBoards: List<SavedPedalBoard>,
+    listState: androidx.compose.foundation.lazy.LazyListState,
+    onItemClick: (String) -> Unit,
+    onDeleteRequest: (SavedPedalBoard) -> Unit
+) {
+    LazyColumn(
+        state = listState,
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(
+            items = pedalBoards,
+            key = { it.id }
+        ) { pedalBoard ->
+            val dismissState = rememberSwipeToDismissBoxState(
+                confirmValueChange = { dismissValue ->
+                    if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
+                        onDeleteRequest(pedalBoard)
+                    }
+                    false
+                }
+            )
+
+            SwipeToDismissBox(
+                state = dismissState,
+                backgroundContent = {
+                    val color by animateColorAsState(
+                        when (dismissState.targetValue) {
+                            SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
+                            else -> Color.Transparent
+                        },
+                        label = "swipe_color"
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(color)
+                            .padding(horizontal = 24.dp),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = stringResource(R.string.delete),
+                            tint = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                },
+                enableDismissFromStartToEnd = false
+            ) {
+                PedalBoardCard(
+                    pedalBoard = pedalBoard,
+                    onClick = { onItemClick(pedalBoard.id) }
+                )
+            }
+        }
+
+        // 하단 여백
+        item {
+            Spacer(modifier = Modifier.height(80.dp))
+        }
+    }
+}
+
+/**
+ * 페달보드 카드
+ */
+@Composable
+private fun PedalBoardCard(
+    pedalBoard: SavedPedalBoard,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val pedalCount = pedalBoard.slots.count { it != null }
+    val totalSlots = pedalBoard.columns * pedalBoard.rows
+    val isKorean = LocalConfiguration.current.locales[0].language == "ko"
+
+    Surface(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 1.dp
     ) {
         Row(
             modifier = Modifier
@@ -263,36 +347,70 @@ private fun PedalBoardListCard(pedalBoard: SavedPedalBoard, onClick: () -> Unit,
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 아이콘
-            Icon(
-                imageVector = Icons.Outlined.Dashboard,
-                contentDescription = null,
-                modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
+            // 아이콘 영역
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.secondaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.GridView,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.size(26.dp)
+                )
+            }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(14.dp))
 
-            // 정보
+            // 정보 영역
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = pedalBoard.name,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "${pedalBoard.columns}×${pedalBoard.rows} · $pedalCount/$totalSlots 페달",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    MetaChip(text = "${pedalBoard.columns}×${pedalBoard.rows}")
+                    MetaChip(
+                        text = if (isKorean) {
+                            "$pedalCount/$totalSlots 페달"
+                        } else {
+                            "$pedalCount/$totalSlots pedals"
+                        }
+                    )
+                }
             }
         }
     }
 }
 
 /**
- * 트렌디한 확장 FAB (스크롤 시 축소)
+ * 메타 정보 칩
+ */
+@Composable
+private fun MetaChip(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        fontSize = 11.sp,
+        modifier = modifier
+    )
+}
+
+/**
+ * 트렌디한 확장 FAB
  */
 @Composable
 private fun TrendyExtendedFab(

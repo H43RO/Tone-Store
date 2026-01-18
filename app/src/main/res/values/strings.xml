@@ -98,4 +98,9 @@
     <string name="empty_state_title">No tones yet</string>
     <string name="empty_state_subtitle">Create your first tone setting\nand save your perfect sound</string>
     <string name="empty_search_subtitle">Try a different search term</string>
+
+    <!-- Pedal Board Screen -->
+    <string name="pedalboards_saved_count">%d boards saved</string>
+    <string name="empty_pedalboard_title">No pedal boards yet</string>
+    <string name="empty_pedalboard_subtitle">Create your first pedal board\nand organize your effects</string>
 </resources>
