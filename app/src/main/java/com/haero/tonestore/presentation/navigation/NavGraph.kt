@@ -428,14 +428,12 @@ private fun FloatingNavItem(
                 modifier = Modifier.size(22.dp)
             )
 
-            if (selected) {
-                Text(
-                    text = stringResource(tab.titleResId),
-                    color = contentColor,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
+            Text(
+                text = stringResource(tab.titleResId),
+                color = contentColor,
+                fontSize = 14.sp,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium
+            )
         }
     }
 }
