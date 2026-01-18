@@ -16,4 +16,6 @@ sealed interface HomeIntent {
     data class UpdateSearchQuery(val query: String) : HomeIntent
 
     data class ToggleFavorite(val id: String) : HomeIntent
+
+    data object ScrollToTopHandled : HomeIntent
 }

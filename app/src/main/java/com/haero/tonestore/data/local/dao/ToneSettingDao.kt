@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ToneSettingDao {
 
-    @Query("SELECT * FROM tone_settings ORDER BY updatedAt DESC")
+    @Query("SELECT * FROM tone_settings ORDER BY isFavorite DESC, updatedAt DESC")
     fun getAllToneSettings(): Flow<List<ToneSettingEntity>>
 
     @Query("SELECT * FROM tone_settings WHERE id = :id")

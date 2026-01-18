@@ -38,6 +38,7 @@ class HomeViewModel(
             is HomeIntent.SetSearchActive -> setSearchActive(intent.isActive)
             is HomeIntent.UpdateSearchQuery -> updateSearchQuery(intent.query)
             is HomeIntent.ToggleFavorite -> toggleFavorite(intent.id)
+            is HomeIntent.ScrollToTopHandled -> clearScrollToTop()
         }
     }
 
@@ -110,6 +111,7 @@ class HomeViewModel(
         viewModelScope.launch {
             runCatching {
                 toggleFavoriteUseCase(id)
+                _state.update { it.copy(scrollToTop = true) }
             }.onFailure { e ->
                 _state.update { it.copy(error = e.message) }
             }
@@ -118,5 +120,9 @@ class HomeViewModel(
 
     private fun clearNavigation() {
         _state.update { it.copy(navigateToDetail = null, navigateToCreate = false) }
+    }
+
+    private fun clearScrollToTop() {
+        _state.update { it.copy(scrollToTop = false) }
     }
 }

@@ -97,6 +97,13 @@ fun HomeScreen(
         }
     }
 
+    LaunchedEffect(state.scrollToTop) {
+        if (state.scrollToTop) {
+            listState.animateScrollToItem(0)
+            viewModel.handleIntent(HomeIntent.ScrollToTopHandled)
+        }
+    }
+
     Scaffold(
         floatingActionButton = {
             ExtendedFab(

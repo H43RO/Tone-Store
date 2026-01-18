@@ -10,5 +10,6 @@ data class HomeState(
     val isSearchActive: Boolean = false,
     val error: String? = null,
     val navigateToDetail: String? = null,
-    val navigateToCreate: Boolean = false
+    val navigateToCreate: Boolean = false,
+    val scrollToTop: Boolean = false
 )
