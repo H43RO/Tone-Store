@@ -1,30 +1,28 @@
 package com.haero.tonestore.presentation.ui.pedalboard.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,10 +34,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.haero.tonestore.R
 
@@ -244,7 +249,7 @@ private fun CustomColorButton(
 }
 
 /**
- * 커스텀 색상 선택 다이얼로그
+ * 커스텀 색상 선택 다이얼로그 - 컬러 팔레트 형태
  */
 @Composable
 private fun CustomColorDialog(
@@ -252,82 +257,69 @@ private fun CustomColorDialog(
     onConfirm: (Long) -> Unit,
     onDismiss: () -> Unit
 ) {
-    // 초기 색상에서 RGB 추출
+    // 초기 색상에서 HSV 추출
     val initial = initialColor ?: 0xFF2196F3
-    var red by remember { mutableFloatStateOf(((initial shr 16) and 0xFF).toFloat()) }
-    var green by remember { mutableFloatStateOf(((initial shr 8) and 0xFF).toFloat()) }
-    var blue by remember { mutableFloatStateOf((initial and 0xFF).toFloat()) }
+    val initialHsv = remember {
+        val r = ((initial shr 16) and 0xFF).toFloat() / 255f
+        val g = ((initial shr 8) and 0xFF).toFloat() / 255f
+        val b = (initial and 0xFF).toFloat() / 255f
+        rgbToHsv(r, g, b)
+    }
 
-    val currentColor = (0xFF shl 24) or (red.toInt() shl 16) or (green.toInt() shl 8) or blue.toInt()
+    var hue by remember { mutableFloatStateOf(initialHsv[0]) }
+    var saturation by remember { mutableFloatStateOf(initialHsv[1]) }
+    var value by remember { mutableFloatStateOf(initialHsv[2]) }
+
+    val currentColor = remember(hue, saturation, value) {
+        hsvToColor(hue, saturation, value)
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.custom_color)) },
         text = {
-            Column {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 // 색상 미리보기
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(60.dp)
+                        .height(50.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(currentColor.toLong()))
+                        .background(Color(currentColor))
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // HEX 입력
-                var hexText by remember(currentColor) {
-                    mutableStateOf(String.format("%06X", currentColor and 0xFFFFFF))
-                }
-                OutlinedTextField(
-                    value = hexText,
-                    onValueChange = { value ->
-                        val filtered = value.filter { it.isDigit() || it in 'A'..'F' || it in 'a'..'f' }
-                            .take(6)
-                            .uppercase()
-                        hexText = filtered
-                        if (filtered.length == 6) {
-                            runCatching {
-                                val parsed = filtered.toLong(16)
-                                red = ((parsed shr 16) and 0xFF).toFloat()
-                                green = ((parsed shr 8) and 0xFF).toFloat()
-                                blue = (parsed and 0xFF).toFloat()
-                            }
-                        }
+                // 컬러 팔레트 (Saturation x Value)
+                ColorPalette(
+                    hue = hue,
+                    saturation = saturation,
+                    value = value,
+                    onSaturationValueChange = { s, v ->
+                        saturation = s
+                        value = v
                     },
-                    label = { Text("HEX") },
-                    prefix = { Text("#") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // RGB 슬라이더
-                ColorSlider(
-                    label = "R",
-                    value = red,
-                    onValueChange = { red = it },
-                    color = Color.Red
-                )
-                ColorSlider(
-                    label = "G",
-                    value = green,
-                    onValueChange = { green = it },
-                    color = Color.Green
-                )
-                ColorSlider(
-                    label = "B",
-                    value = blue,
-                    onValueChange = { blue = it },
-                    color = Color.Blue
+                // Hue 슬라이더 (색상환)
+                HueSlider(
+                    hue = hue,
+                    onHueChange = { hue = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(32.dp)
                 )
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(currentColor.toLong() or (0xFFL shl 24)) }) {
+            TextButton(onClick = { onConfirm(currentColor) }) {
                 Text(stringResource(R.string.confirm))
             }
         },
@@ -340,40 +332,170 @@ private fun CustomColorDialog(
 }
 
 /**
- * RGB 슬라이더 컴포넌트
+ * 컬러 팔레트 (Saturation x Value 2D 선택)
  */
 @Composable
-private fun ColorSlider(
-    label: String,
+private fun ColorPalette(
+    hue: Float,
+    saturation: Float,
     value: Float,
-    onValueChange: (Float) -> Unit,
-    color: Color
+    onSaturationValueChange: (saturation: Float, value: Float) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+    var size by remember { mutableStateOf(IntSize.Zero) }
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .onSizeChanged { size = it }
+            .pointerInput(Unit) {
+                detectTapGestures { offset ->
+                    val s = (offset.x / size.width).coerceIn(0f, 1f)
+                    val v = 1f - (offset.y / size.height).coerceIn(0f, 1f)
+                    onSaturationValueChange(s, v)
+                }
+            }
+            .pointerInput(Unit) {
+                detectDragGestures { change, _ ->
+                    change.consume()
+                    val s = (change.position.x / size.width).coerceIn(0f, 1f)
+                    val v = 1f - (change.position.y / size.height).coerceIn(0f, 1f)
+                    onSaturationValueChange(s, v)
+                }
+            }
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            modifier = Modifier.width(24.dp)
-        )
-        Slider(
-            value = value,
-            onValueChange = onValueChange,
-            valueRange = 0f..255f,
-            modifier = Modifier.weight(1f),
-            colors = SliderDefaults.colors(
-                thumbColor = color,
-                activeTrackColor = color
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            // 배경: 흰색 -> 색상 (가로 그라데이션)
+            val pureColor = Color.hsv(hue, 1f, 1f)
+            drawRect(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(Color.White, pureColor)
+                )
             )
-        )
-        Text(
-            text = value.toInt().toString(),
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.width(36.dp)
-        )
+            // 오버레이: 투명 -> 검정 (세로 그라데이션)
+            drawRect(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color.Transparent, Color.Black)
+                )
+            )
+
+            // 선택 포인터
+            val pointerX = saturation * this.size.width
+            val pointerY = (1f - value) * this.size.height
+            val pointerRadius = 10.dp.toPx()
+
+            // 외곽선 (흰색)
+            drawCircle(
+                color = Color.White,
+                radius = pointerRadius + 2.dp.toPx(),
+                center = Offset(pointerX, pointerY),
+                style = Stroke(width = 3.dp.toPx())
+            )
+            // 내부 원
+            drawCircle(
+                color = Color.hsv(hue, saturation, value),
+                radius = pointerRadius,
+                center = Offset(pointerX, pointerY)
+            )
+        }
     }
+}
+
+/**
+ * Hue 슬라이더 (색상환)
+ */
+@Composable
+private fun HueSlider(
+    hue: Float,
+    onHueChange: (Float) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var width by remember { mutableStateOf(0) }
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .onSizeChanged { width = it.width }
+            .pointerInput(Unit) {
+                detectTapGestures { offset ->
+                    val newHue = (offset.x / width * 360f).coerceIn(0f, 360f)
+                    onHueChange(newHue)
+                }
+            }
+            .pointerInput(Unit) {
+                detectDragGestures { change, _ ->
+                    change.consume()
+                    val newHue = (change.position.x / width * 360f).coerceIn(0f, 360f)
+                    onHueChange(newHue)
+                }
+            }
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            // 색상환 그라데이션
+            val hueColors = (0..360 step 30).map { Color.hsv(it.toFloat(), 1f, 1f) }
+            drawRect(
+                brush = Brush.horizontalGradient(colors = hueColors)
+            )
+
+            // 선택 포인터
+            val pointerX = (hue / 360f) * this.size.width
+            val pointerHeight = this.size.height
+
+            // 포인터 (세로 막대)
+            drawRoundRect(
+                color = Color.White,
+                topLeft = Offset(pointerX - 6.dp.toPx(), 0f),
+                size = Size(12.dp.toPx(), pointerHeight),
+                cornerRadius = CornerRadius(4.dp.toPx()),
+                style = Stroke(width = 3.dp.toPx())
+            )
+        }
+    }
+}
+
+/**
+ * RGB to HSV 변환
+ */
+private fun rgbToHsv(r: Float, g: Float, b: Float): FloatArray {
+    val max = maxOf(r, g, b)
+    val min = minOf(r, g, b)
+    val delta = max - min
+
+    val h = when {
+        delta == 0f -> 0f
+        max == r -> 60f * (((g - b) / delta) % 6)
+        max == g -> 60f * (((b - r) / delta) + 2)
+        else -> 60f * (((r - g) / delta) + 4)
+    }.let { if (it < 0) it + 360f else it }
+
+    val s = if (max == 0f) 0f else delta / max
+    val v = max
+
+    return floatArrayOf(h, s, v)
+}
+
+/**
+ * HSV to Color (Long) 변환
+ */
+private fun hsvToColor(h: Float, s: Float, v: Float): Long {
+    val c = v * s
+    val x = c * (1 - kotlin.math.abs((h / 60f) % 2 - 1))
+    val m = v - c
+
+    val (r, g, b) = when {
+        h < 60 -> Triple(c, x, 0f)
+        h < 120 -> Triple(x, c, 0f)
+        h < 180 -> Triple(0f, c, x)
+        h < 240 -> Triple(0f, x, c)
+        h < 300 -> Triple(x, 0f, c)
+        else -> Triple(c, 0f, x)
+    }
+
+    val red = ((r + m) * 255).toInt()
+    val green = ((g + m) * 255).toInt()
+    val blue = ((b + m) * 255).toInt()
+
+    return (0xFFL shl 24) or (red.toLong() shl 16) or (green.toLong() shl 8) or blue.toLong()
 }
 
 /**
