@@ -93,16 +93,9 @@ fun RotaryKnob(
     var previousStep by remember { mutableIntStateOf((value * steps / 10f).roundToInt()) }
 
     // 노브 색상: 항상 검정색 (실제 이펙터 페달처럼)
-    val actualKnobColor = if (enabled) {
-        androidx.compose.ui.graphics.Color.Black
-    } else {
-        androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.4f)
-    }
-    val trackColor = if (enabled) {
-        androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.3f)
-    } else {
-        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-    }
+    // enabled 여부와 관계없이 동일하게 표시
+    val actualKnobColor = androidx.compose.ui.graphics.Color.Black
+    val trackColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.3f)
     // 포인터 색상: 항상 흰색 (실제 이펙터 페달처럼)
     val indicatorColor = androidx.compose.ui.graphics.Color.White
 
