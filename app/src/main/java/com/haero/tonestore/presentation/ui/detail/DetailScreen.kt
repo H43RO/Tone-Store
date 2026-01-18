@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -36,13 +37,11 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,6 +57,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.haero.tonestore.R
@@ -72,7 +72,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 /**
- * 톤 세팅 상세 보기 화면 (탭 구조)
+ * 톤 세팅 상세 보기 화면 (2025 트렌드 디자인)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,12 +87,10 @@ fun DetailScreen(
     val pagerState = rememberPagerState(pageCount = { 3 })
     val scope = rememberCoroutineScope()
 
-    // 데이터 로드
     LaunchedEffect(toneSettingId) {
         viewModel.handleIntent(DetailIntent.LoadToneSetting(toneSettingId))
     }
 
-    // 네비게이션 처리
     LaunchedEffect(state.navigateToEdit) {
         if (state.navigateToEdit) {
             onNavigateToEdit(toneSettingId)
@@ -114,97 +112,66 @@ fun DetailScreen(
     )
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(state.toneSetting?.songName ?: stringResource(R.string.detail))
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = { viewModel.handleIntent(DetailIntent.NavigateToEdit) }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = stringResource(R.string.edit)
-                        )
-                    }
-                    IconButton(
-                        onClick = { showDeleteDialog = true }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = stringResource(R.string.delete),
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        }
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when {
-                state.isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-                state.toneSetting != null -> {
-                    val toneSetting = state.toneSetting!!
+            // 모던 헤더
+            DetailHeader(
+                title = state.toneSetting?.songName ?: stringResource(R.string.detail),
+                onBackClick = onNavigateBack,
+                onEditClick = { viewModel.handleIntent(DetailIntent.NavigateToEdit) },
+                onDeleteClick = { showDeleteDialog = true }
+            )
 
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        // 탭 바
-                        DetailTabBar(
-                            tabs = tabs,
-                            selectedIndex = pagerState.currentPage,
-                            onTabSelected = { index ->
-                                scope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
-                            },
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+            // 컨텐츠
+            Box(modifier = Modifier.fillMaxSize()) {
+                when {
+                    state.isLoading -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center),
+                            color = MaterialTheme.colorScheme.primary
                         )
+                    }
+                    state.toneSetting != null -> {
+                        val toneSetting = state.toneSetting!!
 
-                        // 페이저 콘텐츠
-                        HorizontalPager(
-                            state = pagerState,
-                            modifier = Modifier.fillMaxSize()
-                        ) { page ->
-                            when (page) {
-                                0 -> DetailPedalBoardContent(
-                                    pedalBoard = toneSetting.pedalBoard
-                                )
-                                1 -> DetailAmpContent(
-                                    ampSetting = toneSetting.ampSetting
-                                )
-                                2 -> DetailGuitarContent(
-                                    guitarSetting = toneSetting.guitarSetting
-                                )
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            // 탭 바
+                            DetailTabBar(
+                                tabs = tabs,
+                                selectedIndex = pagerState.currentPage,
+                                onTabSelected = { index ->
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
+                                },
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+                            )
+
+                            // 페이저 콘텐츠
+                            HorizontalPager(
+                                state = pagerState,
+                                modifier = Modifier.fillMaxSize()
+                            ) { page ->
+                                when (page) {
+                                    0 -> DetailPedalBoardContent(pedalBoard = toneSetting.pedalBoard)
+                                    1 -> DetailAmpContent(ampSetting = toneSetting.ampSetting)
+                                    2 -> DetailGuitarContent(guitarSetting = toneSetting.guitarSetting)
+                                }
                             }
                         }
                     }
-                }
-                state.error != null -> {
-                    Text(
-                        text = state.error ?: stringResource(R.string.error_occurred),
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    state.error != null -> {
+                        Text(
+                            text = state.error ?: stringResource(R.string.error_occurred),
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
                 }
             }
         }
@@ -242,6 +209,91 @@ fun DetailScreen(
                 }
             }
         )
+    }
+}
+
+/**
+ * 모던 헤더
+ */
+@Composable
+private fun DetailHeader(
+    title: String,
+    onBackClick: () -> Unit,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // 뒤로가기 버튼
+        Surface(
+            onClick = onBackClick,
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.size(44.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        // 타이틀
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+
+        // 액션 버튼들
+        Surface(
+            onClick = onEditClick,
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            modifier = Modifier.size(44.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = stringResource(R.string.edit),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Surface(
+            onClick = onDeleteClick,
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.errorContainer,
+            modifier = Modifier.size(44.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(R.string.delete),
+                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
     }
 }
 
