@@ -39,6 +39,7 @@ import kotlin.math.sin
 
 /**
  * 실제 앰프/이펙터 노브를 모방한 회전 노브 컴포넌트
+ * 노브 색상은 검정색, 포인터는 흰색으로 고정 (실제 이펙터 페달처럼)
  *
  * @param value 현재 값 (0-10)
  * @param onValueChange 값 변경 콜백
@@ -47,7 +48,6 @@ import kotlin.math.sin
  * @param size 노브 크기
  * @param enabled 활성화 여부
  * @param steps 노브의 스텝 수 (햅틱 피드백용, 기본 20 = 0.5 단위)
- * @param knobColor 노브 색상 (null이면 기본 테마 색상 사용)
  * @param labelColor 레이블 색상 (null이면 기본 테마 색상 사용)
  */
 @Composable
@@ -59,7 +59,6 @@ fun RotaryKnob(
     size: Dp = 64.dp,
     enabled: Boolean = true,
     steps: Int = 20,
-    knobColor: androidx.compose.ui.graphics.Color? = null,
     labelColor: androidx.compose.ui.graphics.Color? = null
 ) {
     val view = LocalView.current
@@ -93,28 +92,19 @@ fun RotaryKnob(
     // 햅틱 피드백을 위한 이전 스텝 저장
     var previousStep by remember { mutableIntStateOf((value * steps / 10f).roundToInt()) }
 
-    val actualKnobColor = knobColor ?: if (enabled) {
-        MaterialTheme.colorScheme.primary
+    // 노브 색상: 항상 검정색 (실제 이펙터 페달처럼)
+    val actualKnobColor = if (enabled) {
+        androidx.compose.ui.graphics.Color.Black
     } else {
-        MaterialTheme.colorScheme.outline
+        androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.4f)
     }
     val trackColor = if (enabled) {
-        actualKnobColor.copy(alpha = 0.3f)
+        androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.3f)
     } else {
         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
     }
-    // 포인터 색상: 노브 색상에 따라 대비되는 색상 사용 (밝은 노브 -> 검은 포인터)
-    val indicatorColor = if (knobColor != null) {
-        if (PedalColorUtils.isLightColor(knobColor)) {
-            androidx.compose.ui.graphics.Color.Black
-        } else {
-            androidx.compose.ui.graphics.Color.White
-        }
-    } else if (enabled) {
-        MaterialTheme.colorScheme.onPrimary
-    } else {
-        MaterialTheme.colorScheme.surface
-    }
+    // 포인터 색상: 항상 흰색 (실제 이펙터 페달처럼)
+    val indicatorColor = androidx.compose.ui.graphics.Color.White
 
     val actualLabelColor = labelColor ?: if (enabled) {
         MaterialTheme.colorScheme.onSurfaceVariant

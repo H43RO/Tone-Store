@@ -188,27 +188,22 @@ private fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             pedal.knobs.forEach { _ ->
-                MiniKnobIndicator(contentColor = contentColor)
+                MiniKnobIndicator()
             }
         }
     }
 }
 
 /**
- * 노브 표시용 UI
+ * 노브 표시용 UI (검정 노브, 흰색 포인터 - 실제 이펙터 페달처럼)
  */
 @Composable
 private fun MiniKnobIndicator(
-    size: Dp = 18.dp,
-    contentColor: Color = MaterialTheme.colorScheme.primary
+    size: Dp = 18.dp
 ) {
-    val knobColor = contentColor
-    val trackColor = contentColor.copy(alpha = 0.3f)
-    val indicatorColor = if (PedalColorUtils.isLightColor(contentColor)) {
-        Color.White
-    } else {
-        Color.Black
-    }
+    val knobColor = Color.Black
+    val trackColor = Color.Black.copy(alpha = 0.3f)
+    val indicatorColor = Color.White
 
     // 기본값 5.0 (중간)으로 표시
     val normalizedValue = 0.5f

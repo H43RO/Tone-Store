@@ -161,7 +161,6 @@ fun PedalCard(
                         size = 56.dp,
                         enabled = pedal.isEnabled && isEditable,
                         modifier = Modifier.padding(horizontal = 4.dp),
-                        knobColor = adjustedContentColor,
                         labelColor = adjustedContentColor
                     )
                 }
