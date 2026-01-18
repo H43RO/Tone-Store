@@ -494,7 +494,6 @@ private fun SongInfoStepContent(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -507,7 +506,9 @@ private fun SongInfoStepContent(
             singleLine = true,
             isError = songNameError != null,
             supportingText = songNameError?.let { { Text(it) } },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
             shape = RoundedCornerShape(12.dp)
         )
 
