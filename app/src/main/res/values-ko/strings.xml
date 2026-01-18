@@ -92,4 +92,10 @@
     <string name="next">다음</string>
     <string name="previous">이전</string>
     <string name="step_indicator">%2$d단계 중 %1$d단계</string>
+
+    <!-- Home Screen -->
+    <string name="tones_saved_count">%d개의 톤 저장됨</string>
+    <string name="empty_state_title">저장된 톤이 없어요</string>
+    <string name="empty_state_subtitle">첫 번째 톤 세팅을 만들고\n완벽한 사운드를 저장해보세요</string>
+    <string name="empty_search_subtitle">다른 검색어를 시도해보세요</string>
 </resources>

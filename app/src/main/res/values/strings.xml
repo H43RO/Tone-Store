@@ -92,4 +92,10 @@
     <string name="next">Next</string>
     <string name="previous">Previous</string>
     <string name="step_indicator">Step %1$d of %2$d</string>
+
+    <!-- Home Screen -->
+    <string name="tones_saved_count">%d tones saved</string>
+    <string name="empty_state_title">No tones yet</string>
+    <string name="empty_state_subtitle">Create your first tone setting\nand save your perfect sound</string>
+    <string name="empty_search_subtitle">Try a different search term</string>
 </resources>

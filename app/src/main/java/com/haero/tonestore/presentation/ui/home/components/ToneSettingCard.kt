@@ -1,6 +1,11 @@
 package com.haero.tonestore.presentation.ui.home.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -11,22 +16,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,7 +44,7 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * 톤 세팅 카드 컴포넌트
+ * 톤 세팅 카드 컴포넌트 (2025 트렌드 디자인)
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -50,101 +54,89 @@ fun ToneSettingCard(
     onFavoriteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val dateFormat = SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.getDefault())
+    val dateFormat = SimpleDateFormat("MM.dd", Locale.getDefault())
     val formattedDate = dateFormat.format(Date(toneSetting.updatedAt))
     val pedalCount = toneSetting.pedalBoard.pedals.size
     val configuration = LocalConfiguration.current
     val isKorean = configuration.locales[0].language == "ko"
 
-    Card(
+    val favoriteColor by animateColorAsState(
+        targetValue = if (toneSetting.isFavorite) {
+            MaterialTheme.colorScheme.error
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+        },
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "favoriteColor"
+    )
+
+    Surface(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 1.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp),
+            verticalAlignment = Alignment.Top
         ) {
-            // 아이콘
-            Icon(
-                imageVector = Icons.Default.Audiotrack,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(36.dp)
-            )
+            // 아이콘 영역
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.GraphicEq,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(26.dp)
+                )
+            }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(14.dp))
 
-            // 정보
+            // 정보 영역
             Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = toneSetting.songName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false)
-                    )
-                }
+                // 제목
+                Text(
+                    text = toneSetting.songName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
 
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
+                // 메타 정보
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = formattedDate,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(2.dp))
-                        Text(
-                            text = stringResource(R.string.pedal_count, pedalCount),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    MetaChip(text = formattedDate)
+                    MetaChip(text = "$pedalCount pedals")
+                    if (toneSetting.ampSetting.ampModel?.isNotBlank() == true) {
+                        MetaChip(text = toneSetting.ampSetting.ampModel.take(12))
                     }
                 }
 
-                // 태그 표시
+                // 태그
                 if (toneSetting.tags.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                     FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         toneSetting.tags.take(3).forEach { tag ->
-                            AssistChip(
-                                onClick = { },
-                                label = {
-                                    Text(
-                                        text = if (isKorean) tag.displayNameKo else tag.displayName,
-                                        fontSize = 10.sp
-                                    )
-                                },
-                                modifier = Modifier.height(24.dp),
-                                colors = AssistChipDefaults.assistChipColors(
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                                )
+                            TagChip(
+                                text = if (isKorean) tag.displayNameKo else tag.displayName
                             )
                         }
                         if (toneSetting.tags.size > 3) {
@@ -152,7 +144,9 @@ fun ToneSettingCard(
                                 text = "+${toneSetting.tags.size - 3}",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.align(Alignment.CenterVertically)
+                                modifier = Modifier
+                                    .align(Alignment.CenterVertically)
+                                    .padding(start = 2.dp)
                             )
                         }
                     }
@@ -161,14 +155,60 @@ fun ToneSettingCard(
 
             // 즐겨찾기 버튼
             IconButton(
-                onClick = onFavoriteClick
+                onClick = onFavoriteClick,
+                modifier = Modifier.size(40.dp)
             ) {
                 Icon(
-                    imageVector = if (toneSetting.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    imageVector = if (toneSetting.isFavorite) {
+                        Icons.Filled.Favorite
+                    } else {
+                        Icons.Outlined.FavoriteBorder
+                    },
                     contentDescription = stringResource(R.string.favorite),
-                    tint = if (toneSetting.isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = favoriteColor,
+                    modifier = Modifier.size(22.dp)
                 )
             }
         }
+    }
+}
+
+/**
+ * 메타 정보 칩
+ */
+@Composable
+private fun MetaChip(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        fontSize = 11.sp,
+        modifier = modifier
+    )
+}
+
+/**
+ * 태그 칩
+ */
+@Composable
+private fun TagChip(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(8.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            fontSize = 11.sp,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+        )
     }
 }

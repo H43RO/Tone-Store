@@ -1,9 +1,14 @@
 package com.haero.tonestore.presentation.ui.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,18 +18,24 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,15 +43,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,13 +58,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.ToneSetting
@@ -66,7 +78,7 @@ import com.haero.tonestore.presentation.viewmodel.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
 
 /**
- * 홈 화면
+ * 홈 화면 (2025 트렌드 디자인)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,12 +90,10 @@ fun HomeScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
 
-    // 스크롤 시 FAB 축소 여부 결정
     val isScrolling by remember {
         derivedStateOf { listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 100 }
     }
 
-    // 네비게이션 처리
     LaunchedEffect(state.navigateToCreate) {
         if (state.navigateToCreate) {
             onNavigateToCreate()
@@ -99,27 +109,6 @@ fun HomeScreen(
     }
 
     Scaffold(
-        topBar = {
-            if (state.isSearchActive.not()) {
-                TopAppBar(
-                    title = { Text(stringResource(R.string.app_name)) },
-                    actions = {
-                        IconButton(
-                            onClick = { viewModel.handleIntent(HomeIntent.SetSearchActive(true)) }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = stringResource(R.string.search)
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                )
-            }
-        },
         floatingActionButton = {
             TrendyExtendedFab(
                 expanded = !isScrolling,
@@ -127,75 +116,40 @@ fun HomeScreen(
                 icon = Icons.Default.Add,
                 text = stringResource(R.string.add_tone_setting)
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 검색바
-            if (state.isSearchActive) {
-                SearchBar(
-                    query = state.searchQuery,
-                    onQueryChange = { viewModel.handleIntent(HomeIntent.UpdateSearchQuery(it)) },
-                    onSearch = { },
-                    active = false,
-                    onActiveChange = { },
-                    placeholder = { Text(stringResource(R.string.search_hint)) },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = null
-                        )
-                    },
-                    trailingIcon = {
-                        IconButton(
-                            onClick = { viewModel.handleIntent(HomeIntent.SetSearchActive(false)) }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = stringResource(R.string.close_search)
-                            )
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    colors = SearchBarDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) { }
-            }
+            // 헤더 영역
+            HomeHeader(
+                isSearchActive = state.isSearchActive,
+                searchQuery = state.searchQuery,
+                totalCount = state.toneSettings.size,
+                onSearchQueryChange = { viewModel.handleIntent(HomeIntent.UpdateSearchQuery(it)) },
+                onSearchActiveChange = { viewModel.handleIntent(HomeIntent.SetSearchActive(it)) }
+            )
 
             // 컨텐츠
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
                     state.isLoading -> {
                         CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center)
+                            modifier = Modifier.align(Alignment.Center),
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                     state.filteredToneSettings.isEmpty() && state.searchQuery.isNotBlank() -> {
-                        Text(
-                            text = stringResource(R.string.no_search_results),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .padding(32.dp)
+                        EmptySearchState(
+                            modifier = Modifier.align(Alignment.Center)
                         )
                     }
                     state.toneSettings.isEmpty() -> {
-                        Text(
-                            text = stringResource(R.string.empty_tone_settings),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .padding(32.dp)
+                        EmptyState(
+                            modifier = Modifier.align(Alignment.Center)
                         )
                     }
                     else -> {
@@ -219,6 +173,230 @@ fun HomeScreen(
     }
 }
 
+/**
+ * 홈 헤더 (타이틀 + 검색)
+ */
+@Composable
+private fun HomeHeader(
+    isSearchActive: Boolean,
+    searchQuery: String,
+    totalCount: Int,
+    onSearchQueryChange: (String) -> Unit,
+    onSearchActiveChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(horizontal = 20.dp)
+            .padding(top = 16.dp, bottom = 8.dp)
+    ) {
+        // 타이틀 행
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                if (totalCount > 0 && !isSearchActive) {
+                    Text(
+                        text = stringResource(R.string.tones_saved_count, totalCount),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            // 검색 토글 버튼
+            Surface(
+                onClick = { onSearchActiveChange(!isSearchActive) },
+                shape = CircleShape,
+                color = if (isSearchActive) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                },
+                modifier = Modifier.size(48.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = if (isSearchActive) Icons.Default.Close else Icons.Default.Search,
+                        contentDescription = stringResource(R.string.search),
+                        tint = if (isSearchActive) {
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+            }
+        }
+
+        // 검색바
+        AnimatedVisibility(
+            visible = isSearchActive,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            val focusRequester = remember { FocusRequester() }
+
+            LaunchedEffect(isSearchActive) {
+                if (isSearchActive) {
+                    focusRequester.requestFocus()
+                }
+            }
+
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    BasicTextField(
+                        value = searchQuery,
+                        onValueChange = onSearchQueryChange,
+                        modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(focusRequester),
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        singleLine = true,
+                        decorationBox = { innerTextField ->
+                            Box {
+                                if (searchQuery.isEmpty()) {
+                                    Text(
+                                        text = stringResource(R.string.search_hint),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        }
+                    )
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(
+                            onClick = { onSearchQueryChange("") },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * 빈 상태 (데이터 없음)
+ */
+@Composable
+private fun EmptyState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+            modifier = Modifier.size(120.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.MusicNote,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(56.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = stringResource(R.string.empty_state_title),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.empty_state_subtitle),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            lineHeight = 22.sp
+        )
+    }
+}
+
+/**
+ * 검색 결과 없음 상태
+ */
+@Composable
+private fun EmptySearchState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.size(100.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Outlined.SearchOff,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(48.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = stringResource(R.string.no_search_results),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = stringResource(R.string.empty_search_subtitle),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ToneSettingList(
@@ -232,7 +410,7 @@ private fun ToneSettingList(
 
     LazyColumn(
         state = listState,
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(
@@ -261,8 +439,9 @@ private fun ToneSettingList(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
+                            .clip(RoundedCornerShape(20.dp))
                             .background(color)
-                            .padding(horizontal = 20.dp),
+                            .padding(horizontal = 24.dp),
                         contentAlignment = Alignment.CenterEnd
                     ) {
                         Icon(
@@ -281,6 +460,11 @@ private fun ToneSettingList(
                     onFavoriteClick = { onFavoriteClick(toneSetting.id) }
                 )
             }
+        }
+
+        // 하단 여백 (FAB 가림 방지)
+        item {
+            Spacer(modifier = Modifier.height(80.dp))
         }
     }
 
@@ -321,7 +505,7 @@ private fun ToneSettingList(
 }
 
 /**
- * 트렌디한 확장 FAB (스크롤 시 축소)
+ * 트렌디한 확장 FAB
  */
 @Composable
 private fun TrendyExtendedFab(
