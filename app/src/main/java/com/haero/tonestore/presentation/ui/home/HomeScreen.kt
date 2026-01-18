@@ -392,6 +392,7 @@ private fun ToneSettingList(
             key = { it.id }
         ) { toneSetting ->
             ToneSettingCard(
+                modifier = Modifier.animateItem(),
                 toneSetting = toneSetting,
                 onClick = { onItemClick(toneSetting.id) },
                 onFavoriteClick = { onFavoriteClick(toneSetting.id) },
@@ -400,7 +401,7 @@ private fun ToneSettingList(
         }
 
         item {
-            Spacer(modifier = Modifier.height(80.dp))
+            Spacer(modifier = Modifier.height(80.dp).animateItem())
         }
     }
 
