@@ -89,11 +89,15 @@ fun PedalColorPicker(
 ) {
     var showCustomColorDialog by remember { mutableStateOf(false) }
 
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(
             text = stringResource(R.string.pedal_color),
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -101,7 +105,7 @@ fun PedalColorPicker(
         // 프리셋 색상 그리드
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // 기본 색상 (색상 없음) 옵션

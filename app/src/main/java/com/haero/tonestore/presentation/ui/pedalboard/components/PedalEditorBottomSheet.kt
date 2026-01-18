@@ -111,8 +111,7 @@ fun PedalEditorBottomSheet(
                             onValueChange = { }, // 읽기 전용
                             label = knob.name,
                             size = 56.dp,
-                            enabled = false, // 비활성화하여 조작 불가
-                            isPedalKnob = true
+                            enabled = false // 비활성화하여 조작 불가
                         )
                     }
                 }
@@ -123,7 +122,8 @@ fun PedalEditorBottomSheet(
             // 색상 선택
             PedalColorPicker(
                 selectedColor = pedal.color,
-                onColorSelected = onColorChange
+                onColorSelected = onColorChange,
+                modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(24.dp))
