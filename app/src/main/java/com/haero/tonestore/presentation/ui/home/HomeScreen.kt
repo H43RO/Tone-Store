@@ -99,7 +99,9 @@ fun HomeScreen(
 
     LaunchedEffect(state.scrollToTop) {
         if (state.scrollToTop) {
-            listState.animateScrollToItem(0)
+            if (listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0) {
+                listState.animateScrollToItem(0)
+            }
             viewModel.handleIntent(HomeIntent.ScrollToTopHandled)
         }
     }
