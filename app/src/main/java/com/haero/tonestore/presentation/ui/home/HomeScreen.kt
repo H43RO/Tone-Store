@@ -2,6 +2,7 @@ package com.haero.tonestore.presentation.ui.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -107,7 +108,7 @@ fun HomeScreen(
 
     Scaffold(
         floatingActionButton = {
-            TrendyExtendedFab(
+            ExtendedFab(
                 expanded = !isScrolling,
                 onClick = { viewModel.handleIntent(HomeIntent.NavigateToCreate) },
                 icon = Icons.Default.Add,
@@ -486,7 +487,7 @@ private fun ToneSettingList(
 }
 
 @Composable
-private fun TrendyExtendedFab(
+private fun ExtendedFab(
     expanded: Boolean,
     onClick: () -> Unit,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
@@ -507,7 +508,7 @@ private fun TrendyExtendedFab(
         modifier = modifier
             .shadow(
                 elevation = 12.dp,
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(24.dp),
                 ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
                 spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
             ),
@@ -519,6 +520,8 @@ private fun TrendyExtendedFab(
             modifier = Modifier.padding(
                 horizontal = if (expanded) 20.dp else 16.dp,
                 vertical = 16.dp
+            ).animateContentSize(
+                alignment = Alignment.CenterEnd
             ),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
