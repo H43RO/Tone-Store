@@ -11,18 +11,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * 페달보드 목록 화면 State
- */
 data class PedalBoardListState(
     val pedalBoards: List<SavedPedalBoard> = emptyList(),
     val isLoading: Boolean = true,
     val error: String? = null
 )
 
-/**
- * 페달보드 목록 ViewModel
- */
 class PedalBoardListViewModel(
     private val getAllSavedPedalBoardsUseCase: GetAllSavedPedalBoardsUseCase,
     private val deleteSavedPedalBoardUseCase: DeleteSavedPedalBoardUseCase

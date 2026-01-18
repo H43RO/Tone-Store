@@ -21,14 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
-/**
- * 접기/펼치기 가능한 섹션 헤더
- *
- * @param title 섹션 제목
- * @param isExpanded 펼쳐진 상태 여부
- * @param onToggle 토글 콜백
- * @param content 섹션 내용
- */
 @Composable
 fun SectionHeader(
     title: String,

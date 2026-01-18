@@ -29,9 +29,6 @@ import androidx.compose.ui.zIndex
 import com.haero.tonestore.domain.model.Pedal
 import kotlin.math.roundToInt
 
-/**
- * 동적 columns x rows 페달보드 그리드 컴포넌트 (드래그 앤 드롭 지원)
- */
 @Composable
 fun PedalBoardGrid(
     slots: List<Pedal?>,
@@ -48,21 +45,17 @@ fun PedalBoardGrid(
         "slots must have at least $totalSlots elements (got ${slots.size})"
     }
 
-    // 페달 슬롯 높이
     val slotHeight = 120.dp
     val horizontalSpacing = 8.dp
     val verticalSpacing = 12.dp
 
-    // 드래그 상태
     var draggingIndex by remember { mutableIntStateOf(-1) }
     var dragOffsetX by remember { mutableStateOf(0f) }
     var dragOffsetY by remember { mutableStateOf(0f) }
     var targetIndex by remember { mutableIntStateOf(-1) }
 
-    // 슬롯 위치 저장
     val slotPositions = remember { mutableMapOf<Int, Pair<Float, Float>>() }
 
-    // 그리드 전체 높이 계산
     val gridHeight = (slotHeight + verticalSpacing) * rows - verticalSpacing + 32.dp
 
     LazyVerticalGrid(
@@ -123,14 +116,12 @@ fun PedalBoardGrid(
                                         dragOffsetX += dragAmount.x
                                         dragOffsetY += dragAmount.y
 
-                                        // 드래그 중인 슬롯의 현재 중심점 계산
                                         val currentPos = slotPositions[index] ?: return@detectDragGesturesAfterLongPress
                                         val slotWidthPx = size.width.toFloat()
                                         val slotHeightPx = slotHeight.toPx()
                                         val currentCenterX = currentPos.first + dragOffsetX + slotWidthPx / 2
                                         val currentCenterY = currentPos.second + dragOffsetY + slotHeightPx / 2
 
-                                        // 가장 가까운 슬롯 찾기
                                         var closestIndex = -1
                                         var closestDistance = Float.MAX_VALUE
 

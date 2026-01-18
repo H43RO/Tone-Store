@@ -71,9 +71,6 @@ import com.haero.tonestore.presentation.viewmodel.DetailViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
-/**
- * 톤 세팅 상세 보기 화면 (2025 트렌드 디자인)
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
@@ -119,7 +116,6 @@ fun DetailScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 모던 헤더
             DetailHeader(
                 title = state.toneSetting?.songName ?: stringResource(R.string.detail),
                 onBackClick = onNavigateBack,
@@ -127,7 +123,6 @@ fun DetailScreen(
                 onDeleteClick = { showDeleteDialog = true }
             )
 
-            // 컨텐츠
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
                     state.isLoading -> {
@@ -140,7 +135,6 @@ fun DetailScreen(
                         val toneSetting = state.toneSetting!!
 
                         Column(modifier = Modifier.fillMaxSize()) {
-                            // 탭 바
                             DetailTabBar(
                                 tabs = tabs,
                                 selectedIndex = pagerState.currentPage,
@@ -152,7 +146,6 @@ fun DetailScreen(
                                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
                             )
 
-                            // 페이저 콘텐츠
                             HorizontalPager(
                                 state = pagerState,
                                 modifier = Modifier.fillMaxSize()
@@ -177,7 +170,6 @@ fun DetailScreen(
         }
     }
 
-    // 삭제 확인 다이얼로그
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
@@ -212,9 +204,6 @@ fun DetailScreen(
     }
 }
 
-/**
- * 모던 헤더
- */
 @Composable
 private fun DetailHeader(
     title: String,
@@ -230,7 +219,6 @@ private fun DetailHeader(
             .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 뒤로가기 버튼
         Surface(
             onClick = onBackClick,
             shape = CircleShape,
@@ -249,7 +237,6 @@ private fun DetailHeader(
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        // 타이틀
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
@@ -260,7 +247,6 @@ private fun DetailHeader(
             modifier = Modifier.weight(1f)
         )
 
-        // 액션 버튼들
         Surface(
             onClick = onEditClick,
             shape = CircleShape,
@@ -297,17 +283,11 @@ private fun DetailHeader(
     }
 }
 
-/**
- * 탭 아이템 데이터
- */
 private data class TabItem(
     val title: String,
     val icon: ImageVector
 )
 
-/**
- * 모던한 탭 바 (Pill 스타일)
- */
 @Composable
 private fun DetailTabBar(
     tabs: List<TabItem>,
@@ -377,9 +357,6 @@ private fun DetailTabBar(
     }
 }
 
-/**
- * 페달보드 상세 콘텐츠 (그리드 형태)
- */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun DetailPedalBoardContent(
@@ -405,7 +382,6 @@ private fun DetailPedalBoardContent(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // 2열 그리드 형태로 표시
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -422,7 +398,6 @@ private fun DetailPedalBoardContent(
                         modifier = Modifier.weight(1f)
                     )
                 }
-                // 홀수 개일 때 빈 공간 채우기
                 if (pedalBoard.pedals.size % 2 == 1) {
                     Spacer(modifier = Modifier.weight(1f))
                 }
@@ -431,9 +406,6 @@ private fun DetailPedalBoardContent(
     }
 }
 
-/**
- * 앰프 상세 콘텐츠
- */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun DetailAmpContent(
@@ -445,7 +417,6 @@ private fun DetailAmpContent(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        // 앰프 모델명
         if (ampSetting.ampModel.isNullOrBlank().not()) {
             Text(
                 text = ampSetting.ampModel!!,
@@ -456,7 +427,6 @@ private fun DetailAmpContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // 앰프 노브 패널
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -523,9 +493,6 @@ private fun DetailAmpContent(
     }
 }
 
-/**
- * 기타 상세 콘텐츠
- */
 @Composable
 private fun DetailGuitarContent(
     guitarSetting: GuitarSetting
@@ -536,7 +503,6 @@ private fun DetailGuitarContent(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        // 기타 모델명
         if (guitarSetting.guitarModel.isNullOrBlank().not()) {
             Text(
                 text = guitarSetting.guitarModel!!,
@@ -547,7 +513,6 @@ private fun DetailGuitarContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // 픽업 셀렉터
         Text(
             text = stringResource(R.string.pickup_selector),
             style = MaterialTheme.typography.titleMedium,
@@ -562,7 +527,6 @@ private fun DetailGuitarContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 톤/볼륨 노브
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -585,9 +549,6 @@ private fun DetailGuitarContent(
     }
 }
 
-/**
- * 상세 화면용 픽업 셀렉터 (읽기 전용)
- */
 @Composable
 private fun DetailPickupSelector(
     selectedPosition: PickupPosition
@@ -663,5 +624,34 @@ private fun DetailPickupSelector(
                 )
             }
         }
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun DetailHeaderPreview() {
+    com.haero.tonestore.ui.theme.ToneStoreTheme {
+        DetailHeader(
+            title = "Sample Song",
+            onBackClick = {},
+            onEditClick = {},
+            onDeleteClick = {}
+        )
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun DetailTabBarPreview() {
+    com.haero.tonestore.ui.theme.ToneStoreTheme {
+        DetailTabBar(
+            tabs = listOf(
+                TabItem("Pedal Board", Icons.Default.GraphicEq),
+                TabItem("Amp", Icons.Default.Speaker),
+                TabItem("Guitar", Icons.Default.MusicNote)
+            ),
+            selectedIndex = 0,
+            onTabSelected = {}
+        )
     }
 }

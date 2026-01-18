@@ -59,14 +59,9 @@ import com.haero.tonestore.presentation.ui.pedalboard.PedalBoardListScreen
 import com.haero.tonestore.presentation.ui.pedalboard.PedalBoardScreen
 import kotlinx.coroutines.launch
 
-/**
- * 네비게이션 라우트 정의
- */
 sealed class Screen(val route: String) {
-    // 탭 화면들
     data object Main : Screen("main")
 
-    // 상세 화면들
     data object Create : Screen("create?editingId={editingId}") {
         fun createRoute(editingId: String? = null): String {
             return if (editingId != null) "create?editingId=$editingId" else "create"
@@ -82,9 +77,6 @@ sealed class Screen(val route: String) {
     }
 }
 
-/**
- * 하단 네비게이션 탭 정의
- */
 sealed class BottomNavTab(
     val index: Int,
     val titleResId: Int,
@@ -110,9 +102,6 @@ private val bottomNavTabs = listOf(
     BottomNavTab.PedalBoard
 )
 
-/**
- * 앱 네비게이션 그래프
- */
 @Composable
 fun ToneStoreNavGraph(navController: NavHostController = rememberNavController()) {
     val animationDuration = 300
@@ -121,7 +110,6 @@ fun ToneStoreNavGraph(navController: NavHostController = rememberNavController()
         navController = navController,
         startDestination = Screen.Main.route
     ) {
-        // 메인 탭 화면 (스와이프 가능)
         composable(route = Screen.Main.route) {
             MainTabScreen(
                 onNavigateToCreate = {
@@ -139,7 +127,6 @@ fun ToneStoreNavGraph(navController: NavHostController = rememberNavController()
             )
         }
 
-        // 생성/편집 화면
         composable(
             route = Screen.Create.route,
             arguments = listOf(
@@ -181,7 +168,6 @@ fun ToneStoreNavGraph(navController: NavHostController = rememberNavController()
             )
         }
 
-        // 상세 화면
         composable(
             route = Screen.Detail.route,
             arguments = listOf(
@@ -222,7 +208,6 @@ fun ToneStoreNavGraph(navController: NavHostController = rememberNavController()
             )
         }
 
-        // 페달보드 생성/편집 화면
         composable(
             route = Screen.PedalBoardEdit.route,
             arguments = listOf(
@@ -266,9 +251,6 @@ fun ToneStoreNavGraph(navController: NavHostController = rememberNavController()
     }
 }
 
-/**
- * 메인 탭 화면 (HorizontalPager로 스와이프 지원)
- */
 @Composable
 private fun MainTabScreen(
     onNavigateToCreate: () -> Unit,
@@ -312,9 +294,6 @@ private fun MainTabScreen(
     }
 }
 
-/**
- * 플로팅 하단 네비게이션 바 (2025 트렌드 디자인)
- */
 @Composable
 private fun FloatingBottomNavBar(
     tabs: List<BottomNavTab>,
@@ -359,9 +338,6 @@ private fun FloatingBottomNavBar(
     }
 }
 
-/**
- * 플로팅 네비게이션 아이템 (애니메이션 포함)
- */
 @Composable
 private fun FloatingNavItem(
     tab: BottomNavTab,

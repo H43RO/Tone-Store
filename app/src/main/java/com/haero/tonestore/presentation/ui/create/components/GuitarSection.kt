@@ -36,9 +36,6 @@ import com.haero.tonestore.domain.model.PickupPosition
 import com.haero.tonestore.presentation.ui.components.RotaryKnob
 import com.haero.tonestore.presentation.ui.components.SectionHeader
 
-/**
- * 기타 세팅 섹션 컴포넌트
- */
 @Composable
 fun GuitarSection(
     guitarSetting: GuitarSetting,
@@ -62,7 +59,6 @@ fun GuitarSection(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
-            // 기타 모델명 입력
             if (isEditable) {
                 OutlinedTextField(
                     value = guitarSetting.guitarModel ?: "",
@@ -81,7 +77,6 @@ fun GuitarSection(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // 픽업 셀렉터
             Text(
                 text = stringResource(R.string.pickup_selector),
                 style = MaterialTheme.typography.labelLarge,
@@ -97,7 +92,6 @@ fun GuitarSection(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 톤/볼륨 노브
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -124,10 +118,6 @@ fun GuitarSection(
     }
 }
 
-/**
- * 픽업 셀렉터 컴포넌트
- * 5-way 스위치를 시각적으로 표현
- */
 @Composable
 private fun PickupSelector(
     selectedPosition: PickupPosition,

@@ -58,9 +58,6 @@ import com.haero.tonestore.presentation.viewmodel.PedalBoardViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
-/**
- * 페달보드 생성/편집 화면 (2025 트렌드 디자인)
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PedalBoardScreen(
@@ -107,7 +104,6 @@ fun PedalBoardScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 모던 헤더
             PedalBoardEditHeader(
                 title = if (state.isEditMode) {
                     stringResource(R.string.edit_pedalboard)
@@ -121,7 +117,6 @@ fun PedalBoardScreen(
                 onDeleteClick = { viewModel.handleIntent(PedalBoardIntent.DeletePedalBoard) }
             )
 
-            // 컨텐츠
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -130,7 +125,6 @@ fun PedalBoardScreen(
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // 페달보드 이름 입력
                 OutlinedTextField(
                     value = state.name,
                     onValueChange = { viewModel.handleIntent(PedalBoardIntent.UpdateName(it)) },
@@ -145,7 +139,6 @@ fun PedalBoardScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 레이아웃 크기 설정
                 var columnsText by remember(state.columns) { mutableStateOf(state.columns.toString()) }
                 var rowsText by remember(state.rows) { mutableStateOf(state.rows.toString()) }
 
@@ -202,7 +195,6 @@ fun PedalBoardScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // 페달 개수 표시
                 val pedalCountText = stringResource(R.string.pedal_count, state.pedalCount)
                 val slotsText = stringResource(R.string.slots)
                 Text(
@@ -213,7 +205,6 @@ fun PedalBoardScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // 페달보드 그리드
                 PedalBoardGrid(
                     slots = state.slots,
                     columns = state.columns,
@@ -236,7 +227,6 @@ fun PedalBoardScreen(
         }
     }
 
-    // 페달 편집 바텀 시트
     if (state.editingSlotIndex != null && state.editingPedal != null) {
         PedalEditorBottomSheet(
             pedal = state.editingPedal!!,
@@ -255,7 +245,6 @@ fun PedalBoardScreen(
         )
     }
 
-    // 페달 추가 다이얼로그
     if (showAddPedalDialog && addingToSlotIndex != null) {
         AddPedalDialog(
             presetPedals = state.presetPedals,
@@ -275,7 +264,6 @@ fun PedalBoardScreen(
         )
     }
 
-    // 커스텀 페달 생성 다이얼로그
     if (showCustomPedalDialog && addingToSlotIndex != null) {
         CustomPedalDialog(
             onConfirm = { name, knobs ->
@@ -293,9 +281,6 @@ fun PedalBoardScreen(
     }
 }
 
-/**
- * 페달보드 편집 헤더
- */
 @Composable
 private fun PedalBoardEditHeader(
     title: String,
@@ -313,7 +298,6 @@ private fun PedalBoardEditHeader(
             .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 닫기 버튼
         Surface(
             onClick = onCloseClick,
             shape = CircleShape,
@@ -332,7 +316,6 @@ private fun PedalBoardEditHeader(
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        // 타이틀
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
@@ -341,7 +324,6 @@ private fun PedalBoardEditHeader(
             modifier = Modifier.weight(1f)
         )
 
-        // 삭제 버튼 (편집 모드일 때만)
         if (isEditMode) {
             Surface(
                 onClick = onDeleteClick,
@@ -361,7 +343,6 @@ private fun PedalBoardEditHeader(
             Spacer(modifier = Modifier.width(8.dp))
         }
 
-        // 저장 버튼
         Surface(
             onClick = onSaveClick,
             shape = CircleShape,
@@ -490,4 +471,19 @@ private fun CustomPedalDialog(onConfirm: (name: String, knobs: List<String>) -> 
             }
         }
     )
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun PedalBoardEditHeaderPreview() {
+    com.haero.tonestore.ui.theme.ToneStoreTheme {
+        PedalBoardEditHeader(
+            title = "Create Pedal Board",
+            isSaving = false,
+            isEditMode = false,
+            onCloseClick = {},
+            onSaveClick = {},
+            onDeleteClick = {}
+        )
+    }
 }

@@ -77,9 +77,6 @@ import com.haero.tonestore.presentation.ui.home.components.ToneSettingCard
 import com.haero.tonestore.presentation.viewmodel.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
 
-/**
- * 홈 화면 (2025 트렌드 디자인)
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -124,7 +121,6 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 헤더 영역
             HomeHeader(
                 isSearchActive = state.isSearchActive,
                 searchQuery = state.searchQuery,
@@ -133,7 +129,6 @@ fun HomeScreen(
                 onSearchActiveChange = { viewModel.handleIntent(HomeIntent.SetSearchActive(it)) }
             )
 
-            // 컨텐츠
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
                     state.isLoading -> {
@@ -173,9 +168,6 @@ fun HomeScreen(
     }
 }
 
-/**
- * 홈 헤더 (타이틀 + 검색)
- */
 @Composable
 private fun HomeHeader(
     isSearchActive: Boolean,
@@ -192,7 +184,6 @@ private fun HomeHeader(
             .padding(horizontal = 20.dp)
             .padding(top = 16.dp, bottom = 8.dp)
     ) {
-        // 타이틀 행
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -214,7 +205,6 @@ private fun HomeHeader(
                 }
             }
 
-            // 검색 토글 버튼
             Surface(
                 onClick = { onSearchActiveChange(!isSearchActive) },
                 shape = CircleShape,
@@ -240,7 +230,6 @@ private fun HomeHeader(
             }
         }
 
-        // 검색바
         AnimatedVisibility(
             visible = isSearchActive,
             enter = expandVertically() + fadeIn(),
@@ -317,9 +306,6 @@ private fun HomeHeader(
     }
 }
 
-/**
- * 빈 상태 (데이터 없음)
- */
 @Composable
 private fun EmptyState(modifier: Modifier = Modifier) {
     Column(
@@ -358,9 +344,6 @@ private fun EmptyState(modifier: Modifier = Modifier) {
     }
 }
 
-/**
- * 검색 결과 없음 상태
- */
 @Composable
 private fun EmptySearchState(modifier: Modifier = Modifier) {
     Column(
@@ -462,13 +445,11 @@ private fun ToneSettingList(
             }
         }
 
-        // 하단 여백 (FAB 가림 방지)
         item {
             Spacer(modifier = Modifier.height(80.dp))
         }
     }
 
-    // 삭제 확인 다이얼로그
     showDeleteDialog?.let { id ->
         val toneSetting = toneSettings.find { it.id == id }
         AlertDialog(
@@ -504,9 +485,6 @@ private fun ToneSettingList(
     }
 }
 
-/**
- * 트렌디한 확장 FAB
- */
 @Composable
 private fun TrendyExtendedFab(
     expanded: Boolean,
@@ -561,5 +539,27 @@ private fun TrendyExtendedFab(
                 )
             }
         }
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun HomeHeaderPreview() {
+    com.haero.tonestore.ui.theme.ToneStoreTheme {
+        HomeHeader(
+            isSearchActive = false,
+            searchQuery = "",
+            totalCount = 5,
+            onSearchQueryChange = {},
+            onSearchActiveChange = {}
+        )
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun EmptyStatePreview() {
+    com.haero.tonestore.ui.theme.ToneStoreTheme {
+        EmptyState()
     }
 }

@@ -70,9 +70,6 @@ import com.haero.tonestore.presentation.ui.create.components.TagSection
 import com.haero.tonestore.presentation.viewmodel.CreateToneViewModel
 import org.koin.androidx.compose.koinViewModel
 
-/**
- * 스텝 정의
- */
 private enum class CreateStep(val titleResId: Int) {
     SONG_INFO(R.string.step_song_info),
     PEDAL_BOARD(R.string.step_pedal_board),
@@ -82,9 +79,6 @@ private enum class CreateStep(val titleResId: Int) {
 
 private val steps = CreateStep.entries
 
-/**
- * 톤 세팅 생성/편집 화면 (Stepper 방식)
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateToneScreen(
@@ -96,14 +90,12 @@ fun CreateToneScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var currentStep by remember { mutableIntStateOf(0) }
 
-    // 편집 모드일 경우 데이터 로드
     LaunchedEffect(editingId) {
         editingId?.let {
             viewModel.handleIntent(CreateToneIntent.LoadToneSetting(it))
         }
     }
 
-    // 네비게이션 처리
     LaunchedEffect(state.navigateBack) {
         if (state.navigateBack) {
             onNavigateBack()
@@ -111,7 +103,6 @@ fun CreateToneScreen(
         }
     }
 
-    // 성공 메시지
     val saveSuccessMessage = stringResource(R.string.save_success)
     LaunchedEffect(state.showSaveSuccess) {
         if (state.showSaveSuccess) {
@@ -143,7 +134,6 @@ fun CreateToneScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 모던 헤더
             CreateToneHeader(
                 title = if (state.isEditMode) {
                     stringResource(R.string.edit_tone_setting)
@@ -153,14 +143,12 @@ fun CreateToneScreen(
                 onCloseClick = onNavigateBack
             )
 
-            // 프로그레스 인디케이터
             StepProgressIndicator(
                 currentStep = currentStep,
                 totalSteps = steps.size,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
             )
 
-            // 스텝 컨텐츠
             AnimatedContent(
                 targetState = currentStep,
                 transitionSpec = {
@@ -200,9 +188,6 @@ fun CreateToneScreen(
     }
 }
 
-/**
- * 모던 헤더
- */
 @Composable
 private fun CreateToneHeader(
     title: String,
@@ -216,7 +201,6 @@ private fun CreateToneHeader(
             .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 닫기 버튼
         Surface(
             onClick = onCloseClick,
             shape = CircleShape,
@@ -235,7 +219,6 @@ private fun CreateToneHeader(
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        // 타이틀
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
@@ -245,9 +228,6 @@ private fun CreateToneHeader(
     }
 }
 
-/**
- * 스텝 프로그레스 인디케이터
- */
 @Composable
 private fun StepProgressIndicator(
     currentStep: Int,
@@ -261,7 +241,6 @@ private fun StepProgressIndicator(
     )
 
     Column(modifier = modifier.fillMaxWidth()) {
-        // 스텝 라벨
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -281,7 +260,6 @@ private fun StepProgressIndicator(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // 프로그레스 바
         LinearProgressIndicator(
             progress = { progress },
             modifier = Modifier
@@ -295,7 +273,6 @@ private fun StepProgressIndicator(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // 스텝 도트
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -311,9 +288,6 @@ private fun StepProgressIndicator(
     }
 }
 
-/**
- * 스텝 도트
- */
 @Composable
 private fun StepDot(
     label: String,
@@ -368,9 +342,6 @@ private fun StepDot(
     }
 }
 
-/**
- * 하단 네비게이션 바
- */
 @Composable
 private fun StepperBottomBar(
     currentStep: Int,
@@ -394,7 +365,6 @@ private fun StepperBottomBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 이전 버튼
             AnimatedVisibility(visible = !isFirstStep) {
                 StepperButton(
                     text = stringResource(R.string.previous),
@@ -408,7 +378,6 @@ private fun StepperBottomBar(
                 Spacer(modifier = Modifier.width(1.dp))
             }
 
-            // 다음/저장 버튼
             if (isLastStep) {
                 StepperButton(
                     text = stringResource(R.string.save),
@@ -431,9 +400,6 @@ private fun StepperBottomBar(
     }
 }
 
-/**
- * 스테퍼 버튼
- */
 @Composable
 private fun StepperButton(
     text: String,
@@ -506,11 +472,6 @@ private fun StepperButton(
     }
 }
 
-// region Step Contents
-
-/**
- * 곡 정보 스텝 컨텐츠
- */
 @Composable
 private fun SongInfoStepContent(
     songName: String,
@@ -526,7 +487,6 @@ private fun SongInfoStepContent(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 곡 이름 입력
         OutlinedTextField(
             value = songName,
             onValueChange = onSongNameChange,
@@ -543,7 +503,6 @@ private fun SongInfoStepContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 태그 섹션
         TagSection(
             selectedTags = selectedTags,
             onTagToggle = onTagToggle
@@ -553,9 +512,6 @@ private fun SongInfoStepContent(
     }
 }
 
-/**
- * 페달보드 스텝 컨텐츠
- */
 @Composable
 private fun PedalBoardStepContent(
     state: CreateToneState,
@@ -593,9 +549,6 @@ private fun PedalBoardStepContent(
     }
 }
 
-/**
- * 앰프 스텝 컨텐츠
- */
 @Composable
 private fun AmpStepContent(
     state: CreateToneState,
@@ -617,9 +570,6 @@ private fun AmpStepContent(
     }
 }
 
-/**
- * 기타 스텝 컨텐츠
- */
 @Composable
 private fun GuitarStepContent(
     state: CreateToneState,
@@ -641,4 +591,24 @@ private fun GuitarStepContent(
     }
 }
 
-// endregion
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun CreateToneHeaderPreview() {
+    com.haero.tonestore.ui.theme.ToneStoreTheme {
+        CreateToneHeader(
+            title = "Create Tone Setting",
+            onCloseClick = {}
+        )
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun StepProgressIndicatorPreview() {
+    com.haero.tonestore.ui.theme.ToneStoreTheme {
+        StepProgressIndicator(
+            currentStep = 1,
+            totalSteps = 4
+        )
+    }
+}

@@ -35,11 +35,6 @@ import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.presentation.ui.components.RotaryKnob
 
-/**
- * 페달 편집 바텀 시트
- * 페달보드 템플릿에서는 노브 확인, 색상 변경, 삭제 가능
- * (노브 값/ON-OFF는 곡별 설정에서 조절)
- */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun PedalEditorBottomSheet(
@@ -63,7 +58,6 @@ fun PedalEditorBottomSheet(
                 .padding(bottom = 32.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            // 헤더: 페달 이름 + 닫기 버튼
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -81,7 +75,6 @@ fun PedalEditorBottomSheet(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 슬롯 위치 표시
             Text(
                 text = "슬롯 ${slotIndex + 1}",
                 style = MaterialTheme.typography.bodyMedium,
@@ -90,7 +83,6 @@ fun PedalEditorBottomSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 노브 UI (읽기 전용 - 라벨 포함)
             if (pedal.knobs.isNotEmpty()) {
                 Text(
                     text = stringResource(R.string.knobs),
@@ -119,7 +111,6 @@ fun PedalEditorBottomSheet(
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-            // 색상 선택
             PedalColorPicker(
                 selectedColor = pedal.color,
                 onColorSelected = onColorChange,
@@ -128,7 +119,6 @@ fun PedalEditorBottomSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 삭제 버튼
             Button(
                 onClick = onRemove,
                 modifier = Modifier.fillMaxWidth(),

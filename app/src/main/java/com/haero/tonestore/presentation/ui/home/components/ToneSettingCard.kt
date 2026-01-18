@@ -43,9 +43,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/**
- * 톤 세팅 카드 컴포넌트 (2025 트렌드 디자인)
- */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ToneSettingCard(
@@ -83,7 +80,6 @@ fun ToneSettingCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.Top
         ) {
-            // 아이콘 영역
             Box(
                 modifier = Modifier
                     .size(52.dp)
@@ -101,9 +97,7 @@ fun ToneSettingCard(
 
             Spacer(modifier = Modifier.width(14.dp))
 
-            // 정보 영역
             Column(modifier = Modifier.weight(1f)) {
-                // 제목
                 Text(
                     text = toneSetting.songName,
                     style = MaterialTheme.typography.titleMedium,
@@ -115,7 +109,6 @@ fun ToneSettingCard(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // 메타 정보
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -127,7 +120,6 @@ fun ToneSettingCard(
                     }
                 }
 
-                // 태그
                 if (toneSetting.tags.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(10.dp))
                     FlowRow(
@@ -153,7 +145,6 @@ fun ToneSettingCard(
                 }
             }
 
-            // 즐겨찾기 버튼
             IconButton(
                 onClick = onFavoriteClick,
                 modifier = Modifier.size(40.dp)
@@ -173,9 +164,6 @@ fun ToneSettingCard(
     }
 }
 
-/**
- * 메타 정보 칩
- */
 @Composable
 private fun MetaChip(
     text: String,
@@ -190,9 +178,6 @@ private fun MetaChip(
     )
 }
 
-/**
- * 태그 칩
- */
 @Composable
 private fun TagChip(
     text: String,

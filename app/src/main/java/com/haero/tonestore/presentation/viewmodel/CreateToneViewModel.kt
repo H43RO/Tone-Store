@@ -22,9 +22,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * Create/Edit 화면의 ViewModel (MVI 패턴)
- */
 class CreateToneViewModel(
     private val getToneSettingByIdUseCase: GetToneSettingByIdUseCase,
     private val saveToneSettingUseCase: SaveToneSettingUseCase,
@@ -219,7 +216,6 @@ class CreateToneViewModel(
     private fun saveToneSetting() {
         val currentState = _state.value
 
-        // Validation
         if (currentState.songName.isBlank()) {
             _state.update { it.copy(songNameError = "곡 이름을 입력해주세요") }
             return

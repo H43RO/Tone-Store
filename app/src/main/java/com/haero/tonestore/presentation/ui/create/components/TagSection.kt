@@ -26,9 +26,6 @@ import com.haero.tonestore.domain.model.GenreTag
 import com.haero.tonestore.presentation.ui.components.SectionHeader
 import java.util.Locale
 
-/**
- * 장르 태그 선택 섹션 컴포넌트
- */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TagSection(selectedTags: List<GenreTag>, onTagToggle: (GenreTag) -> Unit, modifier: Modifier = Modifier) {

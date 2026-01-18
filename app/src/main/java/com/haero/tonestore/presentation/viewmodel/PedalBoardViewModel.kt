@@ -19,9 +19,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * 페달보드 관리 화면의 ViewModel (MVI 패턴)
- */
 class PedalBoardViewModel(
     private val getSavedPedalBoardByIdUseCase: GetSavedPedalBoardByIdUseCase,
     private val savePedalBoardUseCase: SavePedalBoardUseCase,
@@ -107,12 +104,9 @@ class PedalBoardViewModel(
         val newTotalSlots = newColumns * newRows
         val currentSlots = _state.value.slots
 
-        // 새로운 슬롯 크기에 맞게 조정
         val newSlots = if (newTotalSlots >= currentSlots.size) {
-            // 크기가 늘어나면 기존 슬롯 유지 + 빈 슬롯 추가
             currentSlots + List(newTotalSlots - currentSlots.size) { null }
         } else {
-            // 크기가 줄어들면 앞에서부터 유지 (뒤의 페달들은 잘림)
             currentSlots.take(newTotalSlots)
         }
 
@@ -171,7 +165,6 @@ class PedalBoardViewModel(
         updatedSlots[fromIndex] = updatedSlots[toIndex]
         updatedSlots[toIndex] = temp
 
-        // order 업데이트
         updatedSlots[fromIndex] = updatedSlots[fromIndex]?.copy(order = fromIndex)
         updatedSlots[toIndex] = updatedSlots[toIndex]?.copy(order = toIndex)
 
@@ -186,13 +179,11 @@ class PedalBoardViewModel(
         val updatedSlots = _state.value.slots.toMutableList()
         val pedal = updatedSlots[fromIndex] ?: return
 
-        // 대상 슬롯이 비어있을 때만 이동
         if (updatedSlots[toIndex] == null) {
             updatedSlots[fromIndex] = null
             updatedSlots[toIndex] = pedal.copy(order = toIndex)
             _state.update { it.copy(slots = updatedSlots) }
         } else {
-            // 비어있지 않으면 스왑
             swapSlots(fromIndex, toIndex)
         }
     }
@@ -242,7 +233,6 @@ class PedalBoardViewModel(
     private fun savePedalBoard() {
         val currentState = _state.value
 
-        // Validation
         if (currentState.name.isBlank()) {
             _state.update { it.copy(nameError = "페달보드 이름을 입력해주세요") }
             return

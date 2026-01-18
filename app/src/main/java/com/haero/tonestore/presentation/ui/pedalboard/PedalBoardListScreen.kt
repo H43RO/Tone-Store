@@ -64,9 +64,6 @@ import com.haero.tonestore.domain.model.SavedPedalBoard
 import com.haero.tonestore.presentation.viewmodel.PedalBoardListViewModel
 import org.koin.androidx.compose.koinViewModel
 
-/**
- * 페달보드 목록 화면 (2025 트렌드 디자인)
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PedalBoardListScreen(
@@ -100,12 +97,10 @@ fun PedalBoardListScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 헤더
             PedalBoardHeader(
                 totalCount = state.pedalBoards.size
             )
 
-            // 컨텐츠
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
                     state.isLoading -> {
@@ -135,7 +130,6 @@ fun PedalBoardListScreen(
         }
     }
 
-    // 삭제 확인 다이얼로그
     if (showDeleteDialog && pedalBoardToDelete != null) {
         AlertDialog(
             onDismissRequest = {
@@ -179,9 +173,6 @@ fun PedalBoardListScreen(
     }
 }
 
-/**
- * 페달보드 헤더
- */
 @Composable
 private fun PedalBoardHeader(
     totalCount: Int,
@@ -210,9 +201,6 @@ private fun PedalBoardHeader(
     }
 }
 
-/**
- * 빈 상태
- */
 @Composable
 private fun EmptyPedalBoardState(modifier: Modifier = Modifier) {
     Column(
@@ -251,9 +239,6 @@ private fun EmptyPedalBoardState(modifier: Modifier = Modifier) {
     }
 }
 
-/**
- * 페달보드 목록
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PedalBoardList(
@@ -314,16 +299,12 @@ private fun PedalBoardList(
             }
         }
 
-        // 하단 여백
         item {
             Spacer(modifier = Modifier.height(80.dp))
         }
     }
 }
 
-/**
- * 페달보드 카드
- */
 @Composable
 private fun PedalBoardCard(
     pedalBoard: SavedPedalBoard,
@@ -347,7 +328,6 @@ private fun PedalBoardCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 아이콘 영역
             Box(
                 modifier = Modifier
                     .size(52.dp)
@@ -365,7 +345,6 @@ private fun PedalBoardCard(
 
             Spacer(modifier = Modifier.width(14.dp))
 
-            // 정보 영역
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = pedalBoard.name,
@@ -392,9 +371,6 @@ private fun PedalBoardCard(
     }
 }
 
-/**
- * 메타 정보 칩
- */
 @Composable
 private fun MetaChip(
     text: String,
@@ -409,9 +385,6 @@ private fun MetaChip(
     )
 }
 
-/**
- * 트렌디한 확장 FAB
- */
 @Composable
 private fun TrendyExtendedFab(
     expanded: Boolean,
@@ -466,5 +439,21 @@ private fun TrendyExtendedFab(
                 )
             }
         }
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun PedalBoardHeaderPreview() {
+    com.haero.tonestore.ui.theme.ToneStoreTheme {
+        PedalBoardHeader(totalCount = 3)
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun EmptyPedalBoardStatePreview() {
+    com.haero.tonestore.ui.theme.ToneStoreTheme {
+        EmptyPedalBoardState()
     }
 }

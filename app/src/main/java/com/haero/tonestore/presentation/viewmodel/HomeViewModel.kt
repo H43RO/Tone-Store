@@ -15,9 +15,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * Home 화면의 ViewModel (MVI 패턴)
- */
 class HomeViewModel(
     private val getAllToneSettingsUseCase: GetAllToneSettingsUseCase,
     private val deleteToneSettingUseCase: DeleteToneSettingUseCase,
@@ -66,7 +63,6 @@ class HomeViewModel(
     private fun setSearchActive(isActive: Boolean) {
         _state.update { state ->
             if (isActive.not()) {
-                // 검색 비활성화 시 검색어 초기화
                 state.copy(
                     isSearchActive = false,
                     searchQuery = "",

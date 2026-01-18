@@ -37,16 +37,6 @@ import com.haero.tonestore.domain.model.PedalType
 import com.haero.tonestore.presentation.ui.components.PedalColorUtils
 import com.haero.tonestore.presentation.ui.components.RotaryKnob
 
-/**
- * 이펙터 페달 카드 컴포넌트
- * 실제 이펙터 페달의 디자인을 모방
- *
- * @param pedal 페달 데이터
- * @param onKnobChange 노브 값 변경 콜백
- * @param onToggleEnabled 페달 활성화 토글 콜백
- * @param onRemove 페달 삭제 콜백
- * @param isEditable 편집 가능 여부 (상세 보기에서는 false)
- */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PedalCard(
@@ -57,7 +47,6 @@ fun PedalCard(
     modifier: Modifier = Modifier,
     isEditable: Boolean = true
 ) {
-    // 사용자 지정 색상이 있으면 사용, 없으면 타입에 따른 기본 색상
     val backgroundColor = if (pedal.color != null) {
         Color(pedal.color)
     } else {
@@ -67,14 +56,12 @@ fun PedalCard(
         }
     }
 
-    // 비활성화 시 색상 조정
     val adjustedBackgroundColor = if (pedal.isEnabled) {
         backgroundColor
     } else {
         backgroundColor.copy(alpha = 0.5f)
     }
 
-    // 배경색 밝기에 따라 텍스트 색상 결정
     val isLightBackground = PedalColorUtils.isLightColor(pedal.color)
     val contentColor = if (pedal.color != null) {
         if (isLightBackground) Color.Black else Color.White
@@ -82,14 +69,12 @@ fun PedalCard(
         MaterialTheme.colorScheme.onSurface
     }
 
-    // 비활성화 시 콘텐츠 색상 조정
     val adjustedContentColor = if (pedal.isEnabled) {
         contentColor
     } else {
         contentColor.copy(alpha = 0.5f)
     }
 
-    // 입체감을 위한 Border 색상 계산
     val borderColor = if (pedal.isEnabled) {
         PedalColorUtils.calculateBorderColor(backgroundColor)
     } else {
@@ -109,7 +94,6 @@ fun PedalCard(
                 .padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 상단: 페달 이름 + 삭제 버튼
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -143,7 +127,6 @@ fun PedalCard(
 
             Spacer(Modifier.height(16.dp))
 
-            // 노브들
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -167,9 +150,7 @@ fun PedalCard(
                 }
             }
 
-            // 전원 버튼 (Footswitch)
             if (isEditable) {
-                // 전원 버튼: ON일 때는 배경색의 Border 색상 사용, OFF일 때는 투명하게
                 val powerButtonColor = if (pedal.isEnabled) {
                     PedalColorUtils.calculateBorderColor(backgroundColor)
                 } else {

@@ -48,17 +48,11 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.haero.tonestore.R
 
-/**
- * 페달 색상을 나타내는 프리셋
- */
 data class PedalColorPreset(
     val name: String,
     val color: Long
 )
 
-/**
- * 프리셋 색상 목록
- */
 val presetColors = listOf(
     PedalColorPreset("Red", 0xFFE53935),
     PedalColorPreset("Orange", 0xFFFF9800),
@@ -77,9 +71,6 @@ val presetColors = listOf(
     PedalColorPreset("White", 0xFFFAFAFA)
 )
 
-/**
- * 페달 색상 선택 UI
- */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PedalColorPicker(
@@ -102,20 +93,17 @@ fun PedalColorPicker(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // 프리셋 색상 그리드
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // 기본 색상 (색상 없음) 옵션
             ColorCircle(
                 color = null,
                 isSelected = selectedColor == null,
                 onClick = { onColorSelected(null) }
             )
 
-            // 프리셋 색상들
             presetColors.forEach { preset ->
                 ColorCircle(
                     color = preset.color,
@@ -124,7 +112,6 @@ fun PedalColorPicker(
                 )
             }
 
-            // 커스텀 색상 버튼
             CustomColorButton(
                 currentColor = selectedColor,
                 onClick = { showCustomColorDialog = true }
@@ -132,7 +119,6 @@ fun PedalColorPicker(
         }
     }
 
-    // 커스텀 색상 다이얼로그
     if (showCustomColorDialog) {
         CustomColorDialog(
             initialColor = selectedColor,
@@ -145,9 +131,6 @@ fun PedalColorPicker(
     }
 }
 
-/**
- * 색상 원 컴포넌트
- */
 @Composable
 private fun ColorCircle(
     color: Long?,
@@ -183,7 +166,6 @@ private fun ColorCircle(
                 modifier = Modifier.size(20.dp)
             )
         }
-        // 기본 색상 표시 (색상 없음)
         if (color == null && !isSelected) {
             Text(
                 text = "–",
@@ -194,9 +176,6 @@ private fun ColorCircle(
     }
 }
 
-/**
- * 커스텀 색상 버튼
- */
 @Composable
 private fun CustomColorButton(
     currentColor: Long?,
@@ -252,16 +231,12 @@ private fun CustomColorButton(
     }
 }
 
-/**
- * 커스텀 색상 선택 다이얼로그 - 컬러 팔레트 형태
- */
 @Composable
 private fun CustomColorDialog(
     initialColor: Long?,
     onConfirm: (Long) -> Unit,
     onDismiss: () -> Unit
 ) {
-    // 초기 색상에서 HSV 추출
     val initial = initialColor ?: 0xFF2196F3
     val initialHsv = remember {
         val r = ((initial shr 16) and 0xFF).toFloat() / 255f
@@ -285,7 +260,6 @@ private fun CustomColorDialog(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // 색상 미리보기
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -296,7 +270,6 @@ private fun CustomColorDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 컬러 팔레트 (Saturation x Value)
                 ColorPalette(
                     hue = hue,
                     saturation = saturation,
@@ -312,7 +285,6 @@ private fun CustomColorDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Hue 슬라이더 (색상환)
                 HueSlider(
                     hue = hue,
                     onHueChange = { hue = it },
@@ -335,9 +307,6 @@ private fun CustomColorDialog(
     )
 }
 
-/**
- * 컬러 팔레트 (Saturation x Value 2D 선택)
- */
 @Composable
 private fun ColorPalette(
     hue: Float,
@@ -369,33 +338,28 @@ private fun ColorPalette(
             }
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            // 배경: 흰색 -> 색상 (가로 그라데이션)
             val pureColor = Color.hsv(hue, 1f, 1f)
             drawRect(
                 brush = Brush.horizontalGradient(
                     colors = listOf(Color.White, pureColor)
                 )
             )
-            // 오버레이: 투명 -> 검정 (세로 그라데이션)
             drawRect(
                 brush = Brush.verticalGradient(
                     colors = listOf(Color.Transparent, Color.Black)
                 )
             )
 
-            // 선택 포인터
             val pointerX = saturation * this.size.width
             val pointerY = (1f - value) * this.size.height
             val pointerRadius = 10.dp.toPx()
 
-            // 외곽선 (흰색)
             drawCircle(
                 color = Color.White,
                 radius = pointerRadius + 2.dp.toPx(),
                 center = Offset(pointerX, pointerY),
                 style = Stroke(width = 3.dp.toPx())
             )
-            // 내부 원
             drawCircle(
                 color = Color.hsv(hue, saturation, value),
                 radius = pointerRadius,
@@ -405,9 +369,6 @@ private fun ColorPalette(
     }
 }
 
-/**
- * Hue 슬라이더 (색상환)
- */
 @Composable
 private fun HueSlider(
     hue: Float,
@@ -435,17 +396,14 @@ private fun HueSlider(
             }
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            // 색상환 그라데이션
             val hueColors = (0..360 step 30).map { Color.hsv(it.toFloat(), 1f, 1f) }
             drawRect(
                 brush = Brush.horizontalGradient(colors = hueColors)
             )
 
-            // 선택 포인터
             val pointerX = (hue / 360f) * this.size.width
             val pointerHeight = this.size.height
 
-            // 포인터 (세로 막대)
             drawRoundRect(
                 color = Color.White,
                 topLeft = Offset(pointerX - 6.dp.toPx(), 0f),
@@ -457,9 +415,6 @@ private fun HueSlider(
     }
 }
 
-/**
- * RGB to HSV 변환
- */
 private fun rgbToHsv(r: Float, g: Float, b: Float): FloatArray {
     val max = maxOf(r, g, b)
     val min = minOf(r, g, b)
@@ -478,9 +433,6 @@ private fun rgbToHsv(r: Float, g: Float, b: Float): FloatArray {
     return floatArrayOf(h, s, v)
 }
 
-/**
- * HSV to Color (Long) 변환
- */
 private fun hsvToColor(h: Float, s: Float, v: Float): Long {
     val c = v * s
     val x = c * (1 - kotlin.math.abs((h / 60f) % 2 - 1))
@@ -502,15 +454,11 @@ private fun hsvToColor(h: Float, s: Float, v: Float): Long {
     return (0xFFL shl 24) or (red.toLong() shl 16) or (green.toLong() shl 8) or blue.toLong()
 }
 
-/**
- * 밝은 색상인지 판단 (텍스트 색상 결정용)
- */
 private fun isLightColor(color: Long?): Boolean {
     if (color == null) return true
     val r = ((color shr 16) and 0xFF).toFloat()
     val g = ((color shr 8) and 0xFF).toFloat()
     val b = (color and 0xFF).toFloat()
-    // 상대 휘도 계산
     val luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
     return luminance > 0.5
 }

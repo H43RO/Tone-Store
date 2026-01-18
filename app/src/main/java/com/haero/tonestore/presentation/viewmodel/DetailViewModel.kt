@@ -12,9 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * Detail 화면의 ViewModel (MVI 패턴)
- */
 class DetailViewModel(
     private val getToneSettingByIdUseCase: GetToneSettingByIdUseCase,
     private val deleteToneSettingUseCase: DeleteToneSettingUseCase

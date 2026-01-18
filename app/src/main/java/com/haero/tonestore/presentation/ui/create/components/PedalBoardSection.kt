@@ -38,9 +38,6 @@ import com.haero.tonestore.domain.model.PedalBoard
 import com.haero.tonestore.domain.model.SavedPedalBoard
 import com.haero.tonestore.presentation.ui.components.SectionHeader
 
-/**
- * 페달보드 섹션 컴포넌트
- */
 @Composable
 fun PedalBoardSection(
     pedalBoard: PedalBoard,
@@ -71,7 +68,6 @@ fun PedalBoardSection(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
-            // 페달보드 (가로 스크롤)
             if (pedalBoard.pedals.isNotEmpty()) {
                 Row(
                     modifier = Modifier
@@ -101,11 +97,9 @@ fun PedalBoardSection(
                 )
             }
 
-            // 이펙터 추가 버튼들
             if (isEditable) {
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // 저장된 페달보드 불러오기 버튼
                 if (savedPedalBoards.isNotEmpty()) {
                     OutlinedButton(
                         onClick = { showSavedPedalBoardDialog = true },
@@ -146,7 +140,6 @@ fun PedalBoardSection(
         }
     }
 
-    // 프리셋 페달 선택 다이얼로그
     if (showPresetDialog) {
         PresetPedalDialog(
             presetPedals = presetPedals,
@@ -158,7 +151,6 @@ fun PedalBoardSection(
         )
     }
 
-    // 커스텀 페달 생성 다이얼로그
     if (showCustomDialog) {
         CustomPedalDialog(
             onConfirm = { name, knobs ->
@@ -169,7 +161,6 @@ fun PedalBoardSection(
         )
     }
 
-    // 저장된 페달보드 선택 다이얼로그
     if (showSavedPedalBoardDialog) {
         SavedPedalBoardDialog(
             savedPedalBoards = savedPedalBoards,

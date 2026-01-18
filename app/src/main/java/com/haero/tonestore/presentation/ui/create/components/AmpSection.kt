@@ -28,10 +28,6 @@ import com.haero.tonestore.domain.model.AmpSetting
 import com.haero.tonestore.presentation.ui.components.RotaryKnob
 import com.haero.tonestore.presentation.ui.components.SectionHeader
 
-/**
- * 앰프 세팅 섹션 컴포넌트
- * 실제 앰프 헤드의 노브 배치를 모방
- */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AmpSection(
@@ -54,7 +50,6 @@ fun AmpSection(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
-            // 앰프 모델명 입력
             if (isEditable) {
                 OutlinedTextField(
                     value = ampSetting.ampModel ?: "",
@@ -73,7 +68,6 @@ fun AmpSection(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // 앰프 노브 패널 (앰프 헤드 스타일)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -86,7 +80,6 @@ fun AmpSection(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Gain
                     RotaryKnob(
                         value = ampSetting.gain,
                         onValueChange = { if (isEditable) onKnobChange("gain", it) },
@@ -95,7 +88,6 @@ fun AmpSection(
                         enabled = isEditable
                     )
 
-                    // Bass
                     RotaryKnob(
                         value = ampSetting.bass,
                         onValueChange = { if (isEditable) onKnobChange("bass", it) },
@@ -104,7 +96,6 @@ fun AmpSection(
                         enabled = isEditable
                     )
 
-                    // Middle
                     RotaryKnob(
                         value = ampSetting.middle,
                         onValueChange = { if (isEditable) onKnobChange("middle", it) },
@@ -113,7 +104,6 @@ fun AmpSection(
                         enabled = isEditable
                     )
 
-                    // Treble
                     RotaryKnob(
                         value = ampSetting.treble,
                         onValueChange = { if (isEditable) onKnobChange("treble", it) },
@@ -122,7 +112,6 @@ fun AmpSection(
                         enabled = isEditable
                     )
 
-                    // Presence
                     RotaryKnob(
                         value = ampSetting.presence,
                         onValueChange = { if (isEditable) onKnobChange("presence", it) },
@@ -131,7 +120,6 @@ fun AmpSection(
                         enabled = isEditable
                     )
 
-                    // Reverb
                     RotaryKnob(
                         value = ampSetting.reverb,
                         onValueChange = { if (isEditable) onKnobChange("reverb", it) },
@@ -140,7 +128,6 @@ fun AmpSection(
                         enabled = isEditable
                     )
 
-                    // Master Volume
                     RotaryKnob(
                         value = ampSetting.masterVolume,
                         onValueChange = { if (isEditable) onKnobChange("masterVolume", it) },

@@ -41,9 +41,6 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
-/**
- * 페달보드 그리드의 슬롯 컴포넌트
- */
 @Composable
 fun PedalSlot(
     index: Int,
@@ -131,13 +128,9 @@ fun PedalSlot(
     }
 }
 
-/**
- * 미니 페달 카드
- */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
-    // 사용자 지정 색상이 있으면 사용, 없으면 타입에 따른 기본 색상
     val backgroundColor = if (pedal.color != null) {
         Color(pedal.color)
     } else {
@@ -147,7 +140,6 @@ private fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
         }
     }
 
-    // 배경색 밝기에 따라 텍스트/노브 색상 결정
     val isLightBackground = PedalColorUtils.isLightColor(pedal.color)
     val contentColor = if (pedal.color != null) {
         if (isLightBackground) Color.Black else Color.White
@@ -155,7 +147,6 @@ private fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
         MaterialTheme.colorScheme.onSurface
     }
 
-    // 입체감을 위한 Border 색상 계산
     val borderColor = PedalColorUtils.calculateBorderColor(backgroundColor)
 
     Column(
@@ -166,7 +157,6 @@ private fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // 페달 이름 (최대 2줄)
         Text(
             text = pedal.name,
             style = MaterialTheme.typography.labelMedium,
@@ -179,7 +169,6 @@ private fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // 노브 UI
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
@@ -194,9 +183,6 @@ private fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
     }
 }
 
-/**
- * 노브 표시용 UI (검정 노브, 흰색 포인터 - 실제 이펙터 페달처럼)
- */
 @Composable
 private fun MiniKnobIndicator(
     size: Dp = 18.dp
@@ -205,7 +191,6 @@ private fun MiniKnobIndicator(
     val trackColor = Color.Black.copy(alpha = 0.3f)
     val indicatorColor = Color.White
 
-    // 기본값 5.0 (중간)으로 표시
     val normalizedValue = 0.5f
     val startAngle = -90f
     val sweepAngle = 300f
@@ -236,14 +221,12 @@ private fun MiniKnobIndicator(
             size = androidx.compose.ui.geometry.Size(radius * 2f, radius * 2f)
         )
 
-        // 중앙 원 (노브 몸체)
         drawCircle(
             color = knobColor,
             radius = radius * 0.6f,
             center = center
         )
 
-        // 포인터
         val pointerAngle = currentAngle * (PI.toFloat() / 180f)
         val pointerLength = radius * 0.4f
         val pointerStart = Offset(
