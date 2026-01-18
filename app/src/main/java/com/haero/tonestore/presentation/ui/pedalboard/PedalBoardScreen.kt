@@ -262,10 +262,6 @@ fun PedalBoardScreen(
 
     // 페달 편집 바텀 시트
     if (state.editingSlotIndex != null && state.editingPedal != null) {
-        val availableSlots = state.slots.take(state.totalSlots).mapIndexedNotNull { index, pedal ->
-            if (pedal == null && index != state.editingSlotIndex) index else null
-        }
-
         PedalEditorBottomSheet(
             pedal = state.editingPedal!!,
             slotIndex = state.editingSlotIndex!!,
@@ -275,18 +271,11 @@ fun PedalBoardScreen(
                 viewModel.handleIntent(PedalBoardIntent.RemovePedalFromSlot(state.editingSlotIndex!!))
                 scope.launch { sheetState.hide() }
             },
-            onMoveToSlot = { toIndex ->
-                viewModel.handleIntent(
-                    PedalBoardIntent.MovePedalToSlot(state.editingSlotIndex!!, toIndex)
-                )
-                viewModel.handleIntent(PedalBoardIntent.ClosePedalEditor)
-            },
             onColorChange = { color ->
                 viewModel.handleIntent(
                     PedalBoardIntent.UpdatePedalColor(state.editingSlotIndex!!, color)
                 )
-            },
-            availableSlots = availableSlots
+            }
         )
     }
 

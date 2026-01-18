@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -24,7 +23,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,7 +37,7 @@ import com.haero.tonestore.presentation.ui.components.RotaryKnob
 
 /**
  * 페달 편집 바텀 시트
- * 페달보드 템플릿에서는 노브 확인, 슬롯 이동, 삭제만 가능
+ * 페달보드 템플릿에서는 노브 확인, 색상 변경, 삭제 가능
  * (노브 값/ON-OFF는 곡별 설정에서 조절)
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -50,9 +48,7 @@ fun PedalEditorBottomSheet(
     sheetState: SheetState,
     onDismiss: () -> Unit,
     onRemove: () -> Unit,
-    onMoveToSlot: (toIndex: Int) -> Unit,
     onColorChange: (Long?) -> Unit,
-    availableSlots: List<Int>,
     modifier: Modifier = Modifier
 ) {
     ModalBottomSheet(
@@ -130,36 +126,6 @@ fun PedalEditorBottomSheet(
             )
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            // 이동 가능한 슬롯이 있으면 표시
-            if (availableSlots.isNotEmpty()) {
-                Text(
-                    text = "다른 슬롯으로 이동",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    availableSlots.forEach { targetSlot ->
-                        OutlinedButton(
-                            onClick = { onMoveToSlot(targetSlot) },
-                            modifier = Modifier.size(48.dp),
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
-                        ) {
-                            Text("${targetSlot + 1}")
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-            }
 
             // 삭제 버튼
             Button(

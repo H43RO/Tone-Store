@@ -137,19 +137,26 @@ fun PedalSlot(
 @Composable
 private fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
     // 사용자 지정 색상이 있으면 사용, 없으면 타입에 따른 기본 색상
-    val borderColor = if (pedal.color != null) {
+    val backgroundColor = if (pedal.color != null) {
         Color(pedal.color)
     } else {
         when (pedal.type) {
-            PedalType.PRESET -> MaterialTheme.colorScheme.primary
-            else -> MaterialTheme.colorScheme.secondary
+            PedalType.PRESET -> MaterialTheme.colorScheme.primaryContainer
+            else -> MaterialTheme.colorScheme.secondaryContainer
         }
+    }
+
+    // 배경색 밝기에 따라 텍스트/노브 색상 결정
+    val isLightBackground = isLightColor(pedal.color)
+    val contentColor = if (pedal.color != null) {
+        if (isLightBackground) Color.Black else Color.White
+    } else {
+        MaterialTheme.colorScheme.onSurface
     }
 
     Column(
         modifier = modifier
-            .border(2.dp, borderColor, RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
+            .background(backgroundColor, RoundedCornerShape(8.dp))
             .padding(horizontal = 8.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
@@ -159,7 +166,7 @@ private fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
             text = pedal.name,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = contentColor,
             textAlign = TextAlign.Center,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
@@ -176,21 +183,40 @@ private fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             pedal.knobs.forEach { _ ->
-                MiniKnobIndicator()
+                MiniKnobIndicator(contentColor = contentColor)
             }
         }
     }
 }
 
 /**
+ * 밝은 색상인지 판단 (텍스트 색상 결정용)
+ */
+private fun isLightColor(color: Long?): Boolean {
+    if (color == null) return true
+    val r = ((color shr 16) and 0xFF).toFloat()
+    val g = ((color shr 8) and 0xFF).toFloat()
+    val b = (color and 0xFF).toFloat()
+    // 상대 휘도 계산
+    val luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    return luminance > 0.5
+}
+
+/**
  * 노브 표시용 UI
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun MiniKnobIndicator(size: Dp = 18.dp) {
-    val knobColor = MaterialTheme.colorScheme.primary
-    val trackColor = MaterialTheme.colorScheme.surfaceVariant
-    val indicatorColor = MaterialTheme.colorScheme.onPrimary
+private fun MiniKnobIndicator(
+    size: Dp = 18.dp,
+    contentColor: Color = MaterialTheme.colorScheme.primary
+) {
+    val knobColor = contentColor
+    val trackColor = contentColor.copy(alpha = 0.3f)
+    val indicatorColor = if (isLightColor(contentColor.value.toLong() or (0xFFL shl 56))) {
+        Color.White
+    } else {
+        Color.Black
+    }
 
     // 기본값 5.0 (중간)으로 표시
     val normalizedValue = 0.5f
