@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material3.Icon
@@ -49,6 +50,7 @@ fun ToneSettingCard(
     toneSetting: ToneSetting,
     onClick: () -> Unit,
     onFavoriteClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val dateFormat = SimpleDateFormat("MM.dd", Locale.getDefault())
@@ -157,6 +159,18 @@ fun ToneSettingCard(
                     },
                     contentDescription = stringResource(R.string.favorite),
                     tint = favoriteColor,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+
+            IconButton(
+                onClick = onDeleteClick,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.DeleteOutline,
+                    contentDescription = stringResource(R.string.delete),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                     modifier = Modifier.size(22.dp)
                 )
             }

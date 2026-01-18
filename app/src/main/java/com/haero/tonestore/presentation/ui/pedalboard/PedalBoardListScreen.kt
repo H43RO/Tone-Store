@@ -1,6 +1,5 @@
 package com.haero.tonestore.presentation.ui.pedalboard
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -25,21 +24,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -51,7 +48,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -239,7 +235,6 @@ private fun EmptyPedalBoardState(modifier: Modifier = Modifier) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PedalBoardList(
     pedalBoards: List<SavedPedalBoard>,
@@ -256,47 +251,11 @@ private fun PedalBoardList(
             items = pedalBoards,
             key = { it.id }
         ) { pedalBoard ->
-            val dismissState = rememberSwipeToDismissBoxState(
-                confirmValueChange = { dismissValue ->
-                    if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
-                        onDeleteRequest(pedalBoard)
-                    }
-                    false
-                }
+            PedalBoardCard(
+                pedalBoard = pedalBoard,
+                onClick = { onItemClick(pedalBoard.id) },
+                onDeleteClick = { onDeleteRequest(pedalBoard) }
             )
-
-            SwipeToDismissBox(
-                state = dismissState,
-                backgroundContent = {
-                    val color by animateColorAsState(
-                        when (dismissState.targetValue) {
-                            SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
-                            else -> Color.Transparent
-                        },
-                        label = "swipe_color"
-                    )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(color)
-                            .padding(horizontal = 24.dp),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = stringResource(R.string.delete),
-                            tint = MaterialTheme.colorScheme.onErrorContainer
-                        )
-                    }
-                },
-                enableDismissFromStartToEnd = false
-            ) {
-                PedalBoardCard(
-                    pedalBoard = pedalBoard,
-                    onClick = { onItemClick(pedalBoard.id) }
-                )
-            }
         }
 
         item {
@@ -309,6 +268,7 @@ private fun PedalBoardList(
 private fun PedalBoardCard(
     pedalBoard: SavedPedalBoard,
     onClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val pedalCount = pedalBoard.slots.count { it != null }
@@ -366,6 +326,18 @@ private fun PedalBoardCard(
                         }
                     )
                 }
+            }
+
+            IconButton(
+                onClick = onDeleteClick,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.DeleteOutline,
+                    contentDescription = stringResource(R.string.delete),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    modifier = Modifier.size(22.dp)
+                )
             }
         }
     }
