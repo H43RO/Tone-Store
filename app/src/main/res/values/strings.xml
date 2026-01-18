@@ -68,6 +68,11 @@
     <string name="genre_tags">Genre Tags</string>
     <string name="select_tags_hint">Select genres that match this tone</string>
     
+    <!-- Pedal Color -->
+    <string name="pedal_color">Pedal Color</string>
+    <string name="custom_color">Custom Color</string>
+    <string name="confirm">Confirm</string>
+    
     <!-- Detail Screen -->
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>

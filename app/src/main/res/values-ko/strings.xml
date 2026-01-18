@@ -68,6 +68,11 @@
     <string name="genre_tags">장르 태그</string>
     <string name="select_tags_hint">장르를 선택하세요!</string>
     
+    <!-- Pedal Color -->
+    <string name="pedal_color">페달 색상</string>
+    <string name="custom_color">커스텀 색상</string>
+    <string name="confirm">확인</string>
+    
     <!-- Detail Screen -->
     <string name="edit">편집</string>
     <string name="delete">삭제</string>

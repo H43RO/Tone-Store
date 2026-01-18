@@ -9,6 +9,7 @@ package com.haero.tonestore.domain.model
  * @property knobs 페달의 노브 목록
  * @property order 페달보드 내 순서 (신호 체인 순서)
  * @property isEnabled 페달 활성화 여부
+ * @property color 페달 색상 (ARGB Long 값, null이면 기본 색상 사용)
  */
 data class Pedal(
     val id: String,
@@ -16,5 +17,6 @@ data class Pedal(
     val type: PedalType,
     val knobs: List<Knob>,
     val order: Int,
-    val isEnabled: Boolean = true
+    val isEnabled: Boolean = true,
+    val color: Long? = null
 )

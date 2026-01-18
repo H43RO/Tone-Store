@@ -136,9 +136,14 @@ fun PedalSlot(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
-    val borderColor = when (pedal.type) {
-        PedalType.PRESET -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.secondary
+    // 사용자 지정 색상이 있으면 사용, 없으면 타입에 따른 기본 색상
+    val borderColor = if (pedal.color != null) {
+        Color(pedal.color)
+    } else {
+        when (pedal.type) {
+            PedalType.PRESET -> MaterialTheme.colorScheme.primary
+            else -> MaterialTheme.colorScheme.secondary
+        }
     }
 
     Column(

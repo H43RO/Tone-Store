@@ -50,6 +50,9 @@ sealed interface PedalBoardIntent {
     /** 페달 편집 다이얼로그 닫기 */
     data object ClosePedalEditor : PedalBoardIntent
 
+    /** 페달 색상 업데이트 */
+    data class UpdatePedalColor(val slotIndex: Int, val color: Long?) : PedalBoardIntent
+
     /** 페달보드 저장 */
     data object SavePedalBoard : PedalBoardIntent
 

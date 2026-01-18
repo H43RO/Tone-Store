@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -49,6 +51,7 @@ fun PedalEditorBottomSheet(
     onDismiss: () -> Unit,
     onRemove: () -> Unit,
     onMoveToSlot: (toIndex: Int) -> Unit,
+    onColorChange: (Long?) -> Unit,
     availableSlots: List<Int>,
     modifier: Modifier = Modifier
 ) {
@@ -62,6 +65,7 @@ fun PedalEditorBottomSheet(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             // 헤더: 페달 이름 + 닫기 버튼
             Row(
@@ -118,6 +122,14 @@ fun PedalEditorBottomSheet(
 
                 Spacer(modifier = Modifier.height(24.dp))
             }
+
+            // 색상 선택
+            PedalColorPicker(
+                selectedColor = pedal.color,
+                onColorSelected = onColorChange
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             // 이동 가능한 슬롯이 있으면 표시
             if (availableSlots.isNotEmpty()) {

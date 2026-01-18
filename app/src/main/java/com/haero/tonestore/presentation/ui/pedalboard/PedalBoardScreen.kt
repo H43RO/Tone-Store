@@ -281,6 +281,11 @@ fun PedalBoardScreen(
                 )
                 viewModel.handleIntent(PedalBoardIntent.ClosePedalEditor)
             },
+            onColorChange = { color ->
+                viewModel.handleIntent(
+                    PedalBoardIntent.UpdatePedalColor(state.editingSlotIndex!!, color)
+                )
+            },
             availableSlots = availableSlots
         )
     }

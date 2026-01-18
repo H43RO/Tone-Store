@@ -58,6 +58,7 @@ class PedalBoardViewModel(
             is PedalBoardIntent.TogglePedalEnabled -> togglePedalEnabled(intent.slotIndex)
             is PedalBoardIntent.OpenPedalEditor -> openPedalEditor(intent.slotIndex)
             is PedalBoardIntent.ClosePedalEditor -> closePedalEditor()
+            is PedalBoardIntent.UpdatePedalColor -> updatePedalColor(intent.slotIndex, intent.color)
             is PedalBoardIntent.SavePedalBoard -> savePedalBoard()
             is PedalBoardIntent.DeletePedalBoard -> deletePedalBoard()
             is PedalBoardIntent.NavigationHandled -> clearNavigation()
@@ -226,6 +227,16 @@ class PedalBoardViewModel(
 
     private fun closePedalEditor() {
         _state.update { it.copy(editingSlotIndex = null) }
+    }
+
+    private fun updatePedalColor(slotIndex: Int, color: Long?) {
+        if (slotIndex !in 0 until _state.value.totalSlots) return
+
+        val pedal = _state.value.slots[slotIndex] ?: return
+        val updatedPedal = pedal.copy(color = color)
+        val updatedSlots = _state.value.slots.toMutableList()
+        updatedSlots[slotIndex] = updatedPedal
+        _state.update { it.copy(slots = updatedSlots) }
     }
 
     private fun savePedalBoard() {
