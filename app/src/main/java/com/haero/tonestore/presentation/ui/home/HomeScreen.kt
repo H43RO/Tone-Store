@@ -111,7 +111,8 @@ fun HomeScreen(
                 expanded = isScrolling.not(),
                 onClick = { viewModel.handleIntent(HomeIntent.NavigateToCreate) },
                 icon = Icons.Default.Add,
-                text = stringResource(R.string.add_tone_setting)
+                text = stringResource(R.string.add_tone_setting),
+                modifier = Modifier.padding(bottom = 80.dp)
             )
         },
         containerColor = MaterialTheme.colorScheme.background

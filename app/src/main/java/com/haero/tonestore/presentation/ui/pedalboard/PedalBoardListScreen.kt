@@ -87,7 +87,8 @@ fun PedalBoardListScreen(
                 expanded = isScrolling.not(),
                 onClick = onNavigateToCreate,
                 icon = Icons.Default.Add,
-                text = stringResource(R.string.create_pedalboard)
+                text = stringResource(R.string.create_pedalboard),
+                modifier = Modifier.padding(bottom = 80.dp)
             )
         },
         containerColor = MaterialTheme.colorScheme.background
