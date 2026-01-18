@@ -169,14 +169,11 @@ fun PedalCard(
 
             // 전원 버튼 (Footswitch)
             if (isEditable) {
+                // 전원 버튼: ON일 때는 배경색의 Border 색상 사용, OFF일 때는 투명하게
                 val powerButtonColor = if (pedal.isEnabled) {
-                    if (isLightBackground && pedal.color != null) {
-                        Color(0xFF1B5E20) // 어두운 초록
-                    } else {
-                        MaterialTheme.colorScheme.primary
-                    }
+                    PedalColorUtils.calculateBorderColor(backgroundColor)
                 } else {
-                    contentColor.copy(alpha = 0.3f)
+                    contentColor.copy(alpha = 0.2f)
                 }
 
                 Box(
@@ -192,7 +189,11 @@ fun PedalCard(
                         imageVector = Icons.Default.Power,
                         contentDescription = if (pedal.isEnabled) "끄기" else "켜기",
                         tint = if (pedal.isEnabled) {
-                            Color.White
+                            if (PedalColorUtils.isLightColor(powerButtonColor)) {
+                                Color.Black
+                            } else {
+                                Color.White
+                            }
                         } else {
                             contentColor.copy(alpha = 0.5f)
                         },

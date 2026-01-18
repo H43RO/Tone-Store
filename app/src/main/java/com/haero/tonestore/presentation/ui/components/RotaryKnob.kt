@@ -103,12 +103,12 @@ fun RotaryKnob(
     } else {
         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
     }
-    // 포인터 색상: 노브 색상에 따라 대비되는 색상 사용
+    // 포인터 색상: 노브 색상에 따라 대비되는 색상 사용 (밝은 노브 -> 검은 포인터)
     val indicatorColor = if (knobColor != null) {
         if (PedalColorUtils.isLightColor(knobColor)) {
-            androidx.compose.ui.graphics.Color.White
-        } else {
             androidx.compose.ui.graphics.Color.Black
+        } else {
+            androidx.compose.ui.graphics.Color.White
         }
     } else if (enabled) {
         MaterialTheme.colorScheme.onPrimary
