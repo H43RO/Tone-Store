@@ -111,7 +111,8 @@ fun PedalEditorBottomSheet(
                             onValueChange = { }, // 읽기 전용
                             label = knob.name,
                             size = 56.dp,
-                            enabled = false // 비활성화하여 조작 불가
+                            enabled = false, // 비활성화하여 조작 불가
+                            isPedalKnob = true
                         )
                     }
                 }

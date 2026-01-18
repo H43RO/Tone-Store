@@ -39,7 +39,6 @@ import kotlin.math.sin
 
 /**
  * 실제 앰프/이펙터 노브를 모방한 회전 노브 컴포넌트
- * 노브 색상은 검정색, 포인터는 흰색으로 고정 (실제 이펙터 페달처럼)
  *
  * @param value 현재 값 (0-10)
  * @param onValueChange 값 변경 콜백
@@ -49,6 +48,7 @@ import kotlin.math.sin
  * @param enabled 활성화 여부
  * @param steps 노브의 스텝 수 (햅틱 피드백용, 기본 20 = 0.5 단위)
  * @param labelColor 레이블 색상 (null이면 기본 테마 색상 사용)
+ * @param isPedalKnob 페달용 노브 여부 (true: 검정 노브/흰색 포인터, false: 테마 색상)
  */
 @Composable
 fun RotaryKnob(
@@ -59,7 +59,8 @@ fun RotaryKnob(
     size: Dp = 64.dp,
     enabled: Boolean = true,
     steps: Int = 20,
-    labelColor: androidx.compose.ui.graphics.Color? = null
+    labelColor: androidx.compose.ui.graphics.Color? = null,
+    isPedalKnob: Boolean = false
 ) {
     val view = LocalView.current
     val context = LocalContext.current
@@ -92,12 +93,30 @@ fun RotaryKnob(
     // 햅틱 피드백을 위한 이전 스텝 저장
     var previousStep by remember { mutableIntStateOf((value * steps / 10f).roundToInt()) }
 
-    // 노브 색상: 항상 검정색 (실제 이펙터 페달처럼)
-    // enabled 여부와 관계없이 동일하게 표시
-    val actualKnobColor = androidx.compose.ui.graphics.Color.Black
-    val trackColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.3f)
-    // 포인터 색상: 항상 흰색 (실제 이펙터 페달처럼)
-    val indicatorColor = androidx.compose.ui.graphics.Color.White
+    // 노브 색상: 페달용은 검정/흰색 고정, 그 외는 테마 색상
+    val actualKnobColor = if (isPedalKnob) {
+        androidx.compose.ui.graphics.Color.Black
+    } else if (enabled) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.outline
+    }
+
+    val trackColor = if (isPedalKnob) {
+        androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.3f)
+    } else if (enabled) {
+        MaterialTheme.colorScheme.surfaceVariant
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    }
+
+    val indicatorColor = if (isPedalKnob) {
+        androidx.compose.ui.graphics.Color.White
+    } else if (enabled) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
 
     val actualLabelColor = labelColor ?: if (enabled) {
         MaterialTheme.colorScheme.onSurfaceVariant
