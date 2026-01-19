@@ -382,9 +382,8 @@ private fun DetailPedalBoardContent(
         ) {
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                maxItemsInEachRow = 2
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 pedalBoard.pedals.forEach { pedal ->
                     PedalCard(
@@ -393,11 +392,8 @@ private fun DetailPedalBoardContent(
                         onToggleEnabled = {},
                         onRemove = {},
                         isEditable = false,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.width(160.dp)
                     )
-                }
-                if (pedalBoard.pedals.size % 2 == 1) {
-                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
