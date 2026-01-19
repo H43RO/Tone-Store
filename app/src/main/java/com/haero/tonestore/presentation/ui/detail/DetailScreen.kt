@@ -378,22 +378,27 @@ private fun DetailPedalBoardContent(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                pedalBoard.pedals.forEach { pedal ->
-                    PedalCard(
-                        pedal = pedal,
-                        onKnobChange = { _, _ -> },
-                        onToggleEnabled = {},
-                        onRemove = {},
-                        isEditable = false,
-                        modifier = Modifier.width(160.dp)
-                    )
+            pedalBoard.pedals.chunked(2).forEach { rowPedals ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    rowPedals.forEach { pedal ->
+                        PedalCard(
+                            pedal = pedal,
+                            onKnobChange = { _, _ -> },
+                            onToggleEnabled = {},
+                            onRemove = {},
+                            isEditable = false,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    if (rowPedals.size == 1) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
                 }
             }
         }
