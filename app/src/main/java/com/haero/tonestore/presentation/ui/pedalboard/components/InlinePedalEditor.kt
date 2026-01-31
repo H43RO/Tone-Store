@@ -24,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -77,163 +76,156 @@ fun InlinePedalEditor(
         knobNamesEditState.addAll(pedal.knobs.map { it.name })
     }
 
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        tonalElevation = 8.dp
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 32.dp)
+            .verticalScroll(rememberScrollState())
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 32.dp)
-                .verticalScroll(rememberScrollState())
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    value = pedalNameEditState[0],
-                    onValueChange = { newName ->
-                        pedalNameEditState[0] = newName
-                        onPedalNameChange(newName)
-                    },
-                    label = { Text("페달 이름") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.weight(1f)
-                )
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    IconButton(onClick = onDismiss) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "닫기",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "슬롯 ${slotIndex + 1}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            OutlinedTextField(
+                value = pedalNameEditState[0],
+                onValueChange = { newName ->
+                    pedalNameEditState[0] = newName
+                    onPedalNameChange(newName)
+                },
+                label = { Text("페달 이름") },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.weight(1f)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
-            if (knobsList.isNotEmpty()) {
-                Text(
-                    text = stringResource(R.string.knobs),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                IconButton(onClick = onDismiss) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "닫기",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+        }
 
-                Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    if (knobsList.size < 6) {
-                        item {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.width(56.dp)
-                            ) {
-                                IconButton(
-                                    onClick = {
-                                        val newKnob = Knob(name = "Knob ${knobsList.size + 1}", value = 5f)
-                                        knobsList.add(newKnob)
-                                        knobNamesEditState.add(newKnob.name)
-                                        onKnobsChange(knobsList.toList())
-                                    },
-                                    modifier = Modifier.size(56.dp)
-                                ) {
-                                    Icon(
-                                        Icons.Default.Add,
-                                        contentDescription = stringResource(R.string.add_knob),
-                                        modifier = Modifier.size(32.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = stringResource(R.string.add_knob),
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                            }
-                        }
-                    }
+        Text(
+            text = "슬롯 ${slotIndex + 1}",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
 
-                    itemsIndexed(knobsList) { index, knob ->
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (knobsList.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.knobs),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                if (knobsList.size < 6) {
+                    item {
                         Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.width(56.dp)
                         ) {
-                            RotaryKnob(
-                                value = 5f,
-                                onValueChange = { },
-                                label = knobNamesEditState[index],
-                                size = 56.dp,
-                                enabled = false
-                            )
-                            OutlinedTextField(
-                                value = knobNamesEditState[index],
-                                onValueChange = { newName ->
-                                    knobNamesEditState[index] = newName
-                                    onKnobNameChange(index, newName)
-                                },
-                                singleLine = true,
-                                shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier
-                                    .width(80.dp)
-                                    .height(56.dp)
-                            )
                             IconButton(
                                 onClick = {
-                                    if (knobsList.size > 1) {
-                                        knobsList.removeAt(index)
-                                        knobNamesEditState.removeAt(index)
-                                        onKnobsChange(knobsList.toList())
-                                    }
+                                    val newKnob = Knob(name = "Knob ${knobsList.size + 1}", value = 5f)
+                                    knobsList.add(newKnob)
+                                    knobNamesEditState.add(newKnob.name)
+                                    onKnobsChange(knobsList.toList())
                                 },
-                                modifier = Modifier.size(32.dp),
-                                enabled = knobsList.size > 1
+                                modifier = Modifier.size(56.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "노브 삭제",
-                                    modifier = Modifier.size(16.dp)
+                                    Icons.Default.Add,
+                                    contentDescription = stringResource(R.string.add_knob),
+                                    modifier = Modifier.size(32.dp)
                                 )
                             }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = stringResource(R.string.add_knob),
+                                style = MaterialTheme.typography.labelSmall
+                            )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                itemsIndexed(knobsList) { index, knob ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        RotaryKnob(
+                            value = 5f,
+                            onValueChange = { },
+                            label = knobNamesEditState[index],
+                            size = 56.dp,
+                            enabled = false
+                        )
+                        OutlinedTextField(
+                            value = knobNamesEditState[index],
+                            onValueChange = { newName ->
+                                knobNamesEditState[index] = newName
+                                onKnobNameChange(index, newName)
+                            },
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .width(80.dp)
+                                .height(56.dp)
+                        )
+                        IconButton(
+                            onClick = {
+                                if (knobsList.size > 1) {
+                                    knobsList.removeAt(index)
+                                    knobNamesEditState.removeAt(index)
+                                    onKnobsChange(knobsList.toList())
+                                }
+                            },
+                            modifier = Modifier.size(32.dp),
+                            enabled = knobsList.size > 1
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "노브 삭제",
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
             }
 
-            PedalColorPicker(
-                selectedColor = pedal.color,
-                onColorSelected = onColorChange,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Spacer(modifier = Modifier.height(24.dp))
         }
+
+        PedalColorPicker(
+            selectedColor = pedal.color,
+            onColorSelected = onColorChange,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

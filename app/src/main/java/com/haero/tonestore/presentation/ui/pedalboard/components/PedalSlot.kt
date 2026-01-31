@@ -134,13 +134,11 @@ fun PedalSlot(
 
         if (isEditing && pedal != null) {
             Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(4.dp)
+                modifier = Modifier.align(Alignment.Center)
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = MaterialTheme.colorScheme.error,
+                    color = Color.Black.copy(alpha = 0.5f),
                     modifier = Modifier.size(32.dp)
                 ) {
                     IconButton(
@@ -150,7 +148,7 @@ fun PedalSlot(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "삭제",
-                            tint = MaterialTheme.colorScheme.onError,
+                            tint = Color.White,
                             modifier = Modifier.size(20.dp)
                         )
                     }
