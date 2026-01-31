@@ -27,6 +27,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -53,16 +54,27 @@ fun InlinePedalEditor(
     onKnobNameChange: (knobIndex: Int, name: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val knobsList = remember {
+    val knobsList = remember(pedal.id) {
         mutableStateListOf(*pedal.knobs.toTypedArray())
     }
 
-    var pedalNameEditState = remember {
+    val pedalNameEditState = remember(pedal.id) {
         mutableStateListOf(pedal.name)
     }
 
-    var knobNamesEditState = remember {
+    val knobNamesEditState = remember(pedal.id) {
         mutableStateListOf(*pedal.knobs.map { it.name }.toTypedArray())
+    }
+
+    LaunchedEffect(pedal.id) {
+        knobsList.clear()
+        knobsList.addAll(pedal.knobs)
+
+        pedalNameEditState.clear()
+        pedalNameEditState.add(pedal.name)
+
+        knobNamesEditState.clear()
+        knobNamesEditState.addAll(pedal.knobs.map { it.name })
     }
 
     Surface(
