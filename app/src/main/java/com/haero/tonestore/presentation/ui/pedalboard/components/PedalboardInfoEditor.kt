@@ -37,7 +37,8 @@ fun PedalboardInfoEditor(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 20.dp)
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 20.dp)
     ) {
         OutlinedTextField(
             value = name,

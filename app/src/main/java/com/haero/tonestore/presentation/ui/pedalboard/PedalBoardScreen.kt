@@ -129,8 +129,6 @@ fun PedalBoardScreen(
 
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f)
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 20.dp)
             ) {
@@ -185,7 +183,6 @@ fun PedalBoardScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
             }
-
             if (state.editingSlotIndex != null && state.editingPedal != null) {
                 InlinePedalEditor(
                     pedal = state.editingPedal!!,

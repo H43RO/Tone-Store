@@ -142,7 +142,7 @@ fun InlinePedalEditor(
 
             LazyRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 if (knobsList.size < 6) {
                     item {
@@ -181,7 +181,7 @@ fun InlinePedalEditor(
                         RotaryKnob(
                             value = 5f,
                             onValueChange = { },
-                            label = knobNamesEditState[index],
+                            label = "",
                             size = 56.dp,
                             enabled = false
                         )
@@ -194,7 +194,7 @@ fun InlinePedalEditor(
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
-                                .width(80.dp)
+                                .width(100.dp)
                                 .height(56.dp)
                         )
                         IconButton(
@@ -217,8 +217,6 @@ fun InlinePedalEditor(
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
         }
 
         PedalColorPicker(
