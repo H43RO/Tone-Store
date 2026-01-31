@@ -226,3 +226,103 @@ OutlinedTextField(
 - Editing is now bidirectional: UI → ViewModel → State
 - Consider adding validations in ViewModel if pedal/knob names should have length limits
 - Pedal name changes persist through SavePedalBoard intent
+
+## Wave 2 Tasks 5 & 6: PresetPedalSelectionDialog + ExpressionPedalZone
+
+### Delegation System Failure
+- **Issue**: All delegate_task() calls failed with 0s duration (5 attempts)
+- **Symptom**: Sessions created but no subagent response, no file changes
+- **Root Cause**: System-level initialization failure in subagent spawning
+- **Workaround**: Orchestrator completed tasks directly to unblock Wave 3
+
+### Task 5: PresetPedalSelectionDialog Implementation
+✅ **Card Grid UI with Category Filtering**
+
+#### Key Patterns
+- **ModalBottomSheet**: Used instead of AlertDialog for better UX with large content
+- **LazyVerticalGrid**: GridCells.Fixed(3) for 3-column card layout
+- **FilterChips**: Category filtering with "All" default state
+- **State Management**: `remember(selectedCategory)` for derived filtered list
+
+#### Component Structure
+```kotlin
+ModalBottomSheet {
+  Title
+  FilterChips Row (All + 6 categories)
+  LazyVerticalGrid (filtered pedals)
+  Custom Pedal Button
+}
+```
+
+#### PedalCard Design
+- Size: fillMaxWidth + aspectRatio(1f) for square cards
+- Color: Background tint (15% alpha) + 3dp border in pedal color
+- Color Stripe: 4.dp height bar at top for quick visual ID
+- Content: Color indicator, name (2 lines max), knob count
+
+#### Category Mapping Function
+- `getCategoryForPedal()`: Maps pedal name string to PedalCategory enum
+- Hardcoded mapping (DRIVE: Overdrive/Distortion/Fuzz/Boost, etc.)
+- Falls back to UTILITY for unknown pedals
+
+#### Integration
+- Replaced AddPedalDialog (AlertDialog with vertical list) in PedalBoardScreen.kt
+- Changed prop names: `onSelectPreset` → `onPedalSelect`, `onCreateCustom` → `onCustomPedalCreate`
+- Added import: `com.haero.tonestore.presentation.ui.pedalboard.components.PresetPedalSelectionDialog`
+
+### Task 6: ExpressionPedalZone Implementation
+✅ **Foot-Pedal Shaped UI Component**
+
+#### Key Patterns
+- **Foot-Pedal Shape**: Custom RoundedCornerShape with asymmetric corners
+  - Top: 16.dp (wider, toe area)
+  - Bottom: 4.dp (narrower, heel area)
+- **Conditional Styling**: Different border/background for filled vs empty state
+- **Clickable Box**: Opens selection dialog on tap
+
+#### Component Structure
+```kotlin
+Box (80.dp x 200.dp, foot-pedal shape) {
+  if (expressionPedal != null) {
+    Color Circle (32.dp)
+    Pedal Name
+    Remove IconButton
+  } else {
+    "Wah\n/\nWhammy" text (dotted border hint)
+  }
+}
+```
+
+#### Styling Details
+- **Filled State**: 
+  - Background: Pedal color at 20% alpha
+  - Border: 3.dp solid in pedal color
+  - Content: Color indicator (32.dp circle), name, remove button (24.dp)
+- **Empty State**:
+  - Border: 2.dp dotted in outline color at 50% alpha
+  - Content: Multi-line hint text "Wah\n/\nWhammy"
+
+#### ExpressionPedalSelectionDialog
+- Simple AlertDialog with 2 card options (Wah, Whammy)
+- Cards show: Color box (48.dp) + Pedal name
+- Uses PresetPedals.getPresetPedals() to fetch Wah/Whammy presets
+- Props: onSelectWah, onSelectWhammy, onDismiss
+
+### Files Created
+1. `PresetPedalSelectionDialog.kt` - 229 lines
+2. `ExpressionPedalZone.kt` - 109 lines
+3. `ExpressionPedalSelectionDialog.kt` - 106 lines
+
+### Files Modified
+1. `PedalBoardScreen.kt` - Replaced AddPedalDialog call + added import
+
+### Build Verification
+✅ `./gradlew assembleDebug` - BUILD SUCCESSFUL
+✅ LazyVerticalGrid confirmed in PresetPedalSelectionDialog.kt
+✅ @Composable confirmed in ExpressionPedalZone.kt
+
+### Notes for Wave 3
+- Task 7: Integrate ExpressionPedalZone into PedalBoardScreen layout (Row with PedalBoardGrid)
+- Need to add state management in ViewModel for expressionPedal
+- Need to add Intents: SelectExpressionPedal, RemoveExpressionPedal
+- Task 8 & 9: CableOverlay visualization (depends on pedal ON/OFF states)

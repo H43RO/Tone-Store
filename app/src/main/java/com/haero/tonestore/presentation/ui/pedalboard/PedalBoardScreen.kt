@@ -55,6 +55,7 @@ import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.presentation.ui.pedalboard.components.PedalBoardGrid
 import com.haero.tonestore.presentation.ui.pedalboard.components.PedalEditorBottomSheet
+import com.haero.tonestore.presentation.ui.pedalboard.components.PresetPedalSelectionDialog
 import com.haero.tonestore.presentation.viewmodel.PedalBoardViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -262,14 +263,13 @@ fun PedalBoardScreen(
     }
 
     if (showAddPedalDialog && addingToSlotIndex != null) {
-        AddPedalDialog(
-            presetPedals = state.presetPedals,
-            onSelectPreset = { pedal ->
+        PresetPedalSelectionDialog(
+            onPedalSelect = { pedal ->
                 viewModel.handleIntent(PedalBoardIntent.AddPedalToSlot(addingToSlotIndex!!, pedal))
                 showAddPedalDialog = false
                 addingToSlotIndex = null
             },
-            onCreateCustom = {
+            onCustomPedalCreate = {
                 showAddPedalDialog = false
                 showCustomPedalDialog = true
             },
