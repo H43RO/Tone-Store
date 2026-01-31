@@ -108,127 +108,137 @@ fun PedalBoardScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            PedalBoardEditHeader(
-                title = if (state.isEditMode) {
-                    stringResource(R.string.edit_pedalboard)
-                } else {
-                    stringResource(R.string.create_pedalboard)
-                },
-                isSaving = state.isSaving,
-                isEditMode = state.isEditMode,
-                onCloseClick = onNavigateBack,
-                onSaveClick = { viewModel.handleIntent(PedalBoardIntent.SavePedalBoard) },
-                onDeleteClick = { viewModel.handleIntent(PedalBoardIntent.DeletePedalBoard) }
-            )
-
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp)
+                modifier = Modifier.fillMaxSize()
             ) {
-                AnimatedVisibility(
-                    visible = state.editingSlotIndex == null,
-                    enter = slideInVertically { -it } + fadeIn(),
-                    exit = slideOutVertically { -it } + fadeOut()
+                PedalBoardEditHeader(
+                    title = if (state.isEditMode) {
+                        stringResource(R.string.edit_pedalboard)
+                    } else {
+                        stringResource(R.string.create_pedalboard)
+                    },
+                    isSaving = state.isSaving,
+                    isEditMode = state.isEditMode,
+                    onCloseClick = onNavigateBack,
+                    onSaveClick = { viewModel.handleIntent(PedalBoardIntent.SavePedalBoard) },
+                    onDeleteClick = { viewModel.handleIntent(PedalBoardIntent.DeletePedalBoard) }
+                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 20.dp)
                 ) {
-                    Column {
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        OutlinedTextField(
-                            value = state.name,
-                            onValueChange = { viewModel.handleIntent(PedalBoardIntent.UpdateName(it)) },
-                            label = { Text(stringResource(R.string.pedalboard_name)) },
-                            placeholder = { Text(stringResource(R.string.pedalboard_name_hint)) },
-                            singleLine = true,
-                            isError = state.nameError != null,
-                            supportingText = state.nameError?.let { { Text(it) } },
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        LayoutStepper(
-                            columns = state.columns,
-                            rows = state.rows,
-                            onColumnsChange = { newColumns ->
-                                viewModel.handleIntent(PedalBoardIntent.UpdateLayout(newColumns, state.rows))
-                            },
-                            onRowsChange = { newRows ->
-                                viewModel.handleIntent(PedalBoardIntent.UpdateLayout(state.columns, newRows))
-                            }
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        val pedalCountText = stringResource(R.string.pedal_count, state.pedalCount)
-                        val slotsText = stringResource(R.string.slots)
-                        Text(
-                            text = "$pedalCountText / ${state.totalSlots} $slotsText",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        Spacer(modifier = Modifier.height(20.dp))
-                    }
-                }
-
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    CableOverlay(
-                        slots = state.slots,
-                        slotPositions = slotPositions,
-                        columns = state.columns,
-                        modifier = Modifier.matchParentSize()
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
+                    AnimatedVisibility(
+                        visible = state.editingSlotIndex == null,
+                        enter = slideInVertically { -it } + fadeIn(),
+                        exit = slideOutVertically { -it } + fadeOut()
                     ) {
-                        PedalBoardGrid(
-                            slots = state.slots,
-                            columns = state.columns,
-                            rows = state.rows,
-                            onSlotClick = { slotIndex ->
-                                viewModel.handleIntent(PedalBoardIntent.OpenPedalEditor(slotIndex))
-                            },
-                            onAddClick = { slotIndex ->
-                                addingToSlotIndex = slotIndex
-                                showAddPedalDialog = true
-                            },
-                            onSwapSlots = { fromIndex, toIndex ->
-                                viewModel.handleIntent(PedalBoardIntent.SwapSlots(fromIndex, toIndex))
-                            },
-                            onSlotPositioned = { index, offset ->
-                                slotPositions[index] = offset
-                            },
-                            isEditable = true,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        ExpressionPedalZone(
-                            expressionPedal = state.expressionPedal,
-                            onSelectPedal = { showExpressionPedalDialog = true },
-                            onRemovePedal = { viewModel.handleIntent(PedalBoardIntent.RemoveExpressionPedal) }
-                        )
-                    }
-                }
+                        Column {
+                            Spacer(modifier = Modifier.height(8.dp))
 
-                Spacer(modifier = Modifier.height(32.dp))
+                            OutlinedTextField(
+                                value = state.name,
+                                onValueChange = { viewModel.handleIntent(PedalBoardIntent.UpdateName(it)) },
+                                label = { Text(stringResource(R.string.pedalboard_name)) },
+                                placeholder = { Text(stringResource(R.string.pedalboard_name_hint)) },
+                                singleLine = true,
+                                isError = state.nameError != null,
+                                supportingText = state.nameError?.let { { Text(it) } },
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            LayoutStepper(
+                                columns = state.columns,
+                                rows = state.rows,
+                                onColumnsChange = { newColumns ->
+                                    viewModel.handleIntent(PedalBoardIntent.UpdateLayout(newColumns, state.rows))
+                                },
+                                onRowsChange = { newRows ->
+                                    viewModel.handleIntent(PedalBoardIntent.UpdateLayout(state.columns, newRows))
+                                }
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            val pedalCountText = stringResource(R.string.pedal_count, state.pedalCount)
+                            val slotsText = stringResource(R.string.slots)
+                            Text(
+                                text = "$pedalCountText / ${state.totalSlots} $slotsText",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+
+                            Spacer(modifier = Modifier.height(20.dp))
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        CableOverlay(
+                            slots = state.slots,
+                            slotPositions = slotPositions,
+                            columns = state.columns,
+                            modifier = Modifier.matchParentSize()
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            PedalBoardGrid(
+                                slots = state.slots,
+                                columns = state.columns,
+                                rows = state.rows,
+                                editingSlotIndex = state.editingSlotIndex,
+                                onSlotClick = { slotIndex ->
+                                    viewModel.handleIntent(PedalBoardIntent.OpenPedalEditor(slotIndex))
+                                },
+                                onAddClick = { slotIndex ->
+                                    addingToSlotIndex = slotIndex
+                                    showAddPedalDialog = true
+                                },
+                                onSwapSlots = { fromIndex, toIndex ->
+                                    viewModel.handleIntent(PedalBoardIntent.SwapSlots(fromIndex, toIndex))
+                                },
+                                onSlotPositioned = { index, offset ->
+                                    slotPositions[index] = offset
+                                },
+                                onDeletePedal = { slotIndex ->
+                                    viewModel.handleIntent(PedalBoardIntent.RemovePedalFromSlot(slotIndex))
+                                },
+                                isEditable = true,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            ExpressionPedalZone(
+                                expressionPedal = state.expressionPedal,
+                                onSelectPedal = { showExpressionPedalDialog = true },
+                                onRemovePedal = { viewModel.handleIntent(PedalBoardIntent.RemoveExpressionPedal) }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
             }
 
             AnimatedVisibility(
                 visible = state.editingSlotIndex != null && state.editingPedal != null,
                 enter = slideInVertically { it } + fadeIn(),
-                exit = slideOutVertically { it } + fadeOut()
+                exit = slideOutVertically { it } + fadeOut(),
+                modifier = Modifier.align(Alignment.BottomCenter)
             ) {
                 if (state.editingPedal != null && state.editingSlotIndex != null) {
                     InlinePedalEditor(

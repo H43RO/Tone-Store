@@ -34,10 +34,12 @@ fun PedalBoardGrid(
     slots: List<Pedal?>,
     columns: Int,
     rows: Int,
+    editingSlotIndex: Int? = null,
     onSlotClick: (Int) -> Unit,
     onAddClick: (Int) -> Unit,
     onSwapSlots: (fromIndex: Int, toIndex: Int) -> Unit,
     onSlotPositioned: (Int, Offset) -> Unit = { _, _ -> },
+    onDeletePedal: (Int) -> Unit = {},
     modifier: Modifier = Modifier,
     isEditable: Boolean = true
 ) {
@@ -178,7 +180,9 @@ fun PedalBoardGrid(
                     onPedalClick = { onSlotClick(index) },
                     isEditable = isEditable,
                     isDragging = isDragging,
-                    isDropTarget = isDropTarget
+                    isDropTarget = isDropTarget,
+                    isEditing = (editingSlotIndex == index),
+                    onDeleteClick = { onDeletePedal(index) }
                 )
             }
         }

@@ -31,7 +31,7 @@
 
 ## TODOs
 
-- [ ] 1. PedalBoardGrid에 editingSlotIndex 및 onDeletePedal 파라미터 추가
+- [x] 1. PedalBoardGrid에 editingSlotIndex 및 onDeletePedal 파라미터 추가
 
   **What to do**:
   - `PedalBoardGrid.kt`에 새 파라미터 추가:
@@ -69,7 +69,7 @@
 
 ---
 
-- [ ] 2. PedalBoardScreen 레이아웃 구조 수정
+- [x] 2. PedalBoardScreen 레이아웃 구조 수정
 
   **What to do**:
   - `Scaffold` 내부 최상위 레이아웃을 `Column`에서 `Box`로 변경
