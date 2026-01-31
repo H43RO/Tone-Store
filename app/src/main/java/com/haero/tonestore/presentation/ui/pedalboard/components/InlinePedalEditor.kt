@@ -1,6 +1,8 @@
 package com.haero.tonestore.presentation.ui.pedalboard.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,12 +14,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -90,11 +92,27 @@ fun InlinePedalEditor(
                     label = { Text("페달 이름") },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth(0.85f)
+                    modifier = Modifier.weight(1f)
                 )
-                IconButton(onClick = onDismiss) {
-                    Icon(Icons.Default.Close, contentDescription = "닫기")
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "닫기",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
                 }
             }
 
@@ -168,11 +186,10 @@ fun InlinePedalEditor(
                                     knobNamesEditState[index] = newName
                                     onKnobNameChange(index, newName)
                                 },
-                                label = { Text("노브 ${index + 1}") },
                                 singleLine = true,
                                 shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier
-                                    .width(56.dp)
+                                    .width(80.dp)
                                     .height(56.dp)
                             )
                             IconButton(
@@ -187,7 +204,7 @@ fun InlinePedalEditor(
                                 enabled = knobsList.size > 1
                             ) {
                                 Icon(
-                                    Icons.Default.Delete,
+                                    imageVector = Icons.Default.Close,
                                     contentDescription = "노브 삭제",
                                     modifier = Modifier.size(16.dp)
                                 )
