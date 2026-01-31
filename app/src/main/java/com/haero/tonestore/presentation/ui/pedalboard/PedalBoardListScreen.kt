@@ -201,7 +201,8 @@ private fun PedalBoardHeader(
 private fun EmptyPedalBoardState(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Surface(
             shape = CircleShape,
@@ -232,6 +233,7 @@ private fun EmptyPedalBoardState(modifier: Modifier = Modifier) {
             textAlign = TextAlign.Center,
             lineHeight = 22.sp
         )
+        Spacer(Modifier.height(64.dp))
     }
 }
 

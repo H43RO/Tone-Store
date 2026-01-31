@@ -374,8 +374,9 @@ private fun EmptyState(
         modifier = modifier
     ) {
         Column(
-            modifier = Modifier.padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = modifier.padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Surface(
                 shape = CircleShape,
@@ -419,6 +420,7 @@ private fun EmptyState(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(stringResource(R.string.add_first_tone))
             }
+            Spacer(Modifier.height(64.dp))
         }
     }
 }
