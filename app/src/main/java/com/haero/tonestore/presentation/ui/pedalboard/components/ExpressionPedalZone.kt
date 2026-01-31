@@ -18,6 +18,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.haero.tonestore.domain.model.Pedal
 
@@ -26,7 +27,10 @@ fun ExpressionPedalZone(
     expressionPedal: Pedal?,
     onSelectPedal: () -> Unit,
     onRemovePedal: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isEditable: Boolean = true,
+    width: Dp = 80.dp,
+    height: Dp = 200.dp
 ) {
     val footPedalShape = RoundedCornerShape(
         topStart = 16.dp,
@@ -37,8 +41,8 @@ fun ExpressionPedalZone(
 
     Box(
         modifier = modifier
-            .width(80.dp)
-            .height(200.dp)
+            .width(width)
+            .height(height)
             .clip(footPedalShape)
             .then(
                 if (expressionPedal != null) {
@@ -97,15 +101,17 @@ fun ExpressionPedalZone(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                IconButton(
-                    onClick = onRemovePedal,
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Remove",
-                        modifier = Modifier.size(16.dp)
-                    )
+                if (isEditable) {
+                    IconButton(
+                        onClick = onRemovePedal,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Remove",
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             } else {
                 Text(

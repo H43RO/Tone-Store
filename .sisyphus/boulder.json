@@ -1,6 +1,8 @@
 {
-  "active_plan": "/Users/haero_kim/AndroidStudioProjects/ToneStore/.sisyphus/plans/pedalboard-preview-resize.md",
-  "started_at": "2026-01-31T15:11:01.599Z",
-  "session_ids": ["ses_3eb909060ffeF4vsWPDZn64Bnx"],
-  "plan_name": "pedalboard-preview-resize"
+  "active_plan": "/Users/haero_kim/AndroidStudioProjects/ToneStore/.sisyphus/plans/preview-simplification.md",
+  "started_at": "2026-01-31T15:52:02.394Z",
+  "session_ids": [
+    "ses_3eb909060ffeF4vsWPDZn64Bnx"
+  ],
+  "plan_name": "preview-simplification"
 }

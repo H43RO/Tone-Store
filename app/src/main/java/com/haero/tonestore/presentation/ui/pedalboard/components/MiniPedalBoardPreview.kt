@@ -22,7 +22,7 @@ fun MiniPedalBoardPreview(
     rows: Int,
     expressionPedal: Pedal?,
     modifier: Modifier = Modifier,
-    slotHeight: Dp = 100.dp,
+    slotHeight: Dp = 140.dp,
     maxRows: Int = 2
 ) {
     val displayRows = minOf(rows, maxRows)
@@ -33,6 +33,7 @@ fun MiniPedalBoardPreview(
         horizontalArrangement = Arrangement.spacedBy(horizontalSpacing)
     ) {
         Column(
+            modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(verticalSpacing)
         ) {
             for (rowIndex in 0 until displayRows) {
@@ -63,11 +64,10 @@ fun MiniPedalBoardPreview(
         }
 
         if (expressionPedal != null) {
-            val expressionHeight = (slotHeight + verticalSpacing) * displayRows - verticalSpacing
             MiniExpressionPedalZone(
                 expressionPedal = expressionPedal,
-                height = expressionHeight,
-                modifier = Modifier.align(Alignment.CenterVertically)
+                height = 200.dp,
+                modifier = Modifier.align(Alignment.CenterVertically).weight(0.2f)
             )
         }
     }
