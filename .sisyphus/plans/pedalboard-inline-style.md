@@ -49,11 +49,11 @@
 - `PedalSlot.kt`: 삭제 버튼 위치/색상 변경
 
 ### Definition of Done
-- [ ] `./gradlew assembleDebug` → BUILD SUCCESSFUL
-- [ ] `./gradlew testDebugUnitTest` → BUILD SUCCESSFUL
-- [ ] Surface, RoundedCornerShape, tonalElevation 제거됨 (코드 검증)
-- [ ] Crossfade 제거됨 (코드 검증)
-- [ ] 삭제 버튼 중앙 + 반투명 검은색 적용됨 (코드 검증)
+- [x] `./gradlew assembleDebug` → BUILD SUCCESSFUL
+- [x] `./gradlew testDebugUnitTest` → BUILD SUCCESSFUL
+- [x] Surface, RoundedCornerShape, tonalElevation 제거됨 (코드 검증)
+- [x] Crossfade 제거됨 (코드 검증)
+- [x] 삭제 버튼 중앙 + 반투명 검은색 적용됨 (코드 검증)
 
 ### Must Have
 - Surface 완전 제거 (두 편집 UI 모두)
@@ -572,7 +572,7 @@ Build Verification
 ```
 
 ### Final Checklist
-- [ ] All "Must Have" present
-- [ ] All "Must NOT Have" absent
-- [ ] All builds pass
-- [ ] 4 commits created
+- [x] All "Must Have" present
+- [x] All "Must NOT Have" absent
+- [x] All builds pass
+- [x] 4 commits created
