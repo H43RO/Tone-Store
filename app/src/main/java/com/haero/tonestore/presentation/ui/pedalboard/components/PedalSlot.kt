@@ -278,3 +278,36 @@ private fun MiniKnobIndicator(
         )
     }
 }
+
+@Composable
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+private fun PedalSlotWithDeleteButtonPreview() {
+    MaterialTheme {
+        androidx.compose.foundation.layout.Box(
+            modifier = Modifier
+                .size(width = 120.dp, height = 120.dp)
+                .padding(8.dp)
+        ) {
+            PedalSlot(
+                index = 0,
+                pedal = Pedal(
+                    id = "1",
+                    name = "Overdrive",
+                    type = com.haero.tonestore.domain.model.PedalType.PRESET,
+                    knobs = listOf(
+                        com.haero.tonestore.domain.model.Knob("Gain", 5f),
+                        com.haero.tonestore.domain.model.Knob("Tone", 5f)
+                    ),
+                    order = 0,
+                    isEnabled = true,
+                    color = null
+                ),
+                showAddButton = false,
+                onAddClick = {},
+                onPedalClick = {},
+                isEditing = true,
+                onDeleteClick = {}
+            )
+        }
+    }
+}

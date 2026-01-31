@@ -31,11 +31,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.Knob
 import com.haero.tonestore.domain.model.Pedal
+import com.haero.tonestore.domain.model.PedalType
 import com.haero.tonestore.presentation.ui.components.RotaryKnob
+import com.haero.tonestore.ui.theme.ToneStoreTheme
 
 @Composable
 fun InlinePedalEditor(
@@ -202,5 +205,33 @@ fun InlinePedalEditor(
                 modifier = Modifier.fillMaxWidth()
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun InlinePedalEditorPreview() {
+    ToneStoreTheme {
+        InlinePedalEditor(
+            pedal = Pedal(
+                id = "1",
+                name = "Overdrive",
+                type = PedalType.PRESET,
+                knobs = listOf(
+                    Knob("Gain", 5f),
+                    Knob("Tone", 5f),
+                    Knob("Level", 5f)
+                ),
+                order = 0,
+                isEnabled = true,
+                color = null
+            ),
+            slotIndex = 0,
+            onDismiss = {},
+            onColorChange = {},
+            onKnobsChange = {},
+            onPedalNameChange = {},
+            onKnobNameChange = { _, _ -> }
+        )
     }
 }
