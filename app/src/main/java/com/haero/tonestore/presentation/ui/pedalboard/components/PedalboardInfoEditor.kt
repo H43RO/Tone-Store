@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -35,48 +34,41 @@ fun PedalboardInfoEditor(
     onRowsChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        tonalElevation = 8.dp
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 20.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 20.dp)
-        ) {
-            OutlinedTextField(
-                value = name,
-                onValueChange = onNameChange,
-                label = { Text(stringResource(R.string.pedalboard_name)) },
-                placeholder = { Text(stringResource(R.string.pedalboard_name_hint)) },
-                singleLine = true,
-                isError = nameError != null,
-                supportingText = nameError?.let { { Text(it) } },
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth()
-            )
+        OutlinedTextField(
+            value = name,
+            onValueChange = onNameChange,
+            label = { Text(stringResource(R.string.pedalboard_name)) },
+            placeholder = { Text(stringResource(R.string.pedalboard_name_hint)) },
+            singleLine = true,
+            isError = nameError != null,
+            supportingText = nameError?.let { { Text(it) } },
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth()
+        )
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-            LayoutStepper(
-                columns = columns,
-                rows = rows,
-                onColumnsChange = onColumnsChange,
-                onRowsChange = onRowsChange
-            )
+        LayoutStepper(
+            columns = columns,
+            rows = rows,
+            onColumnsChange = onColumnsChange,
+            onRowsChange = onRowsChange
+        )
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-            val pedalCountText = stringResource(R.string.pedal_count, pedalCount)
-            val slotsText = stringResource(R.string.slots)
-            Text(
-                text = "$pedalCountText / $totalSlots $slotsText",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        val pedalCountText = stringResource(R.string.pedal_count, pedalCount)
+        val slotsText = stringResource(R.string.slots)
+        Text(
+            text = "$pedalCountText / $totalSlots $slotsText",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
