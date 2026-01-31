@@ -130,7 +130,7 @@ fun PedalSlot(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
+internal fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
     val backgroundColor = if (pedal.color != null) {
         Color(pedal.color)
     } else {
