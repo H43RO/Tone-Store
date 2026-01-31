@@ -1,7 +1,5 @@
 package com.haero.tonestore.presentation.ui.pedalboard
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -188,53 +186,48 @@ fun PedalBoardScreen(
                 Spacer(modifier = Modifier.height(32.dp))
             }
 
-            Crossfade(
-                targetState = state.editingSlotIndex != null && state.editingPedal != null,
-                animationSpec = tween(durationMillis = 150)
-            ) { isEditingPedal ->
-                if (isEditingPedal && state.editingPedal != null && state.editingSlotIndex != null) {
-                    InlinePedalEditor(
-                        pedal = state.editingPedal!!,
-                        slotIndex = state.editingSlotIndex!!,
-                        onDismiss = { viewModel.handleIntent(PedalBoardIntent.ClosePedalEditor) },
-                        onColorChange = { color ->
-                            viewModel.handleIntent(
-                                PedalBoardIntent.UpdatePedalColor(state.editingSlotIndex!!, color)
-                            )
-                        },
-                        onKnobsChange = { knobs ->
-                            viewModel.handleIntent(
-                                PedalBoardIntent.UpdatePedalKnobs(state.editingSlotIndex!!, knobs)
-                            )
-                        },
-                        onPedalNameChange = { name ->
-                            viewModel.handleIntent(
-                                PedalBoardIntent.UpdatePedalName(state.editingSlotIndex!!, name)
-                            )
-                        },
-                        onKnobNameChange = { knobIndex, name ->
-                            viewModel.handleIntent(
-                                PedalBoardIntent.UpdateKnobName(state.editingSlotIndex!!, knobIndex, name)
-                            )
-                        }
-                    )
-                } else {
-                    PedalboardInfoEditor(
-                        name = state.name,
-                        columns = state.columns,
-                        rows = state.rows,
-                        pedalCount = state.pedalCount,
-                        totalSlots = state.totalSlots,
-                        nameError = state.nameError,
-                        onNameChange = { viewModel.handleIntent(PedalBoardIntent.UpdateName(it)) },
-                        onColumnsChange = { newColumns ->
-                            viewModel.handleIntent(PedalBoardIntent.UpdateLayout(newColumns, state.rows))
-                        },
-                        onRowsChange = { newRows ->
-                            viewModel.handleIntent(PedalBoardIntent.UpdateLayout(state.columns, newRows))
-                        }
-                    )
-                }
+            if (state.editingSlotIndex != null && state.editingPedal != null) {
+                InlinePedalEditor(
+                    pedal = state.editingPedal!!,
+                    slotIndex = state.editingSlotIndex!!,
+                    onDismiss = { viewModel.handleIntent(PedalBoardIntent.ClosePedalEditor) },
+                    onColorChange = { color ->
+                        viewModel.handleIntent(
+                            PedalBoardIntent.UpdatePedalColor(state.editingSlotIndex!!, color)
+                        )
+                    },
+                    onKnobsChange = { knobs ->
+                        viewModel.handleIntent(
+                            PedalBoardIntent.UpdatePedalKnobs(state.editingSlotIndex!!, knobs)
+                        )
+                    },
+                    onPedalNameChange = { name ->
+                        viewModel.handleIntent(
+                            PedalBoardIntent.UpdatePedalName(state.editingSlotIndex!!, name)
+                        )
+                    },
+                    onKnobNameChange = { knobIndex, name ->
+                        viewModel.handleIntent(
+                            PedalBoardIntent.UpdateKnobName(state.editingSlotIndex!!, knobIndex, name)
+                        )
+                    }
+                )
+            } else {
+                PedalboardInfoEditor(
+                    name = state.name,
+                    columns = state.columns,
+                    rows = state.rows,
+                    pedalCount = state.pedalCount,
+                    totalSlots = state.totalSlots,
+                    nameError = state.nameError,
+                    onNameChange = { viewModel.handleIntent(PedalBoardIntent.UpdateName(it)) },
+                    onColumnsChange = { newColumns ->
+                        viewModel.handleIntent(PedalBoardIntent.UpdateLayout(newColumns, state.rows))
+                    },
+                    onRowsChange = { newRows ->
+                        viewModel.handleIntent(PedalBoardIntent.UpdateLayout(state.columns, newRows))
+                    }
+                )
             }
         }
     }
