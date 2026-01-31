@@ -1,6 +1,7 @@
 package com.haero.tonestore.presentation.ui.home
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -24,6 +25,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -69,6 +74,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.ToneSetting
+import com.haero.tonestore.presentation.ui.home.components.GridToneSettingCard
+import com.haero.tonestore.presentation.ui.home.components.SortFilterBar
 import com.haero.tonestore.presentation.ui.home.components.ToneSettingCard
 import com.haero.tonestore.presentation.viewmodel.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -135,6 +142,15 @@ fun HomeScreen(
                 onSearchActiveChange = { viewModel.handleIntent(HomeIntent.SetSearchActive(it)) }
             )
 
+            if (state.toneSettings.isNotEmpty()) {
+                SortFilterBar(
+                    viewMode = state.viewMode,
+                    sortOption = state.sortOption,
+                    onViewModeChange = { viewModel.handleIntent(HomeIntent.SetViewMode(it)) },
+                    onSortOptionChange = { viewModel.handleIntent(HomeIntent.SetSortOption(it)) }
+                )
+            }
+
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
                     state.isLoading -> {
@@ -160,19 +176,40 @@ fun HomeScreen(
                         )
                     }
                     else -> {
-                        ToneSettingList(
-                            toneSettings = state.filteredToneSettings,
-                            listState = listState,
-                            onItemClick = { id ->
-                                viewModel.handleIntent(HomeIntent.SelectToneSetting(id))
-                            },
-                            onDelete = { id ->
-                                viewModel.handleIntent(HomeIntent.DeleteToneSetting(id))
-                            },
-                            onFavoriteClick = { id ->
-                                viewModel.handleIntent(HomeIntent.ToggleFavorite(id))
+                        Crossfade(
+                            targetState = state.viewMode,
+                            label = "viewModeTransition",
+                            animationSpec = tween(durationMillis = 300)
+                        ) { viewMode ->
+                            when (viewMode) {
+                                ViewMode.LIST -> {
+                                    ToneSettingList(
+                                        toneSettings = state.filteredToneSettings,
+                                        listState = listState,
+                                        onItemClick = { id ->
+                                            viewModel.handleIntent(HomeIntent.SelectToneSetting(id))
+                                        },
+                                        onDelete = { id ->
+                                            viewModel.handleIntent(HomeIntent.DeleteToneSetting(id))
+                                        },
+                                        onFavoriteClick = { id ->
+                                            viewModel.handleIntent(HomeIntent.ToggleFavorite(id))
+                                        }
+                                    )
+                                }
+                                ViewMode.GRID -> {
+                                    ToneSettingGrid(
+                                        toneSettings = state.filteredToneSettings,
+                                        onItemClick = { id ->
+                                            viewModel.handleIntent(HomeIntent.SelectToneSetting(id))
+                                        },
+                                        onFavoriteClick = { id ->
+                                            viewModel.handleIntent(HomeIntent.ToggleFavorite(id))
+                                        }
+                                    )
+                                }
                             }
-                        )
+                        }
                     }
                 }
             }
@@ -510,6 +547,39 @@ private fun ToneSettingList(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun ToneSettingGrid(
+    toneSettings: List<ToneSetting>,
+    onItemClick: (String) -> Unit,
+    onFavoriteClick: (String) -> Unit
+) {
+    val gridState = rememberLazyGridState()
+
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(160.dp),
+        state = gridState,
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(
+            items = toneSettings,
+            key = { it.id }
+        ) { toneSetting ->
+            GridToneSettingCard(
+                toneSetting = toneSetting,
+                onClick = { onItemClick(toneSetting.id) },
+                onFavoriteClick = { onFavoriteClick(toneSetting.id) },
+                sharedElementKey = toneSetting.id
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(80.dp))
+        }
     }
 }
 
