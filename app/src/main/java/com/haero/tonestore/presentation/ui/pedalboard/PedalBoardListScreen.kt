@@ -57,7 +57,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.SavedPedalBoard
-import com.haero.tonestore.presentation.ui.pedalboard.components.MiniPedalBoardPreview
+import com.haero.tonestore.presentation.ui.pedalboard.components.PedalBoardPreview
 import com.haero.tonestore.presentation.viewmodel.PedalBoardListViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -290,7 +290,7 @@ private fun PedalBoardCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            MiniPedalBoardPreview(
+            PedalBoardPreview(
                 slots = pedalBoard.slots,
                 columns = pedalBoard.columns,
                 rows = pedalBoard.rows,
