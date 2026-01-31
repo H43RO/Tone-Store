@@ -59,6 +59,8 @@ class PedalBoardViewModel(
             is PedalBoardIntent.UpdatePedalKnobs -> updatePedalKnobs(intent.slotIndex, intent.knobs)
             is PedalBoardIntent.UpdatePedalName -> updatePedalName(intent.slotIndex, intent.name)
             is PedalBoardIntent.UpdateKnobName -> updateKnobName(intent.slotIndex, intent.knobIndex, intent.name)
+            is PedalBoardIntent.SelectExpressionPedal -> selectExpressionPedal(intent.pedal)
+            is PedalBoardIntent.RemoveExpressionPedal -> removeExpressionPedal()
             is PedalBoardIntent.SavePedalBoard -> savePedalBoard()
             is PedalBoardIntent.DeletePedalBoard -> deletePedalBoard()
             is PedalBoardIntent.NavigationHandled -> clearNavigation()
@@ -85,7 +87,8 @@ class PedalBoardViewModel(
                             name = pedalBoard.name,
                             columns = pedalBoard.columns,
                             rows = pedalBoard.rows,
-                            slots = pedalBoard.slots
+                            slots = pedalBoard.slots,
+                            expressionPedal = pedalBoard.expressionPedal
                         )
                     }
                 } else {
@@ -268,6 +271,14 @@ class PedalBoardViewModel(
         _state.update { it.copy(slots = updatedSlots) }
     }
 
+    private fun selectExpressionPedal(pedal: Pedal) {
+        _state.update { it.copy(expressionPedal = pedal) }
+    }
+
+    private fun removeExpressionPedal() {
+        _state.update { it.copy(expressionPedal = null) }
+    }
+
     private fun savePedalBoard() {
         val currentState = _state.value
 
@@ -285,6 +296,7 @@ class PedalBoardViewModel(
                 columns = currentState.columns,
                 rows = currentState.rows,
                 slots = currentState.slots,
+                expressionPedal = currentState.expressionPedal,
                 createdAt = now,
                 updatedAt = now
             )

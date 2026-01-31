@@ -53,6 +53,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.Pedal
+import com.haero.tonestore.presentation.ui.pedalboard.components.ExpressionPedalSelectionDialog
+import com.haero.tonestore.presentation.ui.pedalboard.components.ExpressionPedalZone
 import com.haero.tonestore.presentation.ui.pedalboard.components.PedalBoardGrid
 import com.haero.tonestore.presentation.ui.pedalboard.components.PedalEditorBottomSheet
 import com.haero.tonestore.presentation.ui.pedalboard.components.PresetPedalSelectionDialog
@@ -76,6 +78,7 @@ fun PedalBoardScreen(
     var showAddPedalDialog by remember { mutableStateOf(false) }
     var addingToSlotIndex by remember { mutableStateOf<Int?>(null) }
     var showCustomPedalDialog by remember { mutableStateOf(false) }
+    var showExpressionPedalDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(editingId) {
         editingId?.let {
@@ -207,22 +210,34 @@ fun PedalBoardScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                PedalBoardGrid(
-                    slots = state.slots,
-                    columns = state.columns,
-                    rows = state.rows,
-                    onSlotClick = { slotIndex ->
-                        viewModel.handleIntent(PedalBoardIntent.OpenPedalEditor(slotIndex))
-                    },
-                    onAddClick = { slotIndex ->
-                        addingToSlotIndex = slotIndex
-                        showAddPedalDialog = true
-                    },
-                    onSwapSlots = { fromIndex, toIndex ->
-                        viewModel.handleIntent(PedalBoardIntent.SwapSlots(fromIndex, toIndex))
-                    },
-                    isEditable = true
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    PedalBoardGrid(
+                        slots = state.slots,
+                        columns = state.columns,
+                        rows = state.rows,
+                        onSlotClick = { slotIndex ->
+                            viewModel.handleIntent(PedalBoardIntent.OpenPedalEditor(slotIndex))
+                        },
+                        onAddClick = { slotIndex ->
+                            addingToSlotIndex = slotIndex
+                            showAddPedalDialog = true
+                        },
+                        onSwapSlots = { fromIndex, toIndex ->
+                            viewModel.handleIntent(PedalBoardIntent.SwapSlots(fromIndex, toIndex))
+                        },
+                        isEditable = true,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    ExpressionPedalZone(
+                        expressionPedal = state.expressionPedal,
+                        onSelectPedal = { showExpressionPedalDialog = true },
+                        onRemovePedal = { viewModel.handleIntent(PedalBoardIntent.RemoveExpressionPedal) }
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(32.dp))
             }
@@ -292,6 +307,24 @@ fun PedalBoardScreen(
             onDismiss = {
                 showCustomPedalDialog = false
                 addingToSlotIndex = null
+            }
+        )
+    }
+
+    if (showExpressionPedalDialog) {
+        ExpressionPedalSelectionDialog(
+            onSelectWah = {
+                val wahPedal = state.presetPedals.find { it.name == "Wah" }
+                wahPedal?.let { viewModel.handleIntent(PedalBoardIntent.SelectExpressionPedal(it)) }
+                showExpressionPedalDialog = false
+            },
+            onSelectWhammy = {
+                val whammyPedal = state.presetPedals.find { it.name == "Whammy" }
+                whammyPedal?.let { viewModel.handleIntent(PedalBoardIntent.SelectExpressionPedal(it)) }
+                showExpressionPedalDialog = false
+            },
+            onDismiss = {
+                showExpressionPedalDialog = false
             }
         )
     }

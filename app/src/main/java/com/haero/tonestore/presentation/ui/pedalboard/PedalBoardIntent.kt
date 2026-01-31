@@ -44,6 +44,10 @@ sealed interface PedalBoardIntent {
 
     data class UpdateKnobName(val slotIndex: Int, val knobIndex: Int, val name: String) : PedalBoardIntent
 
+    data class SelectExpressionPedal(val pedal: Pedal) : PedalBoardIntent
+
+    data object RemoveExpressionPedal : PedalBoardIntent
+
     data object SavePedalBoard : PedalBoardIntent
 
     data object DeletePedalBoard : PedalBoardIntent

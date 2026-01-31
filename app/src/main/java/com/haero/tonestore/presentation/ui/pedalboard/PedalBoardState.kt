@@ -12,6 +12,7 @@ data class PedalBoardState(
     val columns: Int = SavedPedalBoard.DEFAULT_COLUMNS,
     val rows: Int = SavedPedalBoard.DEFAULT_ROWS,
     val slots: List<Pedal?> = List(SavedPedalBoard.DEFAULT_COLUMNS * SavedPedalBoard.DEFAULT_ROWS) { null },
+    val expressionPedal: Pedal? = null,
 
     val presetPedals: List<Pedal> = emptyList(),
 
