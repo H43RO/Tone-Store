@@ -11,11 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalType
 import com.haero.tonestore.presentation.ui.components.PedalColorUtils
@@ -34,7 +36,7 @@ fun PedalIconsRow(
 ) {
     if (pedals.isEmpty()) {
         Text(
-            text = "No pedals",
+            text = stringResource(R.string.no_pedals_short),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = modifier

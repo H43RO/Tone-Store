@@ -99,8 +99,29 @@
     <string name="empty_state_subtitle">첫 번째 톤 세팅을 만들고\n완벽한 사운드를 저장해보세요</string>
     <string name="empty_search_subtitle">다른 검색어를 시도해보세요</string>
 
-    <!-- Pedal Board Screen -->
-    <string name="pedalboards_saved_count">%d개의 보드 저장됨</string>
-    <string name="empty_pedalboard_title">저장된 페달보드가 없어요</string>
-    <string name="empty_pedalboard_subtitle">첫 번째 페달보드를 만들고\n이펙터를 정리해보세요</string>
-</resources>
+     <!-- Pedal Board Screen -->
+     <string name="pedalboards_saved_count">%d개의 보드 저장됨</string>
+     <string name="empty_pedalboard_title">저장된 페달보드가 없어요</string>
+     <string name="empty_pedalboard_subtitle">첫 번째 페달보드를 만들고\n이펙터를 정리해보세요</string>
+ 
+     <!-- View Mode Toggle -->
+     <string name="view_list">리스트 보기</string>
+     <string name="view_grid">그리드 보기</string>
+ 
+     <!-- Sort Options -->
+     <string name="sort_by">정렬</string>
+     <string name="sort_favorites_first">즐겨찾기 우선</string>
+     <string name="sort_date_first">최근 순</string>
+ 
+     <!-- Pedal Preview -->
+     <string name="no_pedals_short">페달 없음</string>
+ 
+     <!-- Enhanced Empty States (v2 - new conversational versions) -->
+     <string name="empty_state_title_v2">톤 라이브러리가 비어있어요</string>
+     <string name="empty_state_subtitle_v2">기타 톤 세팅 컬렉션을 만들어보세요. 연주하는 모든 곡에 맞는 페달, 앰프, 기타 설정을 저장하세요.</string>
+     <string name="add_first_tone">첫 번째 톤 추가하기</string>
+     <string name="no_results_found">검색 결과가 없습니다</string>
+     <string name="empty_search_subtitle_v2">다른 검색어를 시도해보세요</string>
+     <string name="clear_search_button">검색 지우기</string>
+ </resources>
+ 

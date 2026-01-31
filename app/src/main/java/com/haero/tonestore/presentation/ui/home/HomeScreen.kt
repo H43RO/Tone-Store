@@ -388,15 +388,14 @@ private fun EmptyState(
             }
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "Your Tone Library is Empty",
+                text = stringResource(R.string.empty_state_title_v2),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Start building your collection of guitar tone settings. " +
-                    "Save your favorite pedal, amp, and guitar configurations for every song you play.",
+                text = stringResource(R.string.empty_state_subtitle_v2),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -413,7 +412,7 @@ private fun EmptyState(
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Add Your First Tone")
+                Text(stringResource(R.string.add_first_tone))
             }
         }
     }
@@ -453,14 +452,14 @@ private fun EmptySearchState(
             }
             Spacer(modifier = Modifier.height(20.dp))
             Text(
-                text = "No Results Found",
+                text = stringResource(R.string.no_results_found),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Try searching with a different keyword",
+                text = stringResource(R.string.empty_search_subtitle_v2),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -475,7 +474,7 @@ private fun EmptySearchState(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("Clear Search")
+                Text(stringResource(R.string.clear_search_button))
             }
         }
     }

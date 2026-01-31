@@ -30,8 +30,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.haero.tonestore.R
 import com.haero.tonestore.presentation.ui.home.SortOption
 import com.haero.tonestore.presentation.ui.home.ViewMode
 
@@ -72,13 +74,13 @@ fun SortFilterBar(
             ViewToggleButton(
                 isSelected = viewMode == ViewMode.LIST,
                 icon = Icons.Default.ViewList,
-                contentDescription = "List view",
+                contentDescription = stringResource(R.string.view_list),
                 onClick = { onViewModeChange(ViewMode.LIST) }
             )
             ViewToggleButton(
                 isSelected = viewMode == ViewMode.GRID,
                 icon = Icons.Default.GridView,
-                contentDescription = "Grid view",
+                contentDescription = stringResource(R.string.view_grid),
                 onClick = { onViewModeChange(ViewMode.GRID) }
             )
         }
@@ -91,8 +93,8 @@ fun SortFilterBar(
                 label = {
                     Text(
                         text = when (sortOption) {
-                            SortOption.FAVORITES_FIRST -> "Favorites first"
-                            SortOption.DATE_FIRST -> "Recent first"
+                            SortOption.FAVORITES_FIRST -> stringResource(R.string.sort_favorites_first)
+                            SortOption.DATE_FIRST -> stringResource(R.string.sort_date_first)
                         }
                     )
                 }
@@ -102,14 +104,14 @@ fun SortFilterBar(
                 onDismissRequest = { sortExpanded = false }
             ) {
                 DropdownMenuItem(
-                    text = { Text("Favorites first") },
+                    text = { Text(stringResource(R.string.sort_favorites_first)) },
                     onClick = {
                         onSortOptionChange(SortOption.FAVORITES_FIRST)
                         sortExpanded = false
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text("Recent first") },
+                    text = { Text(stringResource(R.string.sort_date_first)) },
                     onClick = {
                         onSortOptionChange(SortOption.DATE_FIRST)
                         sortExpanded = false

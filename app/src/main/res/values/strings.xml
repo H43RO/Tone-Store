@@ -99,8 +99,28 @@
     <string name="empty_state_subtitle">Create your first tone setting\nand save your perfect sound</string>
     <string name="empty_search_subtitle">Try a different search term</string>
 
-    <!-- Pedal Board Screen -->
-    <string name="pedalboards_saved_count">%d boards saved</string>
-    <string name="empty_pedalboard_title">No pedal boards yet</string>
-    <string name="empty_pedalboard_subtitle">Create your first pedal board\nand organize your effects</string>
-</resources>
+     <!-- Pedal Board Screen -->
+     <string name="pedalboards_saved_count">%d boards saved</string>
+     <string name="empty_pedalboard_title">No pedal boards yet</string>
+     <string name="empty_pedalboard_subtitle">Create your first pedal board\nand organize your effects</string>
+ 
+     <!-- View Mode Toggle -->
+     <string name="view_list">List view</string>
+     <string name="view_grid">Grid view</string>
+ 
+     <!-- Sort Options -->
+     <string name="sort_by">Sort by</string>
+     <string name="sort_favorites_first">Favorites first</string>
+     <string name="sort_date_first">Recent first</string>
+ 
+     <!-- Pedal Preview -->
+     <string name="no_pedals_short">No pedals</string>
+ 
+     <!-- Enhanced Empty States (v2 - new conversational versions) -->
+     <string name="empty_state_title_v2">Your Tone Library is Empty</string>
+     <string name="empty_state_subtitle_v2">Start building your collection of guitar tone settings. Save your favorite pedal, amp, and guitar configurations for every song you play.</string>
+     <string name="add_first_tone">Add Your First Tone</string>
+     <string name="no_results_found">No Results Found</string>
+     <string name="empty_search_subtitle_v2">Try searching with a different keyword</string>
+     <string name="clear_search_button">Clear Search</string>
+ </resources>
