@@ -215,7 +215,7 @@ Build Verification
 
 ---
 
-- [ ] 2. InlinePedalEditor: Surface 제거, 인라인 스타일로 변경
+- [x] 2. InlinePedalEditor: Surface 제거, 인라인 스타일로 변경
 
   **What to do**:
   1. 최상위 `Surface(...)` 컴포저블을 `Column(...)`으로 교체
@@ -297,7 +297,7 @@ Build Verification
 
 ---
 
-- [ ] 3. PedalSlot: 삭제 버튼 위치/색상 변경
+- [x] 3. PedalSlot: 삭제 버튼 위치/색상 변경
 
   **What to do**:
   1. 삭제 버튼 Box의 `Alignment.TopEnd` → `Alignment.Center`로 변경
@@ -408,7 +408,7 @@ Build Verification
 
 ---
 
-- [ ] 4. PedalBoardScreen: Crossfade 제거, 즉시 전환으로 변경
+- [x] 4. PedalBoardScreen: Crossfade 제거, 즉시 전환으로 변경
 
   **What to do**:
   1. `Crossfade(...)` 컴포저블을 단순 `if-else`로 교체
@@ -518,7 +518,7 @@ Build Verification
 
 ---
 
-- [ ] 5. 최종 빌드 검증 및 테스트
+- [x] 5. 최종 빌드 검증 및 테스트
 
   **What to do**:
   1. 전체 빌드 검증
