@@ -1,5 +1,6 @@
 package com.haero.tonestore.presentation.ui.pedalboard
 
+import com.haero.tonestore.domain.model.Knob
 import com.haero.tonestore.domain.model.Pedal
 
 sealed interface PedalBoardIntent {
@@ -36,6 +37,8 @@ sealed interface PedalBoardIntent {
     data object ClosePedalEditor : PedalBoardIntent
 
     data class UpdatePedalColor(val slotIndex: Int, val color: Long?) : PedalBoardIntent
+
+    data class UpdatePedalKnobs(val slotIndex: Int, val knobs: List<Knob>) : PedalBoardIntent
 
     data object SavePedalBoard : PedalBoardIntent
 

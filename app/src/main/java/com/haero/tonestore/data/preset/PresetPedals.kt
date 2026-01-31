@@ -19,7 +19,17 @@ object PresetPedals {
         createDelay(),
         createReverb(),
         createCompressor(),
-        createWah()
+        createWah(),
+        createPhaser(),
+        createFlanger(),
+        createTremolo(),
+        createOctave(),
+        createBoost(),
+        createNoiseGate(),
+        createTuner(),
+        createEQ(),
+        createBassPreamp(),
+        createWhammy()
     )
 
     /**
@@ -35,7 +45,8 @@ object PresetPedals {
             Knob(name = "Tone", value = 5f),
             Knob(name = "Level", value = 5f)
         ),
-        order = 0
+        order = 0,
+        color = 0xFF3EB489
     )
 
     /**
@@ -51,7 +62,8 @@ object PresetPedals {
             Knob(name = "Tone", value = 5f),
             Knob(name = "Level", value = 5f)
         ),
-        order = 0
+        order = 0,
+        color = 0xFFFF9800
     )
 
     /**
@@ -67,7 +79,8 @@ object PresetPedals {
             Knob(name = "Tone", value = 5f),
             Knob(name = "Level", value = 5f)
         ),
-        order = 0
+        order = 0,
+        color = 0xFF9E9E9E
     )
 
     /**
@@ -83,7 +96,8 @@ object PresetPedals {
             Knob(name = "Depth", value = 5f),
             Knob(name = "Level", value = 5f)
         ),
-        order = 0
+        order = 0,
+        color = 0xFF2196F3
     )
 
     /**
@@ -99,7 +113,8 @@ object PresetPedals {
             Knob(name = "Feedback", value = 4f),
             Knob(name = "Mix", value = 4f)
         ),
-        order = 0
+        order = 0,
+        color = 0xFF42A5F5
     )
 
     /**
@@ -115,7 +130,8 @@ object PresetPedals {
             Knob(name = "Tone", value = 5f),
             Knob(name = "Mix", value = 4f)
         ),
-        order = 0
+        order = 0,
+        color = 0xFF64B5F6
     )
 
     /**
@@ -131,7 +147,8 @@ object PresetPedals {
             Knob(name = "Level", value = 5f),
             Knob(name = "Attack", value = 5f)
         ),
-        order = 0
+        order = 0,
+        color = 0xFFE53935
     )
 
     /**
@@ -147,6 +164,133 @@ object PresetPedals {
             Knob(name = "Q", value = 5f),
             Knob(name = "Level", value = 5f)
         ),
-        order = 0
+        order = 0,
+        color = 0xFF212121
+    )
+
+    private fun createPhaser() = Pedal(
+        id = UUID.randomUUID().toString(),
+        name = "Phaser",
+        type = PedalType.PRESET,
+        knobs = listOf(
+            Knob(name = "Rate", value = 4f),
+            Knob(name = "Depth", value = 5f)
+        ),
+        order = 0,
+        color = 0xFFFF5722
+    )
+
+    private fun createFlanger() = Pedal(
+        id = UUID.randomUUID().toString(),
+        name = "Flanger",
+        type = PedalType.PRESET,
+        knobs = listOf(
+            Knob(name = "Rate", value = 4f),
+            Knob(name = "Depth", value = 5f),
+            Knob(name = "Regen", value = 5f),
+            Knob(name = "Manual", value = 5f)
+        ),
+        order = 0,
+        color = 0xFF3F51B5
+    )
+
+    private fun createTremolo() = Pedal(
+        id = UUID.randomUUID().toString(),
+        name = "Tremolo",
+        type = PedalType.PRESET,
+        knobs = listOf(
+            Knob(name = "Rate", value = 4f),
+            Knob(name = "Depth", value = 5f),
+            Knob(name = "Wave", value = 5f)
+        ),
+        order = 0,
+        color = 0xFFFFEB3B
+    )
+
+    private fun createOctave() = Pedal(
+        id = UUID.randomUUID().toString(),
+        name = "Octave",
+        type = PedalType.PRESET,
+        knobs = listOf(
+            Knob(name = "Dry", value = 5f),
+            Knob(name = "Oct1", value = 5f),
+            Knob(name = "Oct2", value = 5f)
+        ),
+        order = 0,
+        color = 0xFF1E88E5
+    )
+
+    private fun createBoost() = Pedal(
+        id = UUID.randomUUID().toString(),
+        name = "Boost",
+        type = PedalType.PRESET,
+        knobs = listOf(
+            Knob(name = "Gain", value = 5f)
+        ),
+        order = 0,
+        color = 0xFFFFC107
+    )
+
+    private fun createNoiseGate() = Pedal(
+        id = UUID.randomUUID().toString(),
+        name = "Noise Gate",
+        type = PedalType.PRESET,
+        knobs = listOf(
+            Knob(name = "Threshold", value = 5f),
+            Knob(name = "Decay", value = 5f)
+        ),
+        order = 0,
+        color = 0xFF607D8B
+    )
+
+    private fun createTuner() = Pedal(
+        id = UUID.randomUUID().toString(),
+        name = "Tuner",
+        type = PedalType.PRESET,
+        knobs = emptyList(),
+        order = 0,
+        color = 0xFFFAFAFA
+    )
+
+    private fun createEQ() = Pedal(
+        id = UUID.randomUUID().toString(),
+        name = "EQ",
+        type = PedalType.PRESET,
+        knobs = listOf(
+            Knob(name = "Band1", value = 5f),
+            Knob(name = "Band2", value = 5f),
+            Knob(name = "Band3", value = 5f),
+            Knob(name = "Band4", value = 5f),
+            Knob(name = "Band5", value = 5f)
+        ),
+        order = 0,
+        color = 0xFFCFD8DC
+    )
+
+    private fun createBassPreamp() = Pedal(
+        id = UUID.randomUUID().toString(),
+        name = "Bass Preamp",
+        type = PedalType.PRESET,
+        knobs = listOf(
+            Knob(name = "Blend", value = 5f),
+            Knob(name = "Drive", value = 5f),
+            Knob(name = "Level", value = 5f),
+            Knob(name = "Bass", value = 5f),
+            Knob(name = "Treble", value = 5f)
+        ),
+        order = 0,
+        color = 0xFFFFD54F
+    )
+
+    private fun createWhammy() = Pedal(
+        id = UUID.randomUUID().toString(),
+        name = "Whammy",
+        type = PedalType.PRESET,
+        knobs = listOf(
+            Knob(name = "Shift", value = 5f),
+            Knob(name = "Mode", value = 5f)
+        ),
+        order = 0,
+        color = 0xFFD32F2F
     )
 }

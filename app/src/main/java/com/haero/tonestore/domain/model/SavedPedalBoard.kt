@@ -9,6 +9,7 @@ package com.haero.tonestore.domain.model
  * @property columns 열 개수 (가로 페달 수)
  * @property rows 행 개수 (세로 줄 수)
  * @property slots 슬롯 배열 (columns x rows 크기) - null이면 빈 슬롯
+ * @property expressionPedal 표현식 페달 (Wah/Whammy) - null이면 없음
  * @property createdAt 생성 시간
  * @property updatedAt 수정 시간
  */
@@ -18,6 +19,7 @@ data class SavedPedalBoard(
     val columns: Int = DEFAULT_COLUMNS,
     val rows: Int = DEFAULT_ROWS,
     val slots: List<Pedal?> = List(DEFAULT_COLUMNS * DEFAULT_ROWS) { null },
+    val expressionPedal: Pedal? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 ) {

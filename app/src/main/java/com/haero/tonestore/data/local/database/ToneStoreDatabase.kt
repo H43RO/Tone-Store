@@ -14,7 +14,7 @@ import com.haero.tonestore.data.local.entity.ToneSettingEntity
  */
 @Database(
     entities = [ToneSettingEntity::class, SavedPedalBoardEntity::class],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class ToneStoreDatabase : RoomDatabase() {
@@ -52,6 +52,13 @@ abstract class ToneStoreDatabase : RoomDatabase() {
                 // columns, rows 컬럼 추가 (기본값 5x2)
                 db.execSQL("ALTER TABLE saved_pedal_boards ADD COLUMN columns INTEGER NOT NULL DEFAULT 5")
                 db.execSQL("ALTER TABLE saved_pedal_boards ADD COLUMN rows INTEGER NOT NULL DEFAULT 2")
+            }
+        }
+
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // expressionPedalJson 컬럼 추가 (선택사항)
+                db.execSQL("ALTER TABLE saved_pedal_boards ADD COLUMN expressionPedalJson TEXT DEFAULT NULL")
             }
         }
     }

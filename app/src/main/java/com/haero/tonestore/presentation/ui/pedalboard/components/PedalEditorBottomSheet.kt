@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
@@ -25,13 +26,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.haero.tonestore.R
+import com.haero.tonestore.domain.model.Knob
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.presentation.ui.components.RotaryKnob
 
@@ -44,8 +49,13 @@ fun PedalEditorBottomSheet(
     onDismiss: () -> Unit,
     onRemove: () -> Unit,
     onColorChange: (Long?) -> Unit,
+    onKnobsChange: (List<Knob>) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Create mutable state for knobs management
+    val knobsList = remember {
+        mutableStateListOf(*pedal.knobs.toTypedArray())
+    }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -83,7 +93,7 @@ fun PedalEditorBottomSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (pedal.knobs.isNotEmpty()) {
+            if (knobsList.isNotEmpty()) {
                 Text(
                     text = stringResource(R.string.knobs),
                     style = MaterialTheme.typography.titleMedium,
@@ -97,14 +107,53 @@ fun PedalEditorBottomSheet(
                     horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    pedal.knobs.forEach { knob ->
-                        RotaryKnob(
-                            value = 5f, // 기본값 중간으로 표시
-                            onValueChange = { }, // 읽기 전용
-                            label = knob.name,
-                            size = 56.dp,
-                            enabled = false // 비활성화하여 조작 불가
+                    knobsList.forEachIndexed { index, knob ->
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            RotaryKnob(
+                                value = 5f,
+                                onValueChange = { },
+                                label = knob.name,
+                                size = 56.dp,
+                                enabled = false
+                            )
+                            IconButton(
+                                onClick = {
+                                    if (knobsList.size > 1) {
+                                        knobsList.removeAt(index)
+                                        onKnobsChange(knobsList.toList())
+                                    }
+                                },
+                                modifier = Modifier.size(32.dp),
+                                enabled = knobsList.size > 1
+                            ) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = "노브 삭제",
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (knobsList.size < 6) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    TextButton(
+                        onClick = {
+                            knobsList.add(Knob(name = "Knob ${knobsList.size + 1}", value = 5f))
+                            onKnobsChange(knobsList.toList())
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.add_knob))
                     }
                 }
 

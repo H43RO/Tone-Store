@@ -242,6 +242,11 @@ fun PedalBoardScreen(
                 viewModel.handleIntent(
                     PedalBoardIntent.UpdatePedalColor(state.editingSlotIndex!!, color)
                 )
+            },
+            onKnobsChange = { knobs ->
+                viewModel.handleIntent(
+                    PedalBoardIntent.UpdatePedalKnobs(state.editingSlotIndex!!, knobs)
+                )
             }
         )
     }
