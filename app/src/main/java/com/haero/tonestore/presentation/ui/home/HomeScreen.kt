@@ -5,10 +5,12 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,11 +36,13 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -141,11 +145,17 @@ fun HomeScreen(
                     }
                     state.filteredToneSettings.isEmpty() && state.searchQuery.isNotBlank() -> {
                         EmptySearchState(
+                            onClearSearch = {
+                                viewModel.handleIntent(HomeIntent.UpdateSearchQuery(""))
+                            },
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }
                     state.toneSettings.isEmpty() -> {
                         EmptyState(
+                            onCreateClick = {
+                                viewModel.handleIntent(HomeIntent.NavigateToCreate)
+                            },
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }
@@ -308,76 +318,129 @@ private fun HomeHeader(
 }
 
 @Composable
-private fun EmptyState(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+private fun EmptyState(
+    onCreateClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AnimatedVisibility(
+        visible = true,
+        enter = fadeIn(animationSpec = tween(durationMillis = 600)) +
+            slideInVertically(
+                initialOffsetY = { it / 4 },
+                animationSpec = tween(durationMillis = 600)
+            ),
+        modifier = modifier
     ) {
-        Surface(
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-            modifier = Modifier.size(120.dp)
+        Column(
+            modifier = Modifier.padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(contentAlignment = Alignment.Center) {
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                modifier = Modifier.size(120.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.MusicNote,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(56.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "Your Tone Library is Empty",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Start building your collection of guitar tone settings. " +
+                    "Save your favorite pedal, amp, and guitar configurations for every song you play.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                lineHeight = 22.sp
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(
+                onClick = onCreateClick,
+                shape = RoundedCornerShape(16.dp)
+            ) {
                 Icon(
-                    imageVector = Icons.Default.MusicNote,
+                    imageVector = Icons.Default.Add,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(56.dp)
+                    modifier = Modifier.size(20.dp)
                 )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Add Your First Tone")
             }
         }
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = stringResource(R.string.empty_state_title),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = stringResource(R.string.empty_state_subtitle),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            lineHeight = 22.sp
-        )
     }
 }
 
 @Composable
-private fun EmptySearchState(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+private fun EmptySearchState(
+    onClearSearch: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AnimatedVisibility(
+        visible = true,
+        enter = fadeIn(animationSpec = tween(durationMillis = 400)) +
+            slideInVertically(
+                initialOffsetY = { it / 4 },
+                animationSpec = tween(durationMillis = 400)
+            ),
+        modifier = modifier
     ) {
-        Surface(
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.size(100.dp)
+        Column(
+            modifier = Modifier.padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(contentAlignment = Alignment.Center) {
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.size(100.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Outlined.SearchOff,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(48.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = "No Results Found",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Try searching with a different keyword",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            OutlinedButton(
+                onClick = onClearSearch,
+                shape = RoundedCornerShape(12.dp)
+            ) {
                 Icon(
-                    imageVector = Icons.Outlined.SearchOff,
+                    imageVector = Icons.Default.Close,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier.size(18.dp)
                 )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Clear Search")
             }
         }
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            text = stringResource(R.string.no_search_results),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = stringResource(R.string.empty_search_subtitle),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
     }
 }
 
@@ -527,6 +590,14 @@ private fun HomeHeaderPreview() {
 @Composable
 private fun EmptyStatePreview() {
     com.haero.tonestore.ui.theme.ToneStoreTheme {
-        EmptyState()
+        EmptyState(onCreateClick = {})
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun EmptySearchStatePreview() {
+    com.haero.tonestore.ui.theme.ToneStoreTheme {
+        EmptySearchState(onClearSearch = {})
     }
 }
