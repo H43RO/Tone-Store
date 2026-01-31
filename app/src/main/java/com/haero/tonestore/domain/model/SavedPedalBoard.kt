@@ -40,7 +40,7 @@ data class SavedPedalBoard(
     val pedalCount: Int get() = slots.count { it != null }
 
     companion object {
-        const val DEFAULT_COLUMNS = 5
+        const val DEFAULT_COLUMNS = 4
         const val DEFAULT_ROWS = 2
         const val MIN_COLUMNS = 2
         const val MAX_COLUMNS = 8

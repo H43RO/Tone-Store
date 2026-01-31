@@ -62,7 +62,7 @@ fun PedalSlot(
     val backgroundColor = when {
         isDropTarget -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
         pedal != null -> Color.Transparent
-        else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+        else -> MaterialTheme.colorScheme.background
     }
 
     Box(

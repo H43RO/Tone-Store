@@ -4,7 +4,6 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -47,7 +46,7 @@ fun PedalBoardGrid(
         "slots must have at least $totalSlots elements (got ${slots.size})"
     }
 
-    val slotHeight = 120.dp
+    val slotHeight = 140.dp
     val horizontalSpacing = 8.dp
     val verticalSpacing = 12.dp
 
@@ -58,14 +57,13 @@ fun PedalBoardGrid(
 
     val slotPositions = remember { mutableMapOf<Int, Pair<Float, Float>>() }
 
-    val gridHeight = (slotHeight + verticalSpacing) * rows - verticalSpacing + 32.dp
+    val gridHeight = (slotHeight + verticalSpacing) * rows - verticalSpacing
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(columns),
         modifier = modifier
             .fillMaxWidth()
             .height(gridHeight),
-        contentPadding = PaddingValues(16.dp),
         horizontalArrangement = Arrangement.spacedBy(horizontalSpacing),
         verticalArrangement = Arrangement.spacedBy(verticalSpacing),
         userScrollEnabled = false

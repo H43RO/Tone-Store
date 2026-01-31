@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -82,21 +83,10 @@ fun ExpressionPedalZone(
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(8.dp)
+            verticalArrangement = Arrangement.Bottom,
+            modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp, vertical = 16.dp)
         ) {
             if (expressionPedal != null) {
-                if (expressionPedal.color != null) {
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color(expressionPedal.color))
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-
                 Text(
                     text = expressionPedal.name,
                     style = MaterialTheme.typography.bodySmall,

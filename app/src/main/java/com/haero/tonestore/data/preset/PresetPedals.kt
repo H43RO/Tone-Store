@@ -165,7 +165,7 @@ object PresetPedals {
             Knob(name = "Level", value = 5f)
         ),
         order = 0,
-        color = 0xFF212121
+        color = 0xFFB0B0B0
     )
 
     private fun createPhaser() = Pedal(

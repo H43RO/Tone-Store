@@ -203,7 +203,7 @@ fun PedalBoardScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 val pedalCountText = stringResource(R.string.pedal_count, state.pedalCount)
                 val slotsText = stringResource(R.string.slots)
@@ -227,7 +227,7 @@ fun PedalBoardScreen(
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         PedalBoardGrid(
                             slots = state.slots,
@@ -249,7 +249,7 @@ fun PedalBoardScreen(
                             isEditable = true,
                             modifier = Modifier.weight(1f)
                         )
-
+                        Spacer(Modifier.width(8.dp))
                         ExpressionPedalZone(
                             expressionPedal = state.expressionPedal,
                             onSelectPedal = { showExpressionPedalDialog = true },
