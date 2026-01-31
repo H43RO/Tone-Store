@@ -1,6 +1,10 @@
 package com.haero.tonestore.presentation.ui.pedalboard
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -34,7 +37,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -50,7 +52,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.haero.tonestore.R
@@ -58,11 +59,11 @@ import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.presentation.ui.pedalboard.components.CableOverlay
 import com.haero.tonestore.presentation.ui.pedalboard.components.ExpressionPedalSelectionDialog
 import com.haero.tonestore.presentation.ui.pedalboard.components.ExpressionPedalZone
+import com.haero.tonestore.presentation.ui.pedalboard.components.InlinePedalEditor
+import com.haero.tonestore.presentation.ui.pedalboard.components.LayoutStepper
 import com.haero.tonestore.presentation.ui.pedalboard.components.PedalBoardGrid
-import com.haero.tonestore.presentation.ui.pedalboard.components.PedalEditorBottomSheet
 import com.haero.tonestore.presentation.ui.pedalboard.components.PresetPedalSelectionDialog
 import com.haero.tonestore.presentation.viewmodel.PedalBoardViewModel
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,8 +76,6 @@ fun PedalBoardScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var showAddPedalDialog by remember { mutableStateOf(false) }
     var addingToSlotIndex by remember { mutableStateOf<Int?>(null) }
@@ -133,87 +132,52 @@ fun PedalBoardScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 20.dp)
             ) {
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OutlinedTextField(
-                    value = state.name,
-                    onValueChange = { viewModel.handleIntent(PedalBoardIntent.UpdateName(it)) },
-                    label = { Text(stringResource(R.string.pedalboard_name)) },
-                    placeholder = { Text(stringResource(R.string.pedalboard_name_hint)) },
-                    singleLine = true,
-                    isError = state.nameError != null,
-                    supportingText = state.nameError?.let { { Text(it) } },
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                var columnsText by remember(state.columns) { mutableStateOf(state.columns.toString()) }
-                var rowsText by remember(state.rows) { mutableStateOf(state.rows.toString()) }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                AnimatedVisibility(
+                    visible = state.editingSlotIndex == null,
+                    enter = slideInVertically { -it } + fadeIn(),
+                    exit = slideOutVertically { -it } + fadeOut()
                 ) {
-                    Text(
-                        text = stringResource(R.string.layout_size),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.width(60.dp)
-                    )
+                    Column {
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    OutlinedTextField(
-                        value = columnsText,
-                        onValueChange = { value ->
-                            columnsText = value.filter { it.isDigit() }
-                            val newColumns = columnsText.toIntOrNull()
-                            if (newColumns != null) {
+                        OutlinedTextField(
+                            value = state.name,
+                            onValueChange = { viewModel.handleIntent(PedalBoardIntent.UpdateName(it)) },
+                            label = { Text(stringResource(R.string.pedalboard_name)) },
+                            placeholder = { Text(stringResource(R.string.pedalboard_name_hint)) },
+                            singleLine = true,
+                            isError = state.nameError != null,
+                            supportingText = state.nameError?.let { { Text(it) } },
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        LayoutStepper(
+                            columns = state.columns,
+                            rows = state.rows,
+                            onColumnsChange = { newColumns ->
                                 viewModel.handleIntent(PedalBoardIntent.UpdateLayout(newColumns, state.rows))
-                            }
-                        },
-                        label = { Text(stringResource(R.string.columns)) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    Text(
-                        "×",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    OutlinedTextField(
-                        value = rowsText,
-                        onValueChange = { value ->
-                            rowsText = value.filter { it.isDigit() }
-                            val newRows = rowsText.toIntOrNull()
-                            if (newRows != null) {
+                            },
+                            onRowsChange = { newRows ->
                                 viewModel.handleIntent(PedalBoardIntent.UpdateLayout(state.columns, newRows))
                             }
-                        },
-                        label = { Text(stringResource(R.string.rows)) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.weight(1f)
-                    )
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        val pedalCountText = stringResource(R.string.pedal_count, state.pedalCount)
+                        val slotsText = stringResource(R.string.slots)
+                        Text(
+                            text = "$pedalCountText / ${state.totalSlots} $slotsText",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                val pedalCountText = stringResource(R.string.pedal_count, state.pedalCount)
-                val slotsText = stringResource(R.string.slots)
-                Text(
-                    text = "$pedalCountText / ${state.totalSlots} $slotsText",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
 
                 Box(
                     modifier = Modifier.fillMaxWidth()
@@ -260,40 +224,41 @@ fun PedalBoardScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
             }
-        }
-    }
 
-    if (state.editingSlotIndex != null && state.editingPedal != null) {
-        PedalEditorBottomSheet(
-            pedal = state.editingPedal!!,
-            slotIndex = state.editingSlotIndex!!,
-            sheetState = sheetState,
-            onDismiss = { viewModel.handleIntent(PedalBoardIntent.ClosePedalEditor) },
-            onRemove = {
-                viewModel.handleIntent(PedalBoardIntent.RemovePedalFromSlot(state.editingSlotIndex!!))
-                scope.launch { sheetState.hide() }
-            },
-            onColorChange = { color ->
-                viewModel.handleIntent(
-                    PedalBoardIntent.UpdatePedalColor(state.editingSlotIndex!!, color)
-                )
-            },
-            onKnobsChange = { knobs ->
-                viewModel.handleIntent(
-                    PedalBoardIntent.UpdatePedalKnobs(state.editingSlotIndex!!, knobs)
-                )
-            },
-            onPedalNameChange = { name ->
-                viewModel.handleIntent(
-                    PedalBoardIntent.UpdatePedalName(state.editingSlotIndex!!, name)
-                )
-            },
-            onKnobNameChange = { knobIndex, name ->
-                viewModel.handleIntent(
-                    PedalBoardIntent.UpdateKnobName(state.editingSlotIndex!!, knobIndex, name)
-                )
+            AnimatedVisibility(
+                visible = state.editingSlotIndex != null && state.editingPedal != null,
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutVertically { it } + fadeOut()
+            ) {
+                if (state.editingPedal != null && state.editingSlotIndex != null) {
+                    InlinePedalEditor(
+                        pedal = state.editingPedal!!,
+                        slotIndex = state.editingSlotIndex!!,
+                        onDismiss = { viewModel.handleIntent(PedalBoardIntent.ClosePedalEditor) },
+                        onColorChange = { color ->
+                            viewModel.handleIntent(
+                                PedalBoardIntent.UpdatePedalColor(state.editingSlotIndex!!, color)
+                            )
+                        },
+                        onKnobsChange = { knobs ->
+                            viewModel.handleIntent(
+                                PedalBoardIntent.UpdatePedalKnobs(state.editingSlotIndex!!, knobs)
+                            )
+                        },
+                        onPedalNameChange = { name ->
+                            viewModel.handleIntent(
+                                PedalBoardIntent.UpdatePedalName(state.editingSlotIndex!!, name)
+                            )
+                        },
+                        onKnobNameChange = { knobIndex, name ->
+                            viewModel.handleIntent(
+                                PedalBoardIntent.UpdateKnobName(state.editingSlotIndex!!, knobIndex, name)
+                            )
+                        }
+                    )
+                }
             }
-        )
+        }
     }
 
     if (showAddPedalDialog && addingToSlotIndex != null) {

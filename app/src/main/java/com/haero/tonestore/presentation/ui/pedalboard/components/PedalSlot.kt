@@ -15,11 +15,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -51,7 +55,9 @@ fun PedalSlot(
     modifier: Modifier = Modifier,
     isEditable: Boolean = true,
     isDragging: Boolean = false,
-    isDropTarget: Boolean = false
+    isDropTarget: Boolean = false,
+    isEditing: Boolean = false,
+    onDeleteClick: () -> Unit = {}
 ) {
     val borderColor = when {
         isDropTarget -> MaterialTheme.colorScheme.primary
@@ -122,6 +128,32 @@ fun PedalSlot(
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary
                     )
+                }
+            }
+        }
+
+        if (isEditing && pedal != null) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp)
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    IconButton(
+                        onClick = onDeleteClick,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "삭제",
+                            tint = MaterialTheme.colorScheme.onError,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }
