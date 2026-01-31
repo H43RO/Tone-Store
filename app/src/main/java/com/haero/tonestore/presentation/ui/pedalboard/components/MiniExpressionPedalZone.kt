@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haero.tonestore.domain.model.Pedal
@@ -27,7 +28,8 @@ import com.haero.tonestore.ui.theme.ToneStoreTheme
 @Composable
 fun MiniExpressionPedalZone(
     expressionPedal: Pedal?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    height: Dp = 60.dp
 ) {
     val footPedalShape = RoundedCornerShape(
         topStart = 5.dp,
@@ -39,7 +41,7 @@ fun MiniExpressionPedalZone(
     Box(
         modifier = modifier
             .width(24.dp)
-            .height(60.dp)
+            .height(height)
             .clip(footPedalShape)
             .then(
                 if (expressionPedal != null) {
