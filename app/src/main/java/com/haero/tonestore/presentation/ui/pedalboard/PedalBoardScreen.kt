@@ -1,5 +1,10 @@
 package com.haero.tonestore.presentation.ui.pedalboard
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -77,6 +82,16 @@ fun PedalBoardScreen(
     var showExpressionPedalDialog by remember { mutableStateOf(false) }
 
     val slotPositions = remember { mutableStateMapOf<Int, Offset>() }
+
+    val lastEditingPedal = remember { mutableStateOf<Pedal?>(null) }
+    val lastEditingSlotIndex = remember { mutableStateOf<Int?>(null) }
+
+    LaunchedEffect(state.editingPedal, state.editingSlotIndex) {
+        if (state.editingPedal != null && state.editingSlotIndex != null) {
+            lastEditingPedal.value = state.editingPedal
+            lastEditingSlotIndex.value = state.editingSlotIndex
+        }
+    }
 
     LaunchedEffect(editingId) {
         editingId?.let {
@@ -183,49 +198,57 @@ fun PedalBoardScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
             }
-            if (state.editingSlotIndex != null && state.editingPedal != null) {
+
+            val isEditingPedal = state.editingSlotIndex != null && state.editingPedal != null
+
+            AnimatedVisibility(
+                visible = isEditingPedal,
+                enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
+                exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut()
+            ) {
+                val pedal = lastEditingPedal.value ?: return@AnimatedVisibility
+                val slotIndex = lastEditingSlotIndex.value ?: return@AnimatedVisibility
+
                 InlinePedalEditor(
-                    pedal = state.editingPedal!!,
-                    slotIndex = state.editingSlotIndex!!,
+                    pedal = pedal,
+                    slotIndex = slotIndex,
                     onDismiss = { viewModel.handleIntent(PedalBoardIntent.ClosePedalEditor) },
                     onColorChange = { color ->
                         viewModel.handleIntent(
-                            PedalBoardIntent.UpdatePedalColor(state.editingSlotIndex!!, color)
+                            PedalBoardIntent.UpdatePedalColor(slotIndex, color)
                         )
                     },
                     onKnobsChange = { knobs ->
                         viewModel.handleIntent(
-                            PedalBoardIntent.UpdatePedalKnobs(state.editingSlotIndex!!, knobs)
+                            PedalBoardIntent.UpdatePedalKnobs(slotIndex, knobs)
                         )
                     },
                     onPedalNameChange = { name ->
                         viewModel.handleIntent(
-                            PedalBoardIntent.UpdatePedalName(state.editingSlotIndex!!, name)
+                            PedalBoardIntent.UpdatePedalName(slotIndex, name)
                         )
                     },
                     onKnobNameChange = { knobIndex, name ->
-                        viewModel.handleIntent(
-                            PedalBoardIntent.UpdateKnobName(state.editingSlotIndex!!, knobIndex, name)
-                        )
-                    }
-                )
-            } else {
-                PedalboardInfoEditor(
-                    name = state.name,
-                    columns = state.columns,
-                    rows = state.rows,
-                    pedalCount = state.pedalCount,
-                    totalSlots = state.totalSlots,
-                    nameError = state.nameError,
-                    onNameChange = { viewModel.handleIntent(PedalBoardIntent.UpdateName(it)) },
-                    onColumnsChange = { newColumns ->
-                        viewModel.handleIntent(PedalBoardIntent.UpdateLayout(newColumns, state.rows))
-                    },
-                    onRowsChange = { newRows ->
-                        viewModel.handleIntent(PedalBoardIntent.UpdateLayout(state.columns, newRows))
+                        viewModel.handleIntent(PedalBoardIntent.UpdateKnobName(slotIndex, knobIndex, name))
                     }
                 )
             }
+
+            PedalboardInfoEditor(
+                name = state.name,
+                columns = state.columns,
+                rows = state.rows,
+                pedalCount = state.pedalCount,
+                totalSlots = state.totalSlots,
+                nameError = state.nameError,
+                onNameChange = { viewModel.handleIntent(PedalBoardIntent.UpdateName(it)) },
+                onColumnsChange = { newColumns ->
+                    viewModel.handleIntent(PedalBoardIntent.UpdateLayout(newColumns, state.rows))
+                },
+                onRowsChange = { newRows ->
+                    viewModel.handleIntent(PedalBoardIntent.UpdateLayout(state.columns, newRows))
+                }
+            )
         }
     }
 
