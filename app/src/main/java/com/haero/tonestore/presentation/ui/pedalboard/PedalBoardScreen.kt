@@ -247,6 +247,16 @@ fun PedalBoardScreen(
                 viewModel.handleIntent(
                     PedalBoardIntent.UpdatePedalKnobs(state.editingSlotIndex!!, knobs)
                 )
+            },
+            onPedalNameChange = { name ->
+                viewModel.handleIntent(
+                    PedalBoardIntent.UpdatePedalName(state.editingSlotIndex!!, name)
+                )
+            },
+            onKnobNameChange = { knobIndex, name ->
+                viewModel.handleIntent(
+                    PedalBoardIntent.UpdateKnobName(state.editingSlotIndex!!, knobIndex, name)
+                )
             }
         )
     }

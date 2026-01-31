@@ -40,6 +40,10 @@ sealed interface PedalBoardIntent {
 
     data class UpdatePedalKnobs(val slotIndex: Int, val knobs: List<Knob>) : PedalBoardIntent
 
+    data class UpdatePedalName(val slotIndex: Int, val name: String) : PedalBoardIntent
+
+    data class UpdateKnobName(val slotIndex: Int, val knobIndex: Int, val name: String) : PedalBoardIntent
+
     data object SavePedalBoard : PedalBoardIntent
 
     data object DeletePedalBoard : PedalBoardIntent

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -24,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -50,11 +52,23 @@ fun PedalEditorBottomSheet(
     onRemove: () -> Unit,
     onColorChange: (Long?) -> Unit,
     onKnobsChange: (List<Knob>) -> Unit,
+    onPedalNameChange: (String) -> Unit,
+    onKnobNameChange: (knobIndex: Int, name: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Create mutable state for knobs management
     val knobsList = remember {
         mutableStateListOf(*pedal.knobs.toTypedArray())
+    }
+
+    // Create mutable state for pedal name editing
+    var pedalNameEditState = remember {
+        mutableStateListOf(pedal.name)
+    }
+
+    // Create mutable state for knob name editing
+    var knobNamesEditState = remember {
+        mutableStateListOf(*pedal.knobs.map { it.name }.toTypedArray())
     }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -73,10 +87,17 @@ fun PedalEditorBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = pedal.name,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
+                OutlinedTextField(
+                    value = pedalNameEditState[0],
+                    onValueChange = { newName ->
+                        pedalNameEditState[0] = newName
+                        onPedalNameChange(newName)
+                    },
+                    label = { Text("페달 이름") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth(0.85f)
                 )
                 IconButton(onClick = onDismiss) {
                     Icon(Icons.Default.Close, contentDescription = "닫기")
@@ -114,14 +135,28 @@ fun PedalEditorBottomSheet(
                             RotaryKnob(
                                 value = 5f,
                                 onValueChange = { },
-                                label = knob.name,
+                                label = knobNamesEditState[index],
                                 size = 56.dp,
                                 enabled = false
+                            )
+                            OutlinedTextField(
+                                value = knobNamesEditState[index],
+                                onValueChange = { newName ->
+                                    knobNamesEditState[index] = newName
+                                    onKnobNameChange(index, newName)
+                                },
+                                label = { Text("노브 ${index + 1}") },
+                                singleLine = true,
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth(0.8f)
+                                    .height(56.dp)
                             )
                             IconButton(
                                 onClick = {
                                     if (knobsList.size > 1) {
                                         knobsList.removeAt(index)
+                                        knobNamesEditState.removeAt(index)
                                         onKnobsChange(knobsList.toList())
                                     }
                                 },

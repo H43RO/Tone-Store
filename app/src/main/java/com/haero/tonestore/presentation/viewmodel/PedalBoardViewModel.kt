@@ -57,6 +57,8 @@ class PedalBoardViewModel(
             is PedalBoardIntent.ClosePedalEditor -> closePedalEditor()
             is PedalBoardIntent.UpdatePedalColor -> updatePedalColor(intent.slotIndex, intent.color)
             is PedalBoardIntent.UpdatePedalKnobs -> updatePedalKnobs(intent.slotIndex, intent.knobs)
+            is PedalBoardIntent.UpdatePedalName -> updatePedalName(intent.slotIndex, intent.name)
+            is PedalBoardIntent.UpdateKnobName -> updateKnobName(intent.slotIndex, intent.knobIndex, intent.name)
             is PedalBoardIntent.SavePedalBoard -> savePedalBoard()
             is PedalBoardIntent.DeletePedalBoard -> deletePedalBoard()
             is PedalBoardIntent.NavigationHandled -> clearNavigation()
@@ -236,6 +238,31 @@ class PedalBoardViewModel(
 
         val pedal = _state.value.slots[slotIndex] ?: return
         val updatedPedal = pedal.copy(knobs = knobs)
+        val updatedSlots = _state.value.slots.toMutableList()
+        updatedSlots[slotIndex] = updatedPedal
+        _state.update { it.copy(slots = updatedSlots) }
+    }
+
+    private fun updatePedalName(slotIndex: Int, name: String) {
+        if (slotIndex !in 0 until _state.value.totalSlots) return
+
+        val pedal = _state.value.slots[slotIndex] ?: return
+        val updatedPedal = pedal.copy(name = name)
+        val updatedSlots = _state.value.slots.toMutableList()
+        updatedSlots[slotIndex] = updatedPedal
+        _state.update { it.copy(slots = updatedSlots) }
+    }
+
+    private fun updateKnobName(slotIndex: Int, knobIndex: Int, name: String) {
+        if (slotIndex !in 0 until _state.value.totalSlots) return
+
+        val pedal = _state.value.slots[slotIndex] ?: return
+        if (knobIndex !in pedal.knobs.indices) return
+
+        val updatedKnobs = pedal.knobs.mapIndexed { index, knob ->
+            if (index == knobIndex) knob.copy(name = name) else knob
+        }
+        val updatedPedal = pedal.copy(knobs = updatedKnobs)
         val updatedSlots = _state.value.slots.toMutableList()
         updatedSlots[slotIndex] = updatedPedal
         _state.update { it.copy(slots = updatedSlots) }
