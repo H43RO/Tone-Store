@@ -8,6 +8,8 @@ import com.haero.tonestore.domain.usecase.GetAllToneSettingsUseCase
 import com.haero.tonestore.domain.usecase.ToggleFavoriteUseCase
 import com.haero.tonestore.presentation.ui.home.HomeIntent
 import com.haero.tonestore.presentation.ui.home.HomeState
+import com.haero.tonestore.presentation.ui.home.SortOption
+import com.haero.tonestore.presentation.ui.home.ViewMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,6 +41,8 @@ class HomeViewModel(
             is HomeIntent.UpdateSearchQuery -> updateSearchQuery(intent.query)
             is HomeIntent.ToggleFavorite -> toggleFavorite(intent.id)
             is HomeIntent.ScrollToTopHandled -> clearScrollToTop()
+            is HomeIntent.SetViewMode -> setViewMode(intent.viewMode)
+            is HomeIntent.SetSortOption -> setSortOption(intent.sortOption)
         }
     }
 
@@ -50,10 +54,12 @@ class HomeViewModel(
                 }
                 .collect { settings ->
                     _state.update { state ->
+                        val filtered = filterToneSettings(settings, state.searchQuery)
+                        val sorted = applySorting(filtered, state.sortOption)
                         state.copy(
                             isLoading = false,
                             toneSettings = settings,
-                            filteredToneSettings = filterToneSettings(settings, state.searchQuery),
+                            filteredToneSettings = sorted,
                             error = null
                         )
                     }
@@ -64,10 +70,12 @@ class HomeViewModel(
     private fun setSearchActive(isActive: Boolean) {
         _state.update { state ->
             if (isActive.not()) {
+                val filtered = filterToneSettings(state.toneSettings, "")
+                val sorted = applySorting(filtered, state.sortOption)
                 state.copy(
                     isSearchActive = false,
                     searchQuery = "",
-                    filteredToneSettings = state.toneSettings
+                    filteredToneSettings = sorted
                 )
             } else {
                 state.copy(isSearchActive = true)
@@ -77,9 +85,11 @@ class HomeViewModel(
 
     private fun updateSearchQuery(query: String) {
         _state.update { state ->
+            val filtered = filterToneSettings(state.toneSettings, query)
+            val sorted = applySorting(filtered, state.sortOption)
             state.copy(
                 searchQuery = query,
-                filteredToneSettings = filterToneSettings(state.toneSettings, query)
+                filteredToneSettings = sorted
             )
         }
     }
@@ -87,6 +97,17 @@ class HomeViewModel(
     private fun filterToneSettings(settings: List<ToneSetting>, query: String): List<ToneSetting> {
         if (query.isBlank()) return settings
         return settings.filter { it.songName.contains(query, ignoreCase = true) }
+    }
+
+    private fun applySorting(settings: List<ToneSetting>, sortOption: SortOption): List<ToneSetting> {
+        return when (sortOption) {
+            SortOption.FAVORITES_FIRST -> {
+                settings.sortedWith(compareByDescending<ToneSetting> { it.isFavorite }.thenByDescending { it.updatedAt })
+            }
+            SortOption.DATE_FIRST -> {
+                settings.sortedByDescending { it.updatedAt }
+            }
+        }
     }
 
     private fun navigateToDetail(id: String) {
@@ -124,5 +145,20 @@ class HomeViewModel(
 
     private fun clearScrollToTop() {
         _state.update { it.copy(scrollToTop = false) }
+    }
+
+    private fun setViewMode(viewMode: ViewMode) {
+        _state.update { it.copy(viewMode = viewMode) }
+    }
+
+    private fun setSortOption(sortOption: SortOption) {
+        _state.update { state ->
+            val filtered = filterToneSettings(state.toneSettings, state.searchQuery)
+            val sorted = applySorting(filtered, sortOption)
+            state.copy(
+                sortOption = sortOption,
+                filteredToneSettings = sorted
+            )
+        }
     }
 }

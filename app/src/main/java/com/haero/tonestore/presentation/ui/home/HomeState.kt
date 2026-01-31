@@ -11,5 +11,7 @@ data class HomeState(
     val error: String? = null,
     val navigateToDetail: String? = null,
     val navigateToCreate: Boolean = false,
-    val scrollToTop: Boolean = false
+    val scrollToTop: Boolean = false,
+    val viewMode: ViewMode = ViewMode.LIST,
+    val sortOption: SortOption = SortOption.FAVORITES_FIRST
 )

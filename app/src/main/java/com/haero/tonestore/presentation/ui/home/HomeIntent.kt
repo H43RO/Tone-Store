@@ -18,4 +18,8 @@ sealed interface HomeIntent {
     data class ToggleFavorite(val id: String) : HomeIntent
 
     data object ScrollToTopHandled : HomeIntent
+
+    data class SetViewMode(val viewMode: ViewMode) : HomeIntent
+
+    data class SetSortOption(val sortOption: SortOption) : HomeIntent
 }
