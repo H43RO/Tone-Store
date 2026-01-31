@@ -64,14 +64,13 @@ fun PedalBoardPreview(
         }
 
         if (expressionPedal != null) {
-            val expressionHeight = (slotHeight + verticalSpacing) * displayRows - verticalSpacing
             ExpressionPedalZone(
                 expressionPedal = expressionPedal,
                 onSelectPedal = {},
                 onRemovePedal = {},
                 isEditable = false,
-                width = 40.dp,
-                height = expressionHeight,
+                width = 60.dp,
+                height = 140.dp,
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
         }

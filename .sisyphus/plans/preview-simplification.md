@@ -57,12 +57,12 @@
 5. `MiniExpressionPedalZone.kt` 삭제
 
 ### Definition of Done
-- [ ] `./gradlew assembleDebug` → BUILD SUCCESSFUL
-- [ ] `./gradlew ktlintCheck` → No errors
-- [ ] Mini* 파일 2개 삭제됨
-- [ ] ExpressionPedalZone에 isEditable, width, height 파라미터 존재
-- [ ] PedalBoardPreview 컴포넌트 생성됨
-- [ ] PedalBoardListScreen에서 새 프리뷰 사용
+- [x] `./gradlew assembleDebug` → BUILD SUCCESSFUL
+- [x] `./gradlew ktlintCheck` → No errors
+- [x] Mini* 파일 2개 삭제됨
+- [x] ExpressionPedalZone에 isEditable, width, height 파라미터 존재
+- [x] PedalBoardPreview 컴포넌트 생성됨
+- [x] PedalBoardListScreen에서 새 프리뷰 사용
 
 ### Must Have
 - ExpressionPedalZone에 `isEditable: Boolean = true` 파라미터 추가
@@ -420,7 +420,7 @@ Critical Path: Task 1 → Task 2 → Task 3 → Task 4
 
 ---
 
-- [ ] 4. Mini* 파일 삭제 및 최종 검증
+- [x] 4. Mini* 파일 삭제 및 최종 검증
 
   **What to do**:
   - `MiniPedalBoardPreview.kt` 삭제
@@ -502,11 +502,11 @@ grep -r "MiniPedalBoardPreview\|MiniExpressionPedalZone" app/src/main/java --inc
 ```
 
 ### Final Checklist
-- [ ] ExpressionPedalZone에 isEditable, width, height 파라미터 추가됨
-- [ ] PedalBoardPreview.kt 생성됨
-- [ ] PedalBoardListScreen에서 새 프리뷰 사용
-- [ ] MiniPedalBoardPreview.kt 삭제됨
-- [ ] MiniExpressionPedalZone.kt 삭제됨
-- [ ] 빌드 성공
-- [ ] 린트 통과
-- [ ] 삭제된 컴포넌트 참조 없음
+- [x] ExpressionPedalZone에 isEditable, width, height 파라미터 추가됨
+- [x] PedalBoardPreview.kt 생성됨
+- [x] PedalBoardListScreen에서 새 프리뷰 사용
+- [x] MiniPedalBoardPreview.kt 삭제됨
+- [x] MiniExpressionPedalZone.kt 삭제됨
+- [x] 빌드 성공
+- [x] 린트 통과
+- [x] 삭제된 컴포넌트 참조 없음

@@ -20,3 +20,12 @@
 - All 5 preview functions copied from MiniPedalBoardPreview.kt work without modification
 - Build verification: gradle assembleDebug passes successfully
 - Git commit: "feat(pedalboard): create PedalBoardPreview using original components"
+
+## Task 4 Completion: File Deletion (2026-02-01)
+- Successfully deleted MiniPedalBoardPreview.kt and MiniExpressionPedalZone.kt
+- MiniPedalCard in PedalSlot.kt (line 133) confirmed still exists
+- No references to deleted components found in codebase
+- Clean build: ./gradlew clean assembleDebug → BUILD SUCCESSFUL
+- Lint check: ./gradlew ktlintCheck → BUILD SUCCESSFUL
+- Git commit: "refactor(pedalboard): remove redundant Mini* preview components" (26a7435)
+- Simplification complete: codebase now uses original components with parameters instead of Mini* variants
