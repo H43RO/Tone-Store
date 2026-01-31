@@ -215,6 +215,28 @@ class ExampleUnitTest {
 }
 ```
 
+### Git Commit Guidelines
+
+**커밋 메세지는 한국어로 작성**
+
+형식: `type(scope): 한국어 설명`
+
+| Type | 용도 | 예시 |
+|------|------|------|
+| `feat` | 새로운 기능 추가 | `feat(home): 홈 화면에 검색 기능 추가` |
+| `fix` | 버그 수정 | `fix(pedal): 노브 값 저장 안 되는 문제 수정` |
+| `refactor` | 리팩토링 (기능 변화 없음) | `refactor(data): Repository 패턴 적용` |
+| `style` | 코드 포맷팅, 세미콜론 등 | `style(ui): ktlint 포맷 적용` |
+| `docs` | 문서 수정 | `docs(readme): 설치 방법 업데이트` |
+| `test` | 테스트 코드 | `test(usecase): GetAllToneSettingsUseCase 테스트 추가` |
+| `chore` | 빌드, 설정 등 | `chore(gradle): 의존성 버전 업데이트` |
+
+**규칙**:
+- scope는 영어로 유지 (패키지/모듈명)
+- 설명은 한국어로 작성
+- 마침표 없이 작성
+- 명령형으로 작성 ("추가", "수정", "제거" 등)
+
 ## Adding New Features
 
 ### New Screen Checklist
