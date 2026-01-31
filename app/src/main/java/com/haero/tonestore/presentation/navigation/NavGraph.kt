@@ -1,6 +1,8 @@
 package com.haero.tonestore.presentation.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -104,6 +106,7 @@ private val bottomNavTabs = listOf(
     BottomNavTab.PedalBoard
 )
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ToneStoreNavGraph(navController: NavHostController = rememberNavController()) {
     val animationDuration = 300
@@ -201,13 +204,17 @@ fun ToneStoreNavGraph(navController: NavHostController = rememberNavController()
             }
         ) { backStackEntry ->
             val toneSettingId = backStackEntry.arguments?.getString("toneSettingId") ?: return@composable
-            DetailScreen(
-                toneSettingId = toneSettingId,
-                onNavigateBack = { navController.popBackStack() },
-                onNavigateToEdit = { id ->
-                    navController.navigate(Screen.Create.createRoute(id))
-                }
-            )
+            SharedTransitionLayout {
+                DetailScreen(
+                    toneSettingId = toneSettingId,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToEdit = { id ->
+                        navController.navigate(Screen.Create.createRoute(id))
+                    },
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedVisibilityScope = this@composable
+                )
+            }
         }
 
         composable(
@@ -253,6 +260,7 @@ fun ToneStoreNavGraph(navController: NavHostController = rememberNavController()
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun MainTabScreen(
     onNavigateToCreate: () -> Unit,
@@ -286,7 +294,9 @@ private fun MainTabScreen(
                 when (page) {
                     0 -> HomeScreen(
                         onNavigateToCreate = onNavigateToCreate,
-                        onNavigateToDetail = onNavigateToDetail
+                        onNavigateToDetail = onNavigateToDetail,
+                        sharedTransitionScope = null,
+                        animatedVisibilityScope = null
                     )
                     1 -> PedalBoardListScreen(
                         onNavigateToCreate = onNavigateToPedalBoardCreate,
