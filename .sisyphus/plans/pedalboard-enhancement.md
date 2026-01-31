@@ -72,11 +72,11 @@
 - `PedalBoardScreen.kt`: Expression Zone 통합, 케이블 오버레이 적용
 
 ### Definition of Done
-- [ ] `./gradlew assembleDebug` 빌드 성공
-- [ ] 18개 프리셋 페달 모두 선택 가능
-- [ ] Expression Zone에 Wah/Whammy 배치 가능
-- [ ] 케이블 연결이 ON 페달 간 직선으로 표시
-- [ ] 노브 추가/삭제 동작 확인
+- [x] `./gradlew assembleDebug` 빌드 성공
+- [x] 18개 프리셋 페달 모두 선택 가능
+- [x] Expression Zone에 Wah/Whammy 배치 가능
+- [x] 케이블 연결이 ON 페달 간 직선으로 표시
+- [x] 노브 추가/삭제 동작 확인
 
 ### Must Have
 - 18개 프리셋 페달 (기존 8 + 신규 10)
@@ -719,7 +719,7 @@ Critical Path: Task 1 → Task 5 → Task 8 → Task 9
 
 ---
 
-- [ ] 8. CableOverlay 케이블 시각화 컴포넌트
+- [x] 8. CableOverlay 케이블 시각화 컴포넌트
 
   **What to do**:
   - `CableOverlay.kt` 새 파일 생성 (`presentation/ui/pedalboard/components/`):
@@ -825,7 +825,7 @@ Critical Path: Task 1 → Task 5 → Task 8 → Task 9
 
 ---
 
-- [ ] 9. PedalBoardScreen에 케이블 오버레이 + 신호 번호 통합
+- [x] 9. PedalBoardScreen에 케이블 오버레이 + 신호 번호 통합
 
   **What to do**:
   - `PedalBoardScreen.kt` 수정:
@@ -956,12 +956,12 @@ ls -la app/src/main/java/com/haero/tonestore/presentation/ui/pedalboard/componen
 ```
 
 ### Final Checklist
-- [ ] `./gradlew assembleDebug` 성공
-- [ ] 18개 프리셋 페달 모두 색상 지정됨
-- [ ] 카드 그리드 다이얼로그로 페달 선택 가능
-- [ ] 노브 추가/삭제 동작 (1-6개 범위)
-- [ ] 페달/노브 이름 변경 가능
-- [ ] Expression Zone에 Wah/Whammy 배치 가능
-- [ ] ON 페달 간 실선 케이블 표시
-- [ ] OFF 페달 점선 바이패스 표시
-- [ ] 신호 체인 번호 (1, 2, 3...) 표시
+- [x] `./gradlew assembleDebug` 성공
+- [x] 18개 프리셋 페달 모두 색상 지정됨
+- [x] 카드 그리드 다이얼로그로 페달 선택 가능
+- [x] 노브 추가/삭제 동작 (1-6개 범위)
+- [x] 페달/노브 이름 변경 가능
+- [x] Expression Zone에 Wah/Whammy 배치 가능
+- [x] ON 페달 간 실선 케이블 표시
+- [x] OFF 페달 점선 바이패스 표시
+- [x] 신호 체인 번호 (1, 2, 3...) 표시

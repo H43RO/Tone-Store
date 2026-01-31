@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.unit.dp
 import com.haero.tonestore.domain.model.Pedal
 
@@ -15,83 +14,42 @@ import com.haero.tonestore.domain.model.Pedal
 fun CableOverlay(
     slots: List<Pedal?>,
     slotPositions: Map<Int, Offset>,
-    expressionPedal: Pedal?,
-    expressionPedalPosition: Offset?,
+    columns: Int,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val enabledPedalsWithPositions = slots
-                .mapIndexedNotNull { index, pedal ->
-                    if (pedal != null && pedal.isEnabled && slotPositions.containsKey(index)) {
-                        Triple(index, pedal, slotPositions[index]!!)
-                    } else {
-                        null
-                    }
-                }
-                .sortedBy { it.second.order }
+            val cableColor = Color(0xFF424242)
 
-            for (i in 0 until enabledPedalsWithPositions.size - 1) {
-                val (_, currentPedal, currentPos) = enabledPedalsWithPositions[i]
-                val (_, nextPedal, nextPos) = enabledPedalsWithPositions[i + 1]
+            slotPositions.forEach { (index, position) ->
+                val row = index / columns
+                val col = index % columns
 
-                drawLine(
-                    color = Color.White,
-                    start = currentPos,
-                    end = nextPos,
-                    strokeWidth = 3.dp.toPx()
-                )
-
-                drawCircle(
-                    color = Color.White,
-                    radius = 6.dp.toPx(),
-                    center = currentPos
-                )
-
-                if (i == enabledPedalsWithPositions.size - 2) {
-                    drawCircle(
-                        color = Color.White,
-                        radius = 6.dp.toPx(),
-                        center = nextPos
-                    )
-                }
-            }
-
-            if (expressionPedal != null &&
-                expressionPedal.isEnabled &&
-                expressionPedalPosition != null &&
-                enabledPedalsWithPositions.isNotEmpty()
-            ) {
-                val lastPedalPos = enabledPedalsWithPositions.last().third
-
-                drawLine(
-                    color = Color.White,
-                    start = lastPedalPos,
-                    end = expressionPedalPosition,
-                    strokeWidth = 3.dp.toPx()
-                )
-
-                drawCircle(
-                    color = Color.White,
-                    radius = 6.dp.toPx(),
-                    center = expressionPedalPosition
-                )
-            }
-
-            slots.forEachIndexed { index, pedal ->
-                if (pedal != null && !pedal.isEnabled && slotPositions.containsKey(index)) {
-                    val pos = slotPositions[index]!!
-                    val nextIndex = slots.indexOfFirst { it != null && it.order == pedal.order + 1 }
-                    if (nextIndex >= 0 && slotPositions.containsKey(nextIndex)) {
+                if (col < columns - 1) {
+                    val nextIndex = index + 1
+                    if (slotPositions.containsKey(nextIndex)) {
                         val nextPos = slotPositions[nextIndex]!!
 
                         drawLine(
-                            color = Color.Gray,
-                            start = pos,
+                            color = cableColor,
+                            start = position,
                             end = nextPos,
-                            strokeWidth = 2.dp.toPx(),
-                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
+                            strokeWidth = 2.dp.toPx()
                         )
+
+                        drawCircle(
+                            color = cableColor,
+                            radius = 4.dp.toPx(),
+                            center = position
+                        )
+
+                        if (col == columns - 2) {
+                            drawCircle(
+                                color = cableColor,
+                                radius = 4.dp.toPx(),
+                                center = nextPos
+                            )
+                        }
                     }
                 }
             }

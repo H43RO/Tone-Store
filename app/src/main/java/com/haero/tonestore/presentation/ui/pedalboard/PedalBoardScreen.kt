@@ -48,8 +48,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -86,7 +84,6 @@ fun PedalBoardScreen(
     var showExpressionPedalDialog by remember { mutableStateOf(false) }
 
     val slotPositions = remember { mutableStateMapOf<Int, Offset>() }
-    var expressionPedalPosition by remember { mutableStateOf<Offset?>(null) }
 
     LaunchedEffect(editingId) {
         editingId?.let {
@@ -221,6 +218,13 @@ fun PedalBoardScreen(
                 Box(
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    CableOverlay(
+                        slots = state.slots,
+                        slotPositions = slotPositions,
+                        columns = state.columns,
+                        modifier = Modifier.matchParentSize()
+                    )
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -249,24 +253,9 @@ fun PedalBoardScreen(
                         ExpressionPedalZone(
                             expressionPedal = state.expressionPedal,
                             onSelectPedal = { showExpressionPedalDialog = true },
-                            onRemovePedal = { viewModel.handleIntent(PedalBoardIntent.RemoveExpressionPedal) },
-                            modifier = Modifier.onGloballyPositioned { coordinates ->
-                                val position = coordinates.positionInParent()
-                                expressionPedalPosition = Offset(
-                                    position.x + coordinates.size.width / 2f,
-                                    position.y + coordinates.size.height / 2f
-                                )
-                            }
+                            onRemovePedal = { viewModel.handleIntent(PedalBoardIntent.RemoveExpressionPedal) }
                         )
                     }
-
-                    CableOverlay(
-                        slots = state.slots,
-                        slotPositions = slotPositions,
-                        expressionPedal = state.expressionPedal,
-                        expressionPedalPosition = expressionPedalPosition,
-                        modifier = Modifier.matchParentSize()
-                    )
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))

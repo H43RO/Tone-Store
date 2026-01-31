@@ -1,7 +1,6 @@
 package com.haero.tonestore.ui.theme
 
 import android.app.Activity
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -52,15 +51,15 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun ToneStoreTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+fun ToneStoreTheme(darkTheme: Boolean = true, content: @Composable () -> Unit) {
+    val colorScheme = DarkColorScheme
 
     val view = LocalView.current
     if (view.isInEditMode.not()) {
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.background.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme.not()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
         }
     }
 
