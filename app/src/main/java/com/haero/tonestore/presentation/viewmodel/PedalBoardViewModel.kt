@@ -64,6 +64,7 @@ class PedalBoardViewModel(
             is PedalBoardIntent.SavePedalBoard -> savePedalBoard()
             is PedalBoardIntent.DeletePedalBoard -> deletePedalBoard()
             is PedalBoardIntent.NavigationHandled -> clearNavigation()
+            is PedalBoardIntent.ClearError -> clearError()
         }
     }
 
@@ -110,6 +111,18 @@ class PedalBoardViewModel(
         val newTotalSlots = newColumns * newRows
         val currentSlots = _state.value.slots
 
+        if (newTotalSlots < currentSlots.size) {
+            val pedalsToLose = currentSlots.drop(newTotalSlots).filterNotNull()
+            if (pedalsToLose.isNotEmpty()) {
+                _state.update {
+                    it.copy(
+                        error = "레이아웃을 축소하려면 먼저 ${pedalsToLose.size}개의 페달을 제거하세요"
+                    )
+                }
+                return
+            }
+        }
+
         val newSlots = if (newTotalSlots >= currentSlots.size) {
             currentSlots + List(newTotalSlots - currentSlots.size) { null }
         } else {
@@ -120,7 +133,8 @@ class PedalBoardViewModel(
             it.copy(
                 columns = newColumns,
                 rows = newRows,
-                slots = newSlots
+                slots = newSlots,
+                error = null
             )
         }
     }
@@ -326,5 +340,9 @@ class PedalBoardViewModel(
 
     private fun clearNavigation() {
         _state.update { it.copy(navigateBack = false, showSaveSuccess = false) }
+    }
+
+    private fun clearError() {
+        _state.update { it.copy(error = null) }
     }
 }

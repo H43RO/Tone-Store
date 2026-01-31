@@ -100,6 +100,13 @@ fun PedalBoardScreen(
         }
     }
 
+    LaunchedEffect(state.error) {
+        state.error?.let { errorMessage ->
+            snackbarHostState.showSnackbar(errorMessage)
+            viewModel.handleIntent(PedalBoardIntent.ClearError)
+        }
+    }
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background

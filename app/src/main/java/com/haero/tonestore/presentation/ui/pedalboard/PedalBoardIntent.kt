@@ -49,8 +49,7 @@ sealed interface PedalBoardIntent {
     data object RemoveExpressionPedal : PedalBoardIntent
 
     data object SavePedalBoard : PedalBoardIntent
-
     data object DeletePedalBoard : PedalBoardIntent
-
     data object NavigationHandled : PedalBoardIntent
+    data object ClearError : PedalBoardIntent
 }
