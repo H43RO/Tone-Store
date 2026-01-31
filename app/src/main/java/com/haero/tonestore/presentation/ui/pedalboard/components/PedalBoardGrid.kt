@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -37,6 +38,7 @@ fun PedalBoardGrid(
     onSlotClick: (Int) -> Unit,
     onAddClick: (Int) -> Unit,
     onSwapSlots: (fromIndex: Int, toIndex: Int) -> Unit,
+    onSlotPositioned: (Int, Offset) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
     isEditable: Boolean = true
 ) {
@@ -88,6 +90,13 @@ fun PedalBoardGrid(
                     .onGloballyPositioned { coordinates ->
                         val position = coordinates.positionInParent()
                         slotPositions[index] = Pair(position.x, position.y)
+
+                        // Report center position for cable overlay
+                        val center = Offset(
+                            position.x + coordinates.size.width / 2f,
+                            position.y + coordinates.size.height / 2f
+                        )
+                        onSlotPositioned(index, center)
                     }
                     .then(
                         if (isDragging) {
