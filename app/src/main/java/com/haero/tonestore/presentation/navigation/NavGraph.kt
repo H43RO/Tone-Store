@@ -514,8 +514,8 @@ private fun ObsidianBottomNavBar(
                     spotColor = Color.Black
                 )
                 .clip(RoundedCornerShape(24.dp))
-                .background(ObsidianColors.surface)
-                .border(1.dp, ObsidianColors.border, RoundedCornerShape(24.dp))
+                .background(ObsidianColors.surface.copy(alpha = 0.85f))
+                .border(1.dp, ObsidianColors.border.copy(alpha = 0.6f), RoundedCornerShape(24.dp))
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
