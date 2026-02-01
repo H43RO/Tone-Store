@@ -25,7 +25,7 @@
     <string name="create_tone_setting">New Tone Setting</string>
     <string name="edit_tone_setting">Edit Tone Setting</string>
     <string name="song_name">Song Name</string>
-    <string name="song_name_hint">Enter song name</string>
+    <string name="song_name_hint">Leave empty for auto-naming (e.g. My Tone 1)</string>
     <string name="save">Save</string>
     <string name="save_success">Tone setting saved successfully!</string>
 
@@ -54,7 +54,7 @@
     <string name="create_pedalboard">New Pedal Board</string>
     <string name="edit_pedalboard">Edit Pedal Board</string>
     <string name="pedalboard_name">Pedal Board Name</string>
-    <string name="pedalboard_name_hint">Enter pedal board name</string>
+    <string name="pedalboard_name_hint">Leave empty for auto-naming (e.g. My Pedal Board 1)</string>
     <string name="pedalboard_save_success">Pedal board saved successfully!</string>
     <string name="layout_size">Layout</string>
     <string name="columns">Cols</string>

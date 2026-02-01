@@ -10,6 +10,7 @@ import com.haero.tonestore.domain.model.PedalType
 import com.haero.tonestore.domain.model.SavedPedalBoard
 import com.haero.tonestore.domain.model.ToneSetting
 import com.haero.tonestore.domain.usecase.GetAllSavedPedalBoardsUseCase
+import com.haero.tonestore.domain.usecase.GetAllToneSettingsUseCase
 import com.haero.tonestore.domain.usecase.GetPresetPedalsUseCase
 import com.haero.tonestore.domain.usecase.GetToneSettingByIdUseCase
 import com.haero.tonestore.domain.usecase.SaveToneSettingUseCase
@@ -26,15 +27,19 @@ class CreateToneViewModel(
     private val getToneSettingByIdUseCase: GetToneSettingByIdUseCase,
     private val saveToneSettingUseCase: SaveToneSettingUseCase,
     private val getPresetPedalsUseCase: GetPresetPedalsUseCase,
-    private val getAllSavedPedalBoardsUseCase: GetAllSavedPedalBoardsUseCase
+    private val getAllSavedPedalBoardsUseCase: GetAllSavedPedalBoardsUseCase,
+    private val getAllToneSettingsUseCase: GetAllToneSettingsUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CreateToneState())
     val state: StateFlow<CreateToneState> = _state.asStateFlow()
 
+    private var allToneSettings: List<ToneSetting> = emptyList()
+
     init {
         loadPresetPedals()
         loadSavedPedalBoards()
+        loadAllToneSettings()
     }
 
     fun handleIntent(intent: CreateToneIntent) {
@@ -217,17 +222,20 @@ class CreateToneViewModel(
     private fun saveToneSetting() {
         val currentState = _state.value
 
-        if (currentState.songName.isBlank()) {
-            _state.update { it.copy(songNameError = "곡 이름을 입력해주세요") }
-            return
-        }
-
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
+
+            // 제목이 비어있으면 자동 생성
+            val finalSongName = if (currentState.songName.isBlank()) {
+                generateDefaultToneName()
+            } else {
+                currentState.songName
+            }
+
             val now = System.currentTimeMillis()
             val toneSetting = ToneSetting(
                 id = currentState.editingId ?: UUID.randomUUID().toString(),
-                songName = currentState.songName,
+                songName = finalSongName,
                 createdAt = if (currentState.isEditMode) now else now,
                 updatedAt = now,
                 pedalBoard = currentState.pedalBoard,
@@ -251,5 +259,33 @@ class CreateToneViewModel(
 
     private fun clearError() {
         _state.update { it.copy(error = null) }
+    }
+
+    private fun loadAllToneSettings() {
+        viewModelScope.launch {
+            getAllToneSettingsUseCase().collect { toneSettings ->
+                allToneSettings = toneSettings
+            }
+        }
+    }
+
+    private suspend fun generateDefaultToneName(): String {
+        val baseName = "나의 톤"
+        val existingNames = allToneSettings.map { it.songName }.toSet()
+
+        // "나의 톤" 시작하는 기존 번호들 추출
+        val existingNumbers = existingNames
+            .filter { it.startsWith(baseName) }
+            .mapNotNull { name ->
+                name.removePrefix(baseName).trim().toIntOrNull()
+            }
+
+        // 1부터 시작해서 사용 가능한 첫 번째 번호 찾기
+        var counter = 1
+        while (existingNumbers.contains(counter) || existingNames.contains("$baseName $counter")) {
+            counter++
+        }
+
+        return "$baseName $counter"
     }
 }

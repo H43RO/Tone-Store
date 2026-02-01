@@ -7,6 +7,7 @@ import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalType
 import com.haero.tonestore.domain.model.SavedPedalBoard
 import com.haero.tonestore.domain.usecase.DeleteSavedPedalBoardUseCase
+import com.haero.tonestore.domain.usecase.GetAllSavedPedalBoardsUseCase
 import com.haero.tonestore.domain.usecase.GetPresetPedalsUseCase
 import com.haero.tonestore.domain.usecase.GetSavedPedalBoardByIdUseCase
 import com.haero.tonestore.domain.usecase.SavePedalBoardUseCase
@@ -23,14 +24,18 @@ class PedalBoardViewModel(
     private val getSavedPedalBoardByIdUseCase: GetSavedPedalBoardByIdUseCase,
     private val savePedalBoardUseCase: SavePedalBoardUseCase,
     private val deleteSavedPedalBoardUseCase: DeleteSavedPedalBoardUseCase,
-    private val getPresetPedalsUseCase: GetPresetPedalsUseCase
+    private val getPresetPedalsUseCase: GetPresetPedalsUseCase,
+    private val getAllSavedPedalBoardsUseCase: GetAllSavedPedalBoardsUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PedalBoardState())
     val state: StateFlow<PedalBoardState> = _state.asStateFlow()
 
+    private var allPedalBoards: List<SavedPedalBoard> = emptyList()
+
     init {
         loadPresetPedals()
+        loadAllPedalBoards()
     }
 
     fun handleIntent(intent: PedalBoardIntent) {
@@ -296,17 +301,20 @@ class PedalBoardViewModel(
     private fun savePedalBoard() {
         val currentState = _state.value
 
-        if (currentState.name.isBlank()) {
-            _state.update { it.copy(nameError = "페달보드 이름을 입력해주세요") }
-            return
-        }
-
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
+
+            // 제목이 비어있으면 자동 생성
+            val finalName = if (currentState.name.isBlank()) {
+                generateDefaultPedalBoardName()
+            } else {
+                currentState.name
+            }
+
             val now = System.currentTimeMillis()
             val pedalBoard = SavedPedalBoard(
                 id = currentState.editingId ?: UUID.randomUUID().toString(),
-                name = currentState.name,
+                name = finalName,
                 columns = currentState.columns,
                 rows = currentState.rows,
                 slots = currentState.slots,
@@ -344,5 +352,33 @@ class PedalBoardViewModel(
 
     private fun clearError() {
         _state.update { it.copy(error = null) }
+    }
+
+    private fun loadAllPedalBoards() {
+        viewModelScope.launch {
+            getAllSavedPedalBoardsUseCase().collect { pedalBoards ->
+                allPedalBoards = pedalBoards
+            }
+        }
+    }
+
+    private suspend fun generateDefaultPedalBoardName(): String {
+        val baseName = "나의 페달보드"
+        val existingNames = allPedalBoards.map { it.name }.toSet()
+
+        // "나의 페달보드" 시작하는 기존 번호들 추출
+        val existingNumbers = existingNames
+            .filter { it.startsWith(baseName) }
+            .mapNotNull { name ->
+                name.removePrefix(baseName).trim().toIntOrNull()
+            }
+
+        // 1부터 시작해서 사용 가능한 첫 번째 번호 찾기
+        var counter = 1
+        while (existingNumbers.contains(counter) || existingNames.contains("$baseName $counter")) {
+            counter++
+        }
+
+        return "$baseName $counter"
     }
 }

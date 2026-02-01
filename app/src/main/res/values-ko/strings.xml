@@ -25,7 +25,7 @@
     <string name="create_tone_setting">새로운 톤 저장하기</string>
     <string name="edit_tone_setting">톤 세팅 편집</string>
     <string name="song_name">곡 이름</string>
-    <string name="song_name_hint">곡 이름을 입력하세요</string>
+    <string name="song_name_hint">비워두면 자동으로 지정됩니다 (예: 나의 톤 1)</string>
     <string name="save">저장</string>
     <string name="save_success">톤 세팅이 저장되었습니다!</string>
     
@@ -54,7 +54,7 @@
     <string name="create_pedalboard">새 페달보드</string>
     <string name="edit_pedalboard">페달보드 편집</string>
     <string name="pedalboard_name">페달보드 이름</string>
-    <string name="pedalboard_name_hint">페달보드 이름을 입력하세요</string>
+    <string name="pedalboard_name_hint">비워두면 자동으로 지정됩니다 (예: 나의 페달보드 1)</string>
     <string name="pedalboard_save_success">페달보드가 저장되었습니다!</string>
     <string name="layout_size">레이아웃</string>
     <string name="columns">열</string>
