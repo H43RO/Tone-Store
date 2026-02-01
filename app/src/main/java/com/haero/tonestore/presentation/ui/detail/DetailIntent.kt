@@ -7,5 +7,9 @@ sealed interface DetailIntent {
 
     data object DeleteToneSetting : DetailIntent
 
+    data object DuplicateToneSetting : DetailIntent
+
     data object NavigationHandled : DetailIntent
+
+    data object ClearDuplicateSuccess : DetailIntent
 }

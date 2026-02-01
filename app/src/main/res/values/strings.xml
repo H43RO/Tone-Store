@@ -76,6 +76,9 @@
     <!-- Detail Screen -->
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
+    <string name="duplicate">Duplicate</string>
+    <string name="duplicate_suffix"> (Copy)</string>
+    <string name="duplicate_success">Tone setting duplicated!</string>
     <string name="delete_confirm_title">Delete Tone Setting?</string>
     <string name="delete_confirm_message">Are you sure you want to delete \"%1$s\"? This action cannot be undone.</string>
     <string name="delete_pedalboard_confirm_title">Delete Pedal Board?</string>

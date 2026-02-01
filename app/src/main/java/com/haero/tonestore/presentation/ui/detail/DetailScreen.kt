@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GraphicEq
@@ -42,6 +43,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -88,6 +91,7 @@ fun DetailScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     val pagerState = rememberPagerState(pageCount = { 3 })
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(toneSettingId) {
         viewModel.handleIntent(DetailIntent.LoadToneSetting(toneSettingId))
@@ -107,6 +111,14 @@ fun DetailScreen(
         }
     }
 
+    val duplicateSuccessMessage = stringResource(R.string.duplicate_success)
+    LaunchedEffect(state.showDuplicateSuccess) {
+        if (state.showDuplicateSuccess) {
+            snackbarHostState.showSnackbar(duplicateSuccessMessage)
+            viewModel.handleIntent(DetailIntent.ClearDuplicateSuccess)
+        }
+    }
+
     val tabs = listOf(
         TabItem(stringResource(R.string.pedal_board), Icons.Default.GraphicEq),
         TabItem(stringResource(R.string.amp_setting), Icons.Default.Speaker),
@@ -114,6 +126,7 @@ fun DetailScreen(
     )
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
@@ -125,6 +138,7 @@ fun DetailScreen(
                 title = state.toneSetting?.songName ?: stringResource(R.string.detail),
                 onBackClick = onNavigateBack,
                 onEditClick = { viewModel.handleIntent(DetailIntent.NavigateToEdit) },
+                onDuplicateClick = { viewModel.handleIntent(DetailIntent.DuplicateToneSetting) },
                 onDeleteClick = { showDeleteDialog = true }
             )
 
@@ -214,6 +228,7 @@ private fun DetailHeader(
     title: String,
     onBackClick: () -> Unit,
     onEditClick: () -> Unit,
+    onDuplicateClick: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -253,6 +268,23 @@ private fun DetailHeader(
         )
 
         Surface(
+            onClick = onDuplicateClick,
+            shape = CircleShape,
+            modifier = Modifier.size(44.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.ContentCopy,
+                    contentDescription = stringResource(R.string.duplicate),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.width(4.dp))
+
+        Surface(
             onClick = onEditClick,
             shape = CircleShape,
             modifier = Modifier.size(44.dp)
@@ -267,7 +299,7 @@ private fun DetailHeader(
             }
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(4.dp))
 
         Surface(
             onClick = onDeleteClick,
@@ -639,6 +671,7 @@ private fun DetailHeaderPreview() {
             title = "Sample Song",
             onBackClick = {},
             onEditClick = {},
+            onDuplicateClick = {},
             onDeleteClick = {}
         )
     }
