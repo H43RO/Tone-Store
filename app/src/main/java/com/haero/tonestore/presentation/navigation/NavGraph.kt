@@ -26,8 +26,10 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -55,12 +57,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.firebase.auth.FirebaseAuth
 import com.haero.tonestore.R
+import com.haero.tonestore.presentation.ui.auth.LoginScreen
+import com.haero.tonestore.presentation.ui.community.CommunityScreen
 import com.haero.tonestore.presentation.ui.create.CreateToneScreen
 import com.haero.tonestore.presentation.ui.detail.DetailScreen
 import com.haero.tonestore.presentation.ui.home.HomeScreen
 import com.haero.tonestore.presentation.ui.pedalboard.PedalBoardListScreen
 import com.haero.tonestore.presentation.ui.pedalboard.PedalBoardScreen
+import com.haero.tonestore.presentation.ui.preset_detail.PresetDetailScreen
+import com.haero.tonestore.presentation.ui.share.ShareToneScreen
 import kotlinx.coroutines.launch
 
 sealed class Screen(val route: String) {
@@ -79,6 +86,13 @@ sealed class Screen(val route: String) {
             return if (editingId != null) "pedalboard_edit?editingId=$editingId" else "pedalboard_edit"
         }
     }
+    data object PresetDetail : Screen("preset_detail/{presetId}") {
+        fun createRoute(presetId: String): String = "preset_detail/$presetId"
+    }
+    data object ShareTone : Screen("share_tone/{toneSettingId}") {
+        fun createRoute(toneSettingId: String): String = "share_tone/$toneSettingId"
+    }
+    data object Login : Screen("login")
 }
 
 sealed class BottomNavTab(
@@ -93,8 +107,14 @@ sealed class BottomNavTab(
         icon = Icons.Outlined.Home,
         selectedIcon = Icons.Filled.Home
     )
-    data object PedalBoard : BottomNavTab(
+    data object Community : BottomNavTab(
         index = 1,
+        titleResId = R.string.tab_community,
+        icon = Icons.Outlined.Public,
+        selectedIcon = Icons.Filled.Public
+    )
+    data object PedalBoard : BottomNavTab(
+        index = 2,
         titleResId = R.string.tab_pedalboard,
         icon = Icons.Outlined.Dashboard,
         selectedIcon = Icons.Outlined.Dashboard
@@ -103,6 +123,7 @@ sealed class BottomNavTab(
 
 private val bottomNavTabs = listOf(
     BottomNavTab.Home,
+    BottomNavTab.Community,
     BottomNavTab.PedalBoard
 )
 
@@ -128,6 +149,12 @@ fun ToneStoreNavGraph(navController: NavHostController = rememberNavController()
                 },
                 onNavigateToPedalBoardEdit = { id ->
                     navController.navigate(Screen.PedalBoardEdit.createRoute(id))
+                },
+                onNavigateToPresetDetail = { presetId ->
+                    navController.navigate(Screen.PresetDetail.createRoute(presetId))
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route)
                 }
             )
         }
@@ -211,6 +238,9 @@ fun ToneStoreNavGraph(navController: NavHostController = rememberNavController()
                     onNavigateToEdit = { id ->
                         navController.navigate(Screen.Create.createRoute(id))
                     },
+                    onNavigateToShare = { id ->
+                        navController.navigate(Screen.ShareTone.createRoute(id))
+                    },
                     sharedTransitionScope = this@SharedTransitionLayout,
                     animatedVisibilityScope = this@composable
                 )
@@ -257,6 +287,115 @@ fun ToneStoreNavGraph(navController: NavHostController = rememberNavController()
                 editingId = editingId
             )
         }
+
+        composable(
+            route = Screen.PresetDetail.route,
+            arguments = listOf(
+                navArgument("presetId") { type = NavType.StringType }
+            ),
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    tween(animationDuration)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    tween(animationDuration)
+                )
+            },
+            popEnterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    tween(animationDuration)
+                )
+            },
+            popExitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    tween(animationDuration)
+                )
+            }
+        ) { backStackEntry ->
+            val presetId = backStackEntry.arguments?.getString("presetId") ?: return@composable
+            PresetDetailScreen(
+                presetId = presetId,
+                currentUserId = FirebaseAuth.getInstance().currentUser?.uid,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.ShareTone.route,
+            arguments = listOf(
+                navArgument("toneSettingId") { type = NavType.StringType }
+            ),
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up,
+                    tween(animationDuration)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Down,
+                    tween(animationDuration)
+                )
+            },
+            popEnterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Down,
+                    tween(animationDuration)
+                )
+            },
+            popExitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Down,
+                    tween(animationDuration)
+                )
+            }
+        ) { backStackEntry ->
+            val toneSettingId = backStackEntry.arguments?.getString("toneSettingId") ?: return@composable
+            ShareToneScreen(
+                toneSettingId = toneSettingId,
+                onNavigateBack = { navController.popBackStack() },
+                onShareSuccess = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.Login.route,
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up,
+                    tween(animationDuration)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Down,
+                    tween(animationDuration)
+                )
+            },
+            popEnterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Down,
+                    tween(animationDuration)
+                )
+            },
+            popExitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Down,
+                    tween(animationDuration)
+                )
+            }
+        ) {
+            LoginScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onLoginSuccess = { navController.popBackStack() }
+            )
+        }
     }
 }
 
@@ -266,7 +405,9 @@ private fun MainTabScreen(
     onNavigateToCreate: () -> Unit,
     onNavigateToDetail: (String) -> Unit,
     onNavigateToPedalBoardCreate: () -> Unit,
-    onNavigateToPedalBoardEdit: (String) -> Unit
+    onNavigateToPedalBoardEdit: (String) -> Unit,
+    onNavigateToPresetDetail: (String) -> Unit,
+    onNavigateToLogin: () -> Unit
 ) {
     val pagerState = rememberPagerState(pageCount = { bottomNavTabs.size })
     val scope = rememberCoroutineScope()
@@ -298,7 +439,10 @@ private fun MainTabScreen(
                         sharedTransitionScope = null,
                         animatedVisibilityScope = null
                     )
-                    1 -> PedalBoardListScreen(
+                    1 -> CommunityScreen(
+                        onNavigateToDetail = onNavigateToPresetDetail
+                    )
+                    2 -> PedalBoardListScreen(
                         onNavigateToCreate = onNavigateToPedalBoardCreate,
                         onNavigateToEdit = onNavigateToPedalBoardEdit
                     )

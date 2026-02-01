@@ -6,6 +6,7 @@
     <string name="back">Back</string>
     <string name="detail">Detail</string>
     <string name="tab_home">Tone List</string>
+    <string name="tab_community">Community</string>
     <string name="tab_pedalboard">Pedal Board</string>
     
     <!-- Home Screen -->
@@ -87,6 +88,9 @@
     
     <!-- Errors -->
     <string name="error_occurred">An error occurred</string>
+
+    <!-- Firebase Auth -->
+    <string name="default_web_client_id">YOUR_WEB_CLIENT_ID</string>
 
     <!-- Stepper -->
     <string name="step_song_info">Song Info</string>

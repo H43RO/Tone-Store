@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.LinearScale
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Speaker
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -87,6 +88,7 @@ fun DetailScreen(
     toneSettingId: String,
     onNavigateBack: () -> Unit,
     onNavigateToEdit: (String) -> Unit,
+    onNavigateToShare: (String) -> Unit = {},
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
     viewModel: DetailViewModel = koinViewModel()
@@ -143,6 +145,7 @@ fun DetailScreen(
                 onBackClick = onNavigateBack,
                 onEditClick = { viewModel.handleIntent(DetailIntent.NavigateToEdit) },
                 onDuplicateClick = { viewModel.handleIntent(DetailIntent.DuplicateToneSetting) },
+                onShareClick = { onNavigateToShare(toneSettingId) },
                 onDeleteClick = { showDeleteDialog = true }
             )
 
@@ -233,6 +236,7 @@ private fun DetailHeader(
     onBackClick: () -> Unit,
     onEditClick: () -> Unit,
     onDuplicateClick: () -> Unit,
+    onShareClick: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -270,6 +274,24 @@ private fun DetailHeader(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
         )
+
+        // 공유 버튼
+        Surface(
+            onClick = onShareClick,
+            shape = CircleShape,
+            modifier = Modifier.size(44.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = "Share",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.width(4.dp))
 
         Surface(
             onClick = onDuplicateClick,
@@ -861,6 +883,7 @@ private fun DetailHeaderPreview() {
             onBackClick = {},
             onEditClick = {},
             onDuplicateClick = {},
+            onShareClick = {},
             onDeleteClick = {}
         )
     }

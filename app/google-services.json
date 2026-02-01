@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "685509007770",
+    "project_id": "tonestore-32310",
+    "storage_bucket": "tonestore-32310.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:685509007770:android:c8a69d60308cfa5aff4223",
+        "android_client_info": {
+          "package_name": "com.haero.tonestore"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATcuez-x0QyuDBCihmTDqKF0Z-eKAV3sw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
