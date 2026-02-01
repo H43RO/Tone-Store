@@ -534,6 +534,7 @@ private fun PedalBoardStepContent(
         PedalBoardSection(
             pedalBoard = state.pedalBoard,
             presetPedals = state.presetPedals,
+            customPedals = state.customPedals,
             savedPedalBoards = state.savedPedalBoards,
             onAddPresetPedal = { pedal ->
                 viewModel.handleIntent(CreateToneIntent.AddPresetPedal(pedal))

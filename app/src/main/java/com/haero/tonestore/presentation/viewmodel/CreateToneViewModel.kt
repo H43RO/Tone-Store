@@ -10,6 +10,7 @@ import com.haero.tonestore.domain.model.PedalType
 import com.haero.tonestore.domain.model.SavedCustomPedal
 import com.haero.tonestore.domain.model.SavedPedalBoard
 import com.haero.tonestore.domain.model.ToneSetting
+import com.haero.tonestore.domain.usecase.GetAllCustomPedalsUseCase
 import com.haero.tonestore.domain.usecase.GetAllSavedPedalBoardsUseCase
 import com.haero.tonestore.domain.usecase.GetAllToneSettingsUseCase
 import com.haero.tonestore.domain.usecase.GetPresetPedalsUseCase
@@ -31,7 +32,8 @@ class CreateToneViewModel(
     private val getPresetPedalsUseCase: GetPresetPedalsUseCase,
     private val getAllSavedPedalBoardsUseCase: GetAllSavedPedalBoardsUseCase,
     private val getAllToneSettingsUseCase: GetAllToneSettingsUseCase,
-    private val saveCustomPedalUseCase: SaveCustomPedalUseCase
+    private val saveCustomPedalUseCase: SaveCustomPedalUseCase,
+    private val getAllCustomPedalsUseCase: GetAllCustomPedalsUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CreateToneState())
@@ -43,6 +45,7 @@ class CreateToneViewModel(
         loadPresetPedals()
         loadSavedPedalBoards()
         loadAllToneSettings()
+        loadAllCustomPedals()
     }
 
     fun handleIntent(intent: CreateToneIntent) {
@@ -289,6 +292,14 @@ class CreateToneViewModel(
         viewModelScope.launch {
             getAllToneSettingsUseCase().collect { toneSettings ->
                 allToneSettings = toneSettings
+            }
+        }
+    }
+
+    private fun loadAllCustomPedals() {
+        viewModelScope.launch {
+            getAllCustomPedalsUseCase().collect { customPedals ->
+                _state.update { it.copy(customPedals = customPedals) }
             }
         }
     }

@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalBoard
+import com.haero.tonestore.domain.model.SavedCustomPedal
 import com.haero.tonestore.domain.model.SavedPedalBoard
 import com.haero.tonestore.presentation.ui.components.SectionHeader
 import com.haero.tonestore.presentation.ui.pedalboard.components.PresetPedalSelectionDialog
@@ -40,6 +41,7 @@ import java.util.UUID
 fun PedalBoardSection(
     pedalBoard: PedalBoard,
     presetPedals: List<Pedal>,
+    customPedals: List<SavedCustomPedal>,
     savedPedalBoards: List<SavedPedalBoard>,
     onAddPresetPedal: (Pedal) -> Unit,
     onAddCustomPedal: (name: String, knobNames: List<String>) -> Unit,
@@ -128,6 +130,7 @@ fun PedalBoardSection(
     // 페달 선택 바텀시트 (페달보드 화면과 동일한 UI)
     if (showPedalSelectionSheet) {
         PresetPedalSelectionDialog(
+            customPedals = customPedals,
             onDismiss = { showPedalSelectionSheet = false },
             onPedalSelect = { pedal ->
                 // 새 ID로 복사해서 추가 (같은 페달 여러 개 추가 가능)

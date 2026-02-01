@@ -5,6 +5,7 @@ import com.haero.tonestore.domain.model.GenreTag
 import com.haero.tonestore.domain.model.GuitarSetting
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalBoard
+import com.haero.tonestore.domain.model.SavedCustomPedal
 import com.haero.tonestore.domain.model.SavedPedalBoard
 
 data class CreateToneState(
@@ -19,6 +20,7 @@ data class CreateToneState(
     val selectedTags: List<GenreTag> = emptyList(),
 
     val presetPedals: List<Pedal> = emptyList(),
+    val customPedals: List<SavedCustomPedal> = emptyList(),
 
     val savedPedalBoards: List<SavedPedalBoard> = emptyList(),
 
