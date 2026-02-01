@@ -1,6 +1,7 @@
 package com.haero.tonestore.presentation.ui.preset_detail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -368,30 +369,23 @@ private fun StatItem(
     tint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurfaceVariant,
     onClick: (() -> Unit)? = null
 ) {
+    val modifier = if (onClick != null) {
+        Modifier.clip(CircleShape).clickable { onClick() }
+    } else {
+        Modifier
+    }
+
     Row(
+        modifier = modifier.padding(4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        if (onClick != null) {
-            IconButton(
-                onClick = onClick,
-                modifier = Modifier.size(32.dp)
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = tint
-                )
-            }
-        } else {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = tint
-            )
-        }
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = tint
+        )
         Text(
             text = "$count",
             style = MaterialTheme.typography.labelLarge,

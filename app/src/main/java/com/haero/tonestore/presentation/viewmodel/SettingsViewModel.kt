@@ -3,6 +3,7 @@ package com.haero.tonestore.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.haero.tonestore.domain.repository.AuthRepository
+import com.haero.tonestore.domain.repository.SharedToneSettingRepository
 import com.haero.tonestore.presentation.ui.settings.SettingsIntent
 import com.haero.tonestore.presentation.ui.settings.SettingsState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +13,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val sharedToneSettingRepository: SharedToneSettingRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsState())
@@ -75,11 +77,22 @@ class SettingsViewModel(
     private fun saveProfile() {
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
+
+            val userId = _state.value.currentUser?.uid
+            val newNickname = _state.value.nickname
+
+            // 1. 프로필 업데이트
             val result = authRepository.updateProfile(
-                nickname = _state.value.nickname,
+                nickname = newNickname,
                 photoUrl = null
             )
+
             result.onSuccess { profile ->
+                // 2. 기존 프리셋/댓글의 authorName도 업데이트
+                if (userId != null && newNickname.isNotBlank()) {
+                    sharedToneSettingRepository.updateAuthorName(userId, newNickname)
+                }
+
                 _state.update {
                     it.copy(
                         isSaving = false,

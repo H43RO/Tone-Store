@@ -178,4 +178,50 @@ class SharedToneSettingRepositoryImpl(
             Result.failure(e)
         }
     }
+
+    override suspend fun updateAuthorName(userId: String, newName: String): Result<Unit> {
+        return try {
+            // 1. 해당 유저의 모든 프리셋 authorName 업데이트
+            val presetsSnapshot = presetsCollection
+                .whereEqualTo("authorId", userId)
+                .get()
+                .await()
+
+            val batch = firestore.batch()
+
+            presetsSnapshot.documents.forEach { doc ->
+                batch.update(doc.reference, "authorName", newName)
+
+                // 2. 각 프리셋의 댓글에서도 authorName 업데이트
+                val commentsSnapshot = doc.reference
+                    .collection("comments")
+                    .whereEqualTo("authorId", userId)
+                    .get()
+                    .await()
+
+                commentsSnapshot.documents.forEach { commentDoc ->
+                    batch.update(commentDoc.reference, "authorName", newName)
+                }
+            }
+
+            // 3. 다른 프리셋에 달린 댓글도 업데이트 (본인이 작성자가 아닌 프리셋의 댓글)
+            val allPresetsSnapshot = presetsCollection.get().await()
+            allPresetsSnapshot.documents.forEach { presetDoc ->
+                val commentsSnapshot = presetDoc.reference
+                    .collection("comments")
+                    .whereEqualTo("authorId", userId)
+                    .get()
+                    .await()
+
+                commentsSnapshot.documents.forEach { commentDoc ->
+                    batch.update(commentDoc.reference, "authorName", newName)
+                }
+            }
+
+            batch.commit().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

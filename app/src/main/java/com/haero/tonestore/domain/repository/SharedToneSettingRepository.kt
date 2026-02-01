@@ -57,4 +57,9 @@ interface SharedToneSettingRepository {
      * 다운로드 수 증가
      */
     suspend fun incrementDownloads(id: String): Result<Unit>
+
+    /**
+     * 사용자의 모든 프리셋과 댓글의 작성자명 업데이트
+     */
+    suspend fun updateAuthorName(userId: String, newName: String): Result<Unit>
 }

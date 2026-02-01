@@ -27,5 +27,5 @@ val viewModelModule = module {
     viewModel { PresetDetailViewModel(get(), get(), get(), get()) }
     viewModel { ShareToneViewModel(get(), get(), get()) }
     viewModel { LoginViewModel(get()) }
-    viewModel { SettingsViewModel(get()) }
+    viewModel { SettingsViewModel(get(), get()) }
 }
