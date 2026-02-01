@@ -5,8 +5,6 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -48,6 +46,7 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -228,85 +227,25 @@ fun HomeScreen(
                 }
             }
 
-            // Expandable FAB - 스크롤 내리면 expanded, 올리면 mini
+            // Expandable FAB - Material3 ExtendedFloatingActionButton
             if (state.isLoggedIn && state.toneSettings.isNotEmpty()) {
-                ObsidianExpandableFab(
-                    expanded = isExpanded,
+                ExtendedFloatingActionButton(
                     onClick = { viewModel.handleIntent(HomeIntent.NavigateToCreate) },
-                    label = stringResource(R.string.add_tone_setting),
+                    expanded = isExpanded,
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Add,
+                            contentDescription = null
+                        )
+                    },
+                    text = { Text(stringResource(R.string.add_tone_setting)) },
+                    containerColor = Obsidian.colors.primary,
+                    contentColor = Color.White,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(end = 20.dp, bottom = 100.dp)
                         .navigationBarsPadding()
                 )
-            }
-        }
-    }
-}
-
-/**
- * Expandable FAB - 스크롤 방향에 따라 확장/축소
- * expanded = true: 라벨 표시 (Extended FAB)
- * expanded = false: 아이콘만 (Mini FAB)
- */
-@Composable
-private fun ObsidianExpandableFab(
-    expanded: Boolean,
-    onClick: () -> Unit,
-    label: String,
-    modifier: Modifier = Modifier
-) {
-    val fabWidth by animateDpAsState(
-        targetValue = if (expanded) 160.dp else 56.dp,
-        animationSpec = spring(stiffness = 400f),
-        label = "fabWidth"
-    )
-
-    Box(
-        modifier = modifier
-            .width(fabWidth)
-            .height(56.dp)
-            .shadow(
-                elevation = 8.dp,
-                shape = RoundedCornerShape(16.dp),
-                spotColor = Obsidian.colors.primary.copy(alpha = 0.4f)
-            )
-            .clip(RoundedCornerShape(16.dp))
-            .background(
-                Brush.horizontalGradient(
-                    colors = listOf(
-                        Obsidian.colors.primary,
-                        Obsidian.colors.primaryDark
-                    )
-                )
-            )
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.Add,
-                contentDescription = label,
-                tint = Color.White,
-                modifier = Modifier.size(24.dp)
-            )
-            AnimatedVisibility(
-                visible = expanded,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
-            ) {
-                Row {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = label,
-                        style = Obsidian.typography.labelLarge,
-                        color = Color.White,
-                        maxLines = 1
-                    )
-                }
             }
         }
     }
