@@ -1,10 +1,12 @@
 package com.haero.tonestore.presentation.ui.pedalboard
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,11 +19,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -36,7 +40,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -82,6 +88,27 @@ fun PedalBoardListScreen(
         }
     }
 
+    // 스크롤 방향 감지 - 스크롤 내리면 expanded, 올리면 collapsed
+    var previousScrollOffset by remember { mutableIntStateOf(0) }
+    var previousFirstVisibleIndex by remember { mutableIntStateOf(0) }
+    val isExpanded by remember {
+        derivedStateOf {
+            val currentIndex = listState.firstVisibleItemIndex
+            val currentOffset = listState.firstVisibleItemScrollOffset
+
+            val isScrollingDown = when {
+                currentIndex > previousFirstVisibleIndex -> true
+                currentIndex < previousFirstVisibleIndex -> false
+                else -> currentOffset > previousScrollOffset
+            }
+
+            previousFirstVisibleIndex = currentIndex
+            previousScrollOffset = currentOffset
+
+            isScrollingDown || currentIndex == 0
+        }
+    }
+
     ObsidianBackground {
         Box(modifier = Modifier.fillMaxSize()) {
             // 메인 콘텐츠 Column
@@ -124,15 +151,16 @@ fun PedalBoardListScreen(
                 }
             }
 
-            // Sticky Bottom Button - 화면 위에 overlay로 표시
-            AnimatedVisibility(
-                visible = state.isLoggedIn && state.pedalBoards.isNotEmpty(),
-                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
-                modifier = Modifier.align(Alignment.BottomCenter)
-            ) {
-                StickyBottomAddButton(
-                    onClick = onNavigateToCreate
+            // Expandable FAB - 스크롤 내리면 expanded, 올리면 mini
+            if (state.isLoggedIn && state.pedalBoards.isNotEmpty()) {
+                ObsidianExpandableFab(
+                    expanded = isExpanded,
+                    onClick = onNavigateToCreate,
+                    label = stringResource(R.string.create_pedalboard),
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 20.dp, bottom = 100.dp)
+                        .navigationBarsPadding()
                 )
             }
         }
@@ -163,54 +191,67 @@ fun PedalBoardListScreen(
     }
 }
 
+/**
+ * Expandable FAB - 스크롤 방향에 따라 확장/축소
+ */
 @Composable
-private fun StickyBottomAddButton(
+private fun ObsidianExpandableFab(
+    expanded: Boolean,
     onClick: () -> Unit,
+    label: String,
     modifier: Modifier = Modifier
 ) {
+    val fabWidth by animateDpAsState(
+        targetValue = if (expanded) 170.dp else 56.dp,
+        animationSpec = spring(stiffness = 400f),
+        label = "fabWidth"
+    )
+
     Box(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = Obsidian.spacing.screenPadding)
-            .padding(bottom = 116.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .shadow(
-                    elevation = 12.dp,
-                    shape = RoundedCornerShape(16.dp),
-                    spotColor = Obsidian.colors.primary.copy(alpha = 0.3f)
-                )
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    Brush.horizontalGradient(
-                        colors = listOf(
-                            Obsidian.colors.primary,
-                            Obsidian.colors.primaryDark
-                        )
+            .width(fabWidth)
+            .height(56.dp)
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(16.dp),
+                spotColor = Obsidian.colors.primary.copy(alpha = 0.4f)
+            )
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                Brush.horizontalGradient(
+                    colors = listOf(
+                        Obsidian.colors.primary,
+                        Obsidian.colors.primaryDark
                     )
                 )
-                .clickable(onClick = onClick)
-                .padding(vertical = 16.dp),
-            contentAlignment = Alignment.Center
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+            Icon(
+                imageVector = Icons.Rounded.Add,
+                contentDescription = label,
+                tint = Color.White,
+                modifier = Modifier.size(24.dp)
+            )
+            AnimatedVisibility(
+                visible = expanded,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.Add,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(22.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = stringResource(R.string.create_pedalboard),
-                    style = Obsidian.typography.labelLarge,
-                    color = Color.White
-                )
+                Row {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = label,
+                        style = Obsidian.typography.labelLarge,
+                        color = Color.White,
+                        maxLines = 1
+                    )
+                }
             }
         }
     }
@@ -313,7 +354,7 @@ private fun ObsidianPedalBoardList(
             start = Obsidian.spacing.screenPadding,
             end = Obsidian.spacing.screenPadding,
             top = Obsidian.spacing.md,
-            bottom = 180.dp // NavBar + Sticky Button 영역까지 스크롤 가능
+            bottom = 120.dp // NavBar 영역까지 스크롤 가능
         ),
         verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
     ) {
