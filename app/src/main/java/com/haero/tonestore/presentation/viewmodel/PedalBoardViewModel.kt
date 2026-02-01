@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.haero.tonestore.domain.model.Knob
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalType
+import com.haero.tonestore.domain.model.SavedCustomPedal
 import com.haero.tonestore.domain.model.SavedPedalBoard
 import com.haero.tonestore.domain.usecase.DeleteSavedPedalBoardUseCase
 import com.haero.tonestore.domain.usecase.GetAllSavedPedalBoardsUseCase
 import com.haero.tonestore.domain.usecase.GetPresetPedalsUseCase
 import com.haero.tonestore.domain.usecase.GetSavedPedalBoardByIdUseCase
+import com.haero.tonestore.domain.usecase.SaveCustomPedalUseCase
 import com.haero.tonestore.domain.usecase.SavePedalBoardUseCase
 import com.haero.tonestore.presentation.ui.pedalboard.PedalBoardIntent
 import com.haero.tonestore.presentation.ui.pedalboard.PedalBoardState
@@ -25,7 +27,8 @@ class PedalBoardViewModel(
     private val savePedalBoardUseCase: SavePedalBoardUseCase,
     private val deleteSavedPedalBoardUseCase: DeleteSavedPedalBoardUseCase,
     private val getPresetPedalsUseCase: GetPresetPedalsUseCase,
-    private val getAllSavedPedalBoardsUseCase: GetAllSavedPedalBoardsUseCase
+    private val getAllSavedPedalBoardsUseCase: GetAllSavedPedalBoardsUseCase,
+    private val saveCustomPedalUseCase: SaveCustomPedalUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PedalBoardState())
@@ -323,11 +326,32 @@ class PedalBoardViewModel(
                 updatedAt = now
             )
             runCatching {
+                // 1. 페달보드 저장
                 savePedalBoardUseCase(pedalBoard)
+
+                // 2. 커스텀 페달 자동 저장
+                saveCustomPedalsFromBoard(currentState.slots)
             }.onSuccess {
                 _state.update { it.copy(isSaving = false, navigateBack = true, showSaveSuccess = true) }
             }.onFailure { e ->
                 _state.update { it.copy(isSaving = false, error = e.message) }
+            }
+        }
+    }
+
+    private suspend fun saveCustomPedalsFromBoard(slots: List<Pedal?>) {
+        val customPedals = slots.filterNotNull().filter { it.type == PedalType.CUSTOM }
+        customPedals.forEach { pedal ->
+            val savedPedal = SavedCustomPedal(
+                id = pedal.id,
+                name = pedal.name,
+                knobNames = pedal.knobs.map { it.name },
+                color = pedal.color,
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
+            )
+            runCatching {
+                saveCustomPedalUseCase(savedPedal)
             }
         }
     }

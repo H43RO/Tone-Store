@@ -7,12 +7,14 @@ import com.haero.tonestore.domain.model.Knob
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalBoard
 import com.haero.tonestore.domain.model.PedalType
+import com.haero.tonestore.domain.model.SavedCustomPedal
 import com.haero.tonestore.domain.model.SavedPedalBoard
 import com.haero.tonestore.domain.model.ToneSetting
 import com.haero.tonestore.domain.usecase.GetAllSavedPedalBoardsUseCase
 import com.haero.tonestore.domain.usecase.GetAllToneSettingsUseCase
 import com.haero.tonestore.domain.usecase.GetPresetPedalsUseCase
 import com.haero.tonestore.domain.usecase.GetToneSettingByIdUseCase
+import com.haero.tonestore.domain.usecase.SaveCustomPedalUseCase
 import com.haero.tonestore.domain.usecase.SaveToneSettingUseCase
 import com.haero.tonestore.presentation.ui.create.CreateToneIntent
 import com.haero.tonestore.presentation.ui.create.CreateToneState
@@ -28,7 +30,8 @@ class CreateToneViewModel(
     private val saveToneSettingUseCase: SaveToneSettingUseCase,
     private val getPresetPedalsUseCase: GetPresetPedalsUseCase,
     private val getAllSavedPedalBoardsUseCase: GetAllSavedPedalBoardsUseCase,
-    private val getAllToneSettingsUseCase: GetAllToneSettingsUseCase
+    private val getAllToneSettingsUseCase: GetAllToneSettingsUseCase,
+    private val saveCustomPedalUseCase: SaveCustomPedalUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CreateToneState())
@@ -244,11 +247,32 @@ class CreateToneViewModel(
                 tags = currentState.selectedTags
             )
             runCatching {
+                // 1. 톤 세팅 저장
                 saveToneSettingUseCase(toneSetting)
+
+                // 2. 커스텀 페달 자동 저장
+                saveCustomPedalsFromTone(currentState.pedalBoard)
             }.onSuccess {
                 _state.update { it.copy(isSaving = false, navigateBack = true, showSaveSuccess = true) }
             }.onFailure { e ->
                 _state.update { it.copy(isSaving = false, error = e.message) }
+            }
+        }
+    }
+
+    private suspend fun saveCustomPedalsFromTone(pedalBoard: PedalBoard) {
+        val customPedals = pedalBoard.pedals.filter { it.type == PedalType.CUSTOM }
+        customPedals.forEach { pedal ->
+            val savedPedal = SavedCustomPedal(
+                id = pedal.id,
+                name = pedal.name,
+                knobNames = pedal.knobs.map { it.name },
+                color = pedal.color,
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
+            )
+            runCatching {
+                saveCustomPedalUseCase(savedPedal)
             }
         }
     }
