@@ -322,7 +322,7 @@ private fun ObsidianPedalBoardList(
             start = Obsidian.spacing.screenPadding,
             end = Obsidian.spacing.screenPadding,
             top = Obsidian.spacing.md,
-            bottom = Obsidian.spacing.md
+            bottom = 180.dp // NavBar + Sticky Button 영역까지 스크롤 가능
         ),
         verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
     ) {
