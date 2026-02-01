@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 사용자 정보
+    match /users/{userId} {
+      // 본인만 읽기/쓰기 가능
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 공유 프리셋
+    match /presets/{presetId} {
+      // 누구나 읽기 가능
+      allow read: if true;
+      
+      // 로그인한 사용자만 생성 가능
+      allow create: if request.auth != null;
+      
+      // 작성자만 수정/삭제 가능
+      allow update, delete: if request.auth != null 
+        && request.auth.uid == resource.data.authorId;
+      
+      // 댓글
+      match /comments/{commentId} {
+        // 누구나 읽기 가능
+        allow read: if true;
+        
+        // 로그인한 사용자만 생성 가능
+        allow create: if request.auth != null;
+        
+        // 작성자만 수정/삭제 가능
+        allow update, delete: if request.auth != null 
+          && request.auth.uid == resource.data.authorId;
+      }
+    }
+    
+    // 좋아요
+    match /likes/{likeId} {
+      // 누구나 읽기 가능
+      allow read: if true;
+      
+      // 로그인한 사용자만 생성/삭제 가능 (본인 좋아요만)
+      allow create: if request.auth != null 
+        && request.auth.uid == request.resource.data.userId;
+      allow delete: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+    }
+  }
+}
