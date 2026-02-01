@@ -43,10 +43,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.haero.tonestore.R
 import com.haero.tonestore.presentation.viewmodel.SettingsViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -134,7 +136,7 @@ private fun SettingsHeader(
             .padding(top = 16.dp, bottom = 8.dp)
     ) {
         Text(
-            text = "설정",
+            text = stringResource(R.string.settings),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
@@ -241,7 +243,7 @@ private fun LoggedInContent(
                 )
 
                 Text(
-                    text = "닉네임을 설정하지 않으면 Google 계정 이름이 사용됩니다.",
+                    text = stringResource(R.string.nickname_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -322,13 +324,13 @@ private fun NotLoggedInContent(
         }
 
         Text(
-            text = "로그인이 필요합니다",
+            text = stringResource(R.string.login_required),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold
         )
 
         Text(
-            text = "커뮤니티 기능을 이용하려면\n로그인해주세요",
+            text = stringResource(R.string.login_required_settings_message),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 8.dp)

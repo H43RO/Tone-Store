@@ -33,11 +33,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalType
 import com.haero.tonestore.presentation.ui.components.PedalColorUtils
@@ -124,7 +126,7 @@ fun PedalSlot(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "추가",
+                        text = stringResource(R.string.add_pedal),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary
                     )

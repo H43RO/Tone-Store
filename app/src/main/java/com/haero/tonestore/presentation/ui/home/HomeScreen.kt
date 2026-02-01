@@ -695,7 +695,7 @@ private fun LoginRequiredState(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "로그인이 필요합니다",
+            text = stringResource(R.string.login_required),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
@@ -704,7 +704,7 @@ private fun LoginRequiredState(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "톤 세팅을 저장하고 관리하려면\n로그인해주세요",
+            text = stringResource(R.string.login_required_tone_message),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center

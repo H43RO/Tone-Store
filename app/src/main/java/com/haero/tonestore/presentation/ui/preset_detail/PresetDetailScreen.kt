@@ -47,10 +47,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.GenreTag
 import com.haero.tonestore.domain.model.SharedToneSetting
 import com.haero.tonestore.presentation.ui.preset_detail.components.CommentInput
@@ -169,7 +171,7 @@ fun PresetDetailScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "댓글 ${state.comments.size}",
+                                text = stringResource(R.string.comments_count, state.comments.size),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -181,7 +183,7 @@ fun PresetDetailScreen(
                     if (state.comments.isEmpty()) {
                         item {
                             Text(
-                                text = "아직 댓글이 없어요. 첫 댓글을 남겨보세요!",
+                                text = stringResource(R.string.no_comments_yet),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp)

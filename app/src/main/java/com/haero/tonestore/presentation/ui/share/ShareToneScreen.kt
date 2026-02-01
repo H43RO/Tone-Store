@@ -39,9 +39,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.GenreTag
 import com.haero.tonestore.presentation.viewmodel.ShareToneViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -109,7 +111,7 @@ fun ShareToneScreen(
                 // 원곡 정보
                 state.toneSetting?.let { toneSetting ->
                     Text(
-                        text = "공유할 톤",
+                        text = stringResource(R.string.tone_to_share),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -120,7 +122,10 @@ fun ShareToneScreen(
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = "페달 ${toneSetting.pedalBoard.pedals.size}개 · ${toneSetting.ampSetting.ampModel ?: "앰프 설정 있음"}",
+                        text = stringResource(
+                            R.string.pedals_count_format,
+                            toneSetting.pedalBoard.pedals.size
+                        ) + " · " + (toneSetting.ampSetting.ampModel ?: stringResource(R.string.amp_setting_exists)),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -130,7 +135,7 @@ fun ShareToneScreen(
 
                 // 제목
                 Text(
-                    text = "제목 *",
+                    text = stringResource(R.string.title_required),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -139,7 +144,7 @@ fun ShareToneScreen(
                     value = state.title,
                     onValueChange = { viewModel.handleIntent(ShareToneIntent.UpdateTitle(it)) },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("프리셋 제목을 입력하세요") },
+                    placeholder = { Text(stringResource(R.string.title_placeholder)) },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -148,7 +153,7 @@ fun ShareToneScreen(
 
                 // 설명
                 Text(
-                    text = "설명",
+                    text = stringResource(R.string.description),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -159,7 +164,7 @@ fun ShareToneScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(120.dp),
-                    placeholder = { Text("톤에 대한 설명을 입력하세요 (선택사항)") },
+                    placeholder = { Text(stringResource(R.string.description_placeholder)) },
                     shape = RoundedCornerShape(12.dp)
                 )
 
@@ -167,7 +172,7 @@ fun ShareToneScreen(
 
                 // 태그
                 Text(
-                    text = "태그",
+                    text = stringResource(R.string.tags),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -226,7 +231,7 @@ fun ShareToneScreen(
                         )
                         Spacer(modifier = Modifier.padding(horizontal = 8.dp))
                         Text(
-                            text = "커뮤니티에 공유하기",
+                            text = stringResource(R.string.share_to_community),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )

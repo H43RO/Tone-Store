@@ -42,6 +42,13 @@
     <string name="add_knob">Add Knob</string>
     <string name="create">Create</string>
     <string name="cancel">Cancel</string>
+    <string name="add_pedal">Add</string>
+    <string name="add_effect">Add Effect</string>
+    <string name="category">Category</string>
+    <string name="category_all">All</string>
+    <string name="create_custom_effect">Create Your Own Effect</string>
+    <string name="custom_knob_description">Customize with your own knobs</string>
+    <string name="slot_number">Slot %d</string>
 
     <!-- Pedal Board Management -->
     <string name="create_pedalboard">New Pedal Board</string>
@@ -60,6 +67,7 @@
     <!-- Amp Section -->
     <string name="amp_setting">Amp Setting</string>
     <string name="amp_model_hint">Amp model (e.g., Fender Twin Reverb)</string>
+    <string name="amp_setting_exists">Amp configured</string>
 
     <!-- Guitar Section -->
     <string name="guitar_setting">Guitar Setting</string>
@@ -132,4 +140,37 @@
      <string name="no_results_found">No Results Found</string>
      <string name="empty_search_subtitle_v2">Try searching with a different keyword</string>
      <string name="clear_search_button">Clear Search</string>
+
+     <!-- Settings Screen -->
+     <string name="settings">Settings</string>
+     <string name="nickname_hint">If not set, Google account name will be used.</string>
+     <string name="login_required">Login Required</string>
+     <string name="login_required_settings_message">Please login to use\ncommunity features</string>
+     <string name="login_required_tone_message">Please login to save\nand manage tone settings</string>
+     <string name="login_required_pedalboard_message">Please login to save\nand manage pedal boards</string>
+
+     <!-- Login Screen -->
+     <string name="login_subtitle">Login to share tones\nin the community</string>
+     <string name="continue_with_google">Continue with Google</string>
+
+     <!-- Community Screen -->
+     <string name="community">Community</string>
+     <string name="community_subtitle">Explore and share tones with other players</string>
+     <string name="empty_presets_title">No shared presets yet</string>
+     <string name="empty_presets_subtitle">Be the first to share your tone!</string>
+     <string name="comments_count">Comments %d</string>
+     <string name="no_comments_yet">No comments yet. Be the first to comment!</string>
+     <string name="edited_suffix"> (edited)</string>
+
+     <!-- Share Screen -->
+     <string name="share_tone">Share Tone</string>
+     <string name="tone_to_share">Tone to Share</string>
+     <string name="pedals_count_format">%d pedals</string>
+     <string name="title_required">Title *</string>
+     <string name="title_placeholder">Enter preset title</string>
+     <string name="description">Description</string>
+     <string name="description_placeholder">Enter description (optional)</string>
+     <string name="tags">Tags</string>
+     <string name="share_to_community">Share to Community</string>
+     <string name="share_success">Tone shared to community!</string>
  </resources>

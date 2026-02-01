@@ -14,12 +14,14 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -54,12 +56,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.haero.tonestore.R
 import com.haero.tonestore.data.preset.PresetPedals
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalCategory
@@ -92,8 +96,9 @@ fun PresetPedalSelectionDialog(
         }
     }
 
+    val navigationBarPadding = WindowInsets.navigationBars.asPaddingValues()
+
     ModalBottomSheet(
-        modifier = Modifier.statusBarsPadding(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface,
@@ -118,6 +123,7 @@ fun PresetPedalSelectionDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
+                .padding(bottom = navigationBarPadding.calculateBottomPadding())
         ) {
             // Header
             Row(
@@ -132,7 +138,7 @@ fun PresetPedalSelectionDialog(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "이펙터 추가",
+                    text = stringResource(R.string.add_effect),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -147,20 +153,21 @@ fun PresetPedalSelectionDialog(
 
             // Category Filter
             Text(
-                text = "카테고리",
+                text = stringResource(R.string.category),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(8.dp))
 
+            val categoryAllLabel = stringResource(R.string.category_all)
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(end = 8.dp)
             ) {
                 item {
                     CategoryChip(
-                        label = "전체",
+                        label = categoryAllLabel,
                         emoji = "🎸",
                         selected = selectedCategory == null,
                         onClick = { selectedCategory = null }
@@ -260,13 +267,13 @@ private fun CustomPedalCard(
 
                 Column {
                     Text(
-                        text = "나만의 이펙터 만들기",
+                        text = stringResource(R.string.create_custom_effect),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                     Text(
-                        text = "커스텀 노브와 설정으로 구성",
+                        text = stringResource(R.string.custom_knob_description),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.White.copy(alpha = 0.8f)
                     )
@@ -347,13 +354,15 @@ private fun SelectablePedalCard(
         // 페달 이름
         Text(
             text = pedal.name,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
             color = contentColor,
             textAlign = TextAlign.Center,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -362,7 +371,7 @@ private fun SelectablePedalCard(
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 8.dp)
                 .weight(1f),
             horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
@@ -372,6 +381,15 @@ private fun SelectablePedalCard(
                 SelectableKnobIndicator(contentColor = contentColor)
             }
         }
+
+        // 풋스위치
+        FootSwitch(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 12.dp)
+                .height(12.dp)
+        )
     }
 }
 
@@ -444,6 +462,40 @@ private fun SelectableKnobIndicator(
             strokeWidth = strokeWidth * 0.4f,
             cap = StrokeCap.Round
         )
+    }
+}
+
+/**
+ * 풋스위치 - 검은색 직사각형 + 가로 스트라이프 패턴
+ */
+@Composable
+private fun FootSwitch(modifier: Modifier = Modifier) {
+    Canvas(
+        modifier = modifier
+            .clip(RoundedCornerShape(4.dp))
+    ) {
+        val width = size.width
+        val height = size.height
+
+        // 베이스 검은색
+        drawRoundRect(
+            color = Color(0xFF1A1A1A),
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(4.dp.toPx())
+        )
+
+        // 가로 스트라이프 패턴
+        val stripeCount = 6
+        val stripeSpacing = width / (stripeCount + 1)
+        for (i in 1..stripeCount) {
+            val x = stripeSpacing * i
+            drawLine(
+                color = Color(0xFF3A3A3A),
+                start = Offset(x, height * 0.2f),
+                end = Offset(x, height * 0.8f),
+                strokeWidth = 2.dp.toPx(),
+                cap = StrokeCap.Round
+            )
+        }
     }
 }
 

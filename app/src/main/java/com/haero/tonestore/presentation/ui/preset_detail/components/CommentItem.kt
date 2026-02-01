@@ -31,9 +31,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.Comment
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -99,7 +101,7 @@ fun CommentItem(
                 )
                 if (comment.updatedAt > comment.createdAt) {
                     Text(
-                        text = " (수정됨)",
+                        text = stringResource(R.string.edited_suffix),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

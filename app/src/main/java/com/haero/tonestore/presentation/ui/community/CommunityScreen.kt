@@ -36,10 +36,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.haero.tonestore.R
 import com.haero.tonestore.presentation.ui.community.components.SharedPresetCard
 import com.haero.tonestore.presentation.viewmodel.CommunityViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -142,14 +144,14 @@ private fun CommunityHeader(
             )
             Spacer(modifier = Modifier.padding(horizontal = 8.dp))
             Text(
-                text = "커뮤니티",
+                text = stringResource(R.string.community),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
         }
         Text(
-            text = "다른 연주자들의 톤을 탐색하고 공유해보세요",
+            text = stringResource(R.string.community_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -243,14 +245,14 @@ private fun EmptyCommunityState(
         }
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-            text = "아직 공유된 프리셋이 없어요",
+            text = stringResource(R.string.empty_presets_title),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "첫 번째로 톤을 공유해보세요!",
+            text = stringResource(R.string.empty_presets_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center

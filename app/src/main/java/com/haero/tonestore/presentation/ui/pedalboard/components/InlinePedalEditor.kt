@@ -124,7 +124,7 @@ fun InlinePedalEditor(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "슬롯 ${slotIndex + 1}",
+            text = stringResource(R.string.slot_number, slotIndex + 1),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
