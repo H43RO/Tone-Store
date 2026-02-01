@@ -43,4 +43,6 @@ sealed interface CreateToneIntent {
     data object SaveToneSetting : CreateToneIntent
 
     data object NavigationHandled : CreateToneIntent
+
+    data object ClearError : CreateToneIntent
 }

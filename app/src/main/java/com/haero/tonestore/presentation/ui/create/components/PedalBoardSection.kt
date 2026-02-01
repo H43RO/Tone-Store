@@ -12,23 +12,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -37,6 +33,8 @@ import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalBoard
 import com.haero.tonestore.domain.model.SavedPedalBoard
 import com.haero.tonestore.presentation.ui.components.SectionHeader
+import com.haero.tonestore.presentation.ui.pedalboard.components.PresetPedalSelectionDialog
+import java.util.UUID
 
 @Composable
 fun PedalBoardSection(
@@ -53,9 +51,9 @@ fun PedalBoardSection(
     isEditable: Boolean = true
 ) {
     var isExpanded by remember { mutableStateOf(true) }
-    var showPresetDialog by remember { mutableStateOf(false) }
-    var showCustomDialog by remember { mutableStateOf(false) }
+    var showPedalSelectionSheet by remember { mutableStateOf(false) }
     var showSavedPedalBoardDialog by remember { mutableStateOf(false) }
+    var showCustomPedalDialog by remember { mutableStateOf(false) }
 
     SectionHeader(
         title = stringResource(R.string.pedal_board),
@@ -112,27 +110,14 @@ fun PedalBoardSection(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                // 페달 추가 버튼 하나로 통합
+                OutlinedButton(
+                    onClick = { showPedalSelectionSheet = true },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    OutlinedButton(
-                        onClick = { showPresetDialog = true },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = null)
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(stringResource(R.string.add_preset_pedal))
-                    }
-
-                    OutlinedButton(
-                        onClick = { showCustomDialog = true },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(Icons.Default.Build, contentDescription = null)
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(stringResource(R.string.add_custom_pedal))
-                    }
+                    Icon(Icons.Default.Add, contentDescription = null)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(stringResource(R.string.add_preset_pedal))
                 }
             }
 
@@ -140,32 +125,42 @@ fun PedalBoardSection(
         }
     }
 
-    if (showPresetDialog) {
-        PresetPedalDialog(
-            presetPedals = presetPedals,
-            onSelect = { pedal ->
-                onAddPresetPedal(pedal)
-                showPresetDialog = false
+    // 페달 선택 바텀시트 (페달보드 화면과 동일한 UI)
+    if (showPedalSelectionSheet) {
+        PresetPedalSelectionDialog(
+            onDismiss = { showPedalSelectionSheet = false },
+            onPedalSelect = { pedal ->
+                // 새 ID로 복사해서 추가 (같은 페달 여러 개 추가 가능)
+                val newPedal = pedal.copy(
+                    id = UUID.randomUUID().toString(),
+                    order = pedalBoard.pedals.size
+                )
+                onAddPresetPedal(newPedal)
+                showPedalSelectionSheet = false
             },
-            onDismiss = { showPresetDialog = false }
+            onCustomPedalCreate = {
+                showPedalSelectionSheet = false
+                showCustomPedalDialog = true
+            }
         )
     }
 
-    if (showCustomDialog) {
-        CustomPedalDialog(
-            onConfirm = { name, knobs ->
-                onAddCustomPedal(name, knobs)
-                showCustomDialog = false
+    // 커스텀 페달 생성 다이얼로그
+    if (showCustomPedalDialog) {
+        CustomPedalCreationDialog(
+            onConfirm = { name, knobNames ->
+                onAddCustomPedal(name, knobNames)
+                showCustomPedalDialog = false
             },
-            onDismiss = { showCustomDialog = false }
+            onDismiss = { showCustomPedalDialog = false }
         )
     }
 
     if (showSavedPedalBoardDialog) {
         SavedPedalBoardDialog(
             savedPedalBoards = savedPedalBoards,
-            onSelect = { pedalBoard ->
-                onLoadSavedPedalBoard(pedalBoard)
+            onSelect = { savedBoard ->
+                onLoadSavedPedalBoard(savedBoard)
                 showSavedPedalBoardDialog = false
             },
             onDismiss = { showSavedPedalBoardDialog = false }
@@ -174,43 +169,19 @@ fun PedalBoardSection(
 }
 
 @Composable
-private fun PresetPedalDialog(presetPedals: List<Pedal>, onSelect: (Pedal) -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.select_preset_pedal)) },
-        text = {
-            Column {
-                presetPedals.forEach { pedal ->
-                    AssistChip(
-                        onClick = { onSelect(pedal) },
-                        label = { Text(pedal.name) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                    )
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
-        }
-    )
-}
-
-@Composable
-private fun CustomPedalDialog(onConfirm: (name: String, knobs: List<String>) -> Unit, onDismiss: () -> Unit) {
+private fun CustomPedalCreationDialog(
+    onConfirm: (name: String, knobs: List<String>) -> Unit,
+    onDismiss: () -> Unit
+) {
     var pedalName by remember { mutableStateOf("") }
-    val knobNames = remember { mutableStateListOf("Knob 1") }
+    val knobNames = remember { mutableStateOf(listOf("Knob 1")) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.create_custom_pedal)) },
         text = {
             Column {
-                OutlinedTextField(
+                androidx.compose.material3.OutlinedTextField(
                     value = pedalName,
                     onValueChange = { pedalName = it },
                     label = { Text(stringResource(R.string.pedal_name)) },
@@ -225,10 +196,14 @@ private fun CustomPedalDialog(onConfirm: (name: String, knobs: List<String>) -> 
                     style = MaterialTheme.typography.labelLarge
                 )
 
-                knobNames.forEachIndexed { index, name ->
-                    OutlinedTextField(
+                knobNames.value.forEachIndexed { index, name ->
+                    androidx.compose.material3.OutlinedTextField(
                         value = name,
-                        onValueChange = { knobNames[index] = it },
+                        onValueChange = { newName ->
+                            knobNames.value = knobNames.value.toMutableList().also {
+                                it[index] = newName
+                            }
+                        },
                         label = { Text("Knob ${index + 1}") },
                         singleLine = true,
                         modifier = Modifier
@@ -237,10 +212,12 @@ private fun CustomPedalDialog(onConfirm: (name: String, knobs: List<String>) -> 
                     )
                 }
 
-                if (knobNames.size < 6) {
+                if (knobNames.value.size < 6) {
                     TextButton(
-                        onClick = { knobNames.add("Knob ${knobNames.size + 1}") },
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        onClick = {
+                            knobNames.value = knobNames.value + "Knob ${knobNames.value.size + 1}"
+                        },
+                        modifier = Modifier.align(androidx.compose.ui.Alignment.CenterHorizontally)
                     ) {
                         Icon(Icons.Default.Add, contentDescription = null)
                         Text(stringResource(R.string.add_knob))
@@ -252,7 +229,7 @@ private fun CustomPedalDialog(onConfirm: (name: String, knobs: List<String>) -> 
             TextButton(
                 onClick = {
                     if (pedalName.isNotBlank()) {
-                        onConfirm(pedalName, knobNames.filter { it.isNotBlank() })
+                        onConfirm(pedalName, knobNames.value.filter { it.isNotBlank() })
                     }
                 },
                 enabled = pedalName.isNotBlank()

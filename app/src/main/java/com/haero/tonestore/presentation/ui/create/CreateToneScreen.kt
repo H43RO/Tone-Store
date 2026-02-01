@@ -111,6 +111,14 @@ fun CreateToneScreen(
         }
     }
 
+    // 에러 메시지 표시
+    LaunchedEffect(state.error) {
+        state.error?.let { error ->
+            snackbarHostState.showSnackbar(error)
+            viewModel.handleIntent(CreateToneIntent.ClearError)
+        }
+    }
+
     val isLastStep = currentStep == steps.lastIndex
     val isFirstStep = currentStep == 0
 

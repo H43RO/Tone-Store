@@ -56,6 +56,7 @@ class CreateToneViewModel(
             is CreateToneIntent.ToggleTag -> toggleTag(intent.tag)
             is CreateToneIntent.SaveToneSetting -> saveToneSetting()
             is CreateToneIntent.NavigationHandled -> clearNavigation()
+            is CreateToneIntent.ClearError -> clearError()
         }
     }
 
@@ -246,5 +247,9 @@ class CreateToneViewModel(
 
     private fun clearNavigation() {
         _state.update { it.copy(navigateBack = false, showSaveSuccess = false) }
+    }
+
+    private fun clearError() {
+        _state.update { it.copy(error = null) }
     }
 }
