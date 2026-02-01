@@ -141,10 +141,6 @@ fun ToneSettingCard(
                     color = theme.textPrimary
                 )
 
-                Spacer(modifier = Modifier.height(6.dp))
-
-                PedalIconsRow(pedals = toneSetting.pedalBoard.pedals)
-
                 if (toneSetting.tags.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(10.dp))
                     FlowRow(

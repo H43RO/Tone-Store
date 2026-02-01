@@ -130,13 +130,6 @@ fun GridToneSettingCard(
                     color = theme.textPrimary,
                     modifier = Modifier.fillMaxWidth()
                 )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                PedalIconsRow(
-                    pedals = toneSetting.pedalBoard.pedals,
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
 
             // Favorite button
