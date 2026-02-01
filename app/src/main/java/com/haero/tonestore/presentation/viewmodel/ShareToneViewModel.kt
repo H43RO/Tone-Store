@@ -108,8 +108,14 @@ class ShareToneViewModel(
                 )
 
                 val result = sharedToneSettingRepository.uploadToneSetting(sharedToneSetting)
-                result.onSuccess {
-                    _state.update { it.copy(isLoading = false, isSuccess = true) }
+                result.onSuccess { presetId ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            isSuccess = true,
+                            sharedPresetId = presetId
+                        )
+                    }
                 }.onFailure { e ->
                     _state.update { it.copy(error = "공유 실패: ${e.message}", isLoading = false) }
                 }

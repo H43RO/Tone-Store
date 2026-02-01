@@ -370,7 +370,12 @@ fun ToneStoreNavGraph(navController: NavHostController = rememberNavController()
             ShareToneScreen(
                 toneSettingId = toneSettingId,
                 onNavigateBack = { navController.popBackStack() },
-                onShareSuccess = { navController.popBackStack() }
+                onShareSuccess = { presetId ->
+                    // 공유 완료 후 커뮤니티 상세 화면으로 이동
+                    navController.navigate(Screen.PresetDetail.createRoute(presetId)) {
+                        popUpTo(Screen.ShareTone.route) { inclusive = true }
+                    }
+                }
             )
         }
 

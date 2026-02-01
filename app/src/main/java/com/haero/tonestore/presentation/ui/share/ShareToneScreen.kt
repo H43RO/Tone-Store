@@ -51,7 +51,7 @@ import org.koin.androidx.compose.koinViewModel
 fun ShareToneScreen(
     toneSettingId: String,
     onNavigateBack: () -> Unit,
-    onShareSuccess: () -> Unit,
+    onShareSuccess: (presetId: String) -> Unit,
     viewModel: ShareToneViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -61,10 +61,10 @@ fun ShareToneScreen(
         viewModel.handleIntent(ShareToneIntent.LoadToneSetting(toneSettingId))
     }
 
-    LaunchedEffect(state.isSuccess) {
-        if (state.isSuccess) {
+    LaunchedEffect(state.isSuccess, state.sharedPresetId) {
+        if (state.isSuccess && state.sharedPresetId != null) {
             snackbarHostState.showSnackbar("톤이 커뮤니티에 공유되었습니다!")
-            onShareSuccess()
+            onShareSuccess(state.sharedPresetId!!)
         }
     }
 

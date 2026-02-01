@@ -13,5 +13,6 @@ data class ShareToneState(
     val selectedTags: List<GenreTag> = emptyList(),
     val isLoading: Boolean = false,
     val isSuccess: Boolean = false,
+    val sharedPresetId: String? = null,
     val error: String? = null
 )
