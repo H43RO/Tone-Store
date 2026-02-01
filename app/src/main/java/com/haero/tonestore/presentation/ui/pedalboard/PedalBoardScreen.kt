@@ -253,6 +253,7 @@ fun PedalBoardScreen(
     if (showAddPedalDialog && addingToSlotIndex != null) {
         val slotIndex = addingToSlotIndex ?: return@PedalBoardScreen
         PresetPedalSelectionDialog(
+            customPedals = state.customPedals,
             onPedalSelect = { pedal ->
                 viewModel.handleIntent(PedalBoardIntent.AddPedalToSlot(slotIndex, pedal))
                 showAddPedalDialog = false

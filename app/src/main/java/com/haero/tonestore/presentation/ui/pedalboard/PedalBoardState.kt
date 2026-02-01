@@ -1,6 +1,7 @@
 package com.haero.tonestore.presentation.ui.pedalboard
 
 import com.haero.tonestore.domain.model.Pedal
+import com.haero.tonestore.domain.model.SavedCustomPedal
 import com.haero.tonestore.domain.model.SavedPedalBoard
 
 data class PedalBoardState(
@@ -15,6 +16,7 @@ data class PedalBoardState(
     val expressionPedal: Pedal? = null,
 
     val presetPedals: List<Pedal> = emptyList(),
+    val customPedals: List<SavedCustomPedal> = emptyList(),
 
     val editingSlotIndex: Int? = null,
 

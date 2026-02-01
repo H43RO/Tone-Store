@@ -40,6 +40,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -68,22 +70,25 @@ import com.haero.tonestore.R
 import com.haero.tonestore.data.preset.PresetPedals
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalCategory
+import com.haero.tonestore.domain.model.SavedCustomPedal
 import com.haero.tonestore.presentation.ui.components.PedalColorUtils
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * 프리셋 페달 선택 바텀시트
+ * 프리셋/커스텀 페달 선택 바텀시트
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PresetPedalSelectionDialog(
+    customPedals: List<SavedCustomPedal>,
     onDismiss: () -> Unit,
     onPedalSelect: (Pedal) -> Unit,
     onCustomPedalCreate: () -> Unit
 ) {
     val presetPedals = remember { PresetPedals.getPresetPedals() }
+    var selectedTab by remember { mutableStateOf(0) } // 0: 프리셋, 1: 커스텀
     var selectedCategory by remember { mutableStateOf<PedalCategory?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -147,61 +152,127 @@ fun PresetPedalSelectionDialog(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Custom Pedal Card
-            CustomPedalCard(onClick = onCustomPedalCreate)
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Category Filter
-            Text(
-                text = stringResource(R.string.category),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            val categoryAllLabel = stringResource(R.string.category_all)
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(end = 8.dp)
+            // Tabs (프리셋 / 커스텀)
+            TabRow(
+                selectedTabIndex = selectedTab,
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
             ) {
-                item {
-                    CategoryChip(
-                        label = categoryAllLabel,
-                        emoji = "🎸",
-                        selected = selectedCategory == null,
-                        onClick = { selectedCategory = null }
-                    )
-                }
-                items(PedalCategory.entries) { category ->
-                    CategoryChip(
-                        label = getCategoryDisplayName(category),
-                        emoji = getCategoryEmoji(category),
-                        selected = selectedCategory == category,
-                        onClick = {
-                            selectedCategory = if (selectedCategory == category) null else category
-                        }
-                    )
-                }
+                Tab(
+                    selected = selectedTab == 0,
+                    onClick = { selectedTab = 0 },
+                    text = { Text("프리셋 페달") }
+                )
+                Tab(
+                    selected = selectedTab == 1,
+                    onClick = { selectedTab = 1 },
+                    text = { Text("나의 커스텀 페달") }
+                )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(4),
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                contentPadding = PaddingValues(bottom = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                items(filteredPedals, key = { it.name }) { pedal ->
-                    SelectablePedalCard(
-                        pedal = pedal,
-                        onClick = { onPedalSelect(pedal) }
-                    )
+            // Custom Pedal Card (프리셋 탭에서만 표시)
+            if (selectedTab == 0) {
+                CustomPedalCard(onClick = onCustomPedalCreate)
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            // 프리셋 탭: Category Filter
+            if (selectedTab == 0) {
+                Text(
+                    text = stringResource(R.string.category),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                val categoryAllLabel = stringResource(R.string.category_all)
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(end = 8.dp)
+                ) {
+                    item {
+                        CategoryChip(
+                            label = categoryAllLabel,
+                            emoji = "🎸",
+                            selected = selectedCategory == null,
+                            onClick = { selectedCategory = null }
+                        )
+                    }
+                    items(PedalCategory.entries) { category ->
+                        CategoryChip(
+                            label = getCategoryDisplayName(category),
+                            emoji = getCategoryEmoji(category),
+                            selected = selectedCategory == category,
+                            onClick = {
+                                selectedCategory = if (selectedCategory == category) null else category
+                            }
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+
+            // 페달 리스트
+            if (selectedTab == 0) {
+                // 프리셋 페달 그리드
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(4),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    contentPadding = PaddingValues(bottom = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    items(filteredPedals, key = { it.name }) { pedal ->
+                        SelectablePedalCard(
+                            pedal = pedal,
+                            onClick = { onPedalSelect(pedal) }
+                        )
+                    }
+                }
+            } else {
+                // 커스텀 페달 그리드
+                if (customPedals.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "아직 커스텀 페달이 없어요",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "프리셋 탭에서 커스텀 페달을 만들어보세요!",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(4),
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        contentPadding = PaddingValues(bottom = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        items(customPedals, key = { it.id }) { savedPedal ->
+                            SelectablePedalCard(
+                                pedal = savedPedal.toPedal(),
+                                onClick = { onPedalSelect(savedPedal.toPedal()) }
+                            )
+                        }
+                    }
                 }
             }
         }

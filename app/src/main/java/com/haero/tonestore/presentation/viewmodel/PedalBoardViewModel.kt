@@ -8,6 +8,7 @@ import com.haero.tonestore.domain.model.PedalType
 import com.haero.tonestore.domain.model.SavedCustomPedal
 import com.haero.tonestore.domain.model.SavedPedalBoard
 import com.haero.tonestore.domain.usecase.DeleteSavedPedalBoardUseCase
+import com.haero.tonestore.domain.usecase.GetAllCustomPedalsUseCase
 import com.haero.tonestore.domain.usecase.GetAllSavedPedalBoardsUseCase
 import com.haero.tonestore.domain.usecase.GetPresetPedalsUseCase
 import com.haero.tonestore.domain.usecase.GetSavedPedalBoardByIdUseCase
@@ -28,7 +29,8 @@ class PedalBoardViewModel(
     private val deleteSavedPedalBoardUseCase: DeleteSavedPedalBoardUseCase,
     private val getPresetPedalsUseCase: GetPresetPedalsUseCase,
     private val getAllSavedPedalBoardsUseCase: GetAllSavedPedalBoardsUseCase,
-    private val saveCustomPedalUseCase: SaveCustomPedalUseCase
+    private val saveCustomPedalUseCase: SaveCustomPedalUseCase,
+    private val getAllCustomPedalsUseCase: GetAllCustomPedalsUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PedalBoardState())
@@ -39,6 +41,7 @@ class PedalBoardViewModel(
     init {
         loadPresetPedals()
         loadAllPedalBoards()
+        loadAllCustomPedals()
     }
 
     fun handleIntent(intent: PedalBoardIntent) {
@@ -382,6 +385,14 @@ class PedalBoardViewModel(
         viewModelScope.launch {
             getAllSavedPedalBoardsUseCase().collect { pedalBoards ->
                 allPedalBoards = pedalBoards
+            }
+        }
+    }
+
+    private fun loadAllCustomPedals() {
+        viewModelScope.launch {
+            getAllCustomPedalsUseCase().collect { customPedals ->
+                _state.update { it.copy(customPedals = customPedals) }
             }
         }
     }
