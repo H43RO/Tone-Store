@@ -3,6 +3,7 @@ agp = "8.13.2"
 kotlin = "2.0.21"
 googleServices = "4.4.2"
 firebaseBom = "33.7.0"
+playServicesAuth = "21.0.0"
 coil = "2.5.0"
 coreKtx = "1.10.1"
 junit = "4.13.2"
@@ -66,6 +67,8 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth-ktx" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage-ktx" }
 # Coil
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+# Google Play Services Auth
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

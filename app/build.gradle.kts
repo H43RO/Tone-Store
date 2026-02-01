@@ -97,6 +97,9 @@ dependencies {
     // Coil (이미지 로딩)
     implementation(libs.coil.compose)
 
+    // Google Play Services Auth
+    implementation(libs.play.services.auth)
+
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
