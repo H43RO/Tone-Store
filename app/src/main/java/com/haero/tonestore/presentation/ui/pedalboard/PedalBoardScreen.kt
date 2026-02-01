@@ -55,7 +55,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.Pedal
-import com.haero.tonestore.presentation.ui.pedalboard.components.CableOverlay
 import com.haero.tonestore.presentation.ui.pedalboard.components.ExpressionPedalSelectionDialog
 import com.haero.tonestore.presentation.ui.pedalboard.components.ExpressionPedalZone
 import com.haero.tonestore.presentation.ui.pedalboard.components.InlinePedalEditor
@@ -152,13 +151,6 @@ fun PedalBoardScreen(
                 Box(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    CableOverlay(
-                        slots = state.slots,
-                        slotPositions = slotPositions,
-                        columns = state.columns,
-                        modifier = Modifier.matchParentSize()
-                    )
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically

@@ -51,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -219,27 +220,36 @@ private fun CustomPedalCard(
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale = if (isPressed) 0.98f else 1f
 
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val tertiaryColor = MaterialTheme.colorScheme.tertiary
+    val gradientColor = androidx.compose.ui.graphics.lerp(primaryColor, tertiaryColor, 0.5f)
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .height(72.dp)
             .scale(scale)
+            .shadow(
+                elevation = 12.dp,
+                shape = RoundedCornerShape(16.dp),
+                spotColor = gradientColor.copy(alpha = 0.5f)
+            )
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick
             ),
         shape = RoundedCornerShape(16.dp),
-        shadowElevation = 4.dp
+        color = Color.Transparent
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    brush = Brush.linearGradient(
+                    brush = Brush.verticalGradient(
                         colors = listOf(
-                            MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.tertiary
+                            primaryColor.copy(alpha = 0.9f),
+                            tertiaryColor.copy(alpha = 0.7f)
                         )
                     )
                 )
@@ -331,65 +341,81 @@ private fun SelectablePedalCard(
     val scale = if (isPressed) 0.95f else 1f
 
     val backgroundColor = pedal.color?.let { Color(it) } ?: MaterialTheme.colorScheme.surfaceVariant
+    val gradient = Brush.verticalGradient(
+        colors = listOf(
+            backgroundColor.copy(alpha = 0.9f),
+            backgroundColor.copy(alpha = 0.7f)
+        )
+    )
     val isLightColor = PedalColorUtils.isLightColor(pedal.color)
     val contentColor = if (isLightColor) Color.Black else Color.White
-    val borderColor = PedalColorUtils.calculateBorderColor(backgroundColor)
+    val borderColor = backgroundColor.copy(alpha = 0.3f)
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .height(150.dp)
             .scale(scale)
+            .shadow(
+                elevation = 10.dp,
+                shape = RoundedCornerShape(12.dp),
+                spotColor = backgroundColor.copy(alpha = 0.4f)
+            )
             .clip(RoundedCornerShape(12.dp))
-            .border(2.dp, borderColor, RoundedCornerShape(12.dp))
-            .background(backgroundColor)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-        // 페달 이름
-        Text(
-            text = pedal.name,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold,
-            color = contentColor,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp)
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 노브들
-        FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-                .weight(1f),
-            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
-            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
+                .fillMaxSize()
+                .background(gradient)
+                .border(2.dp, borderColor, RoundedCornerShape(12.dp))
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = onClick
+                ),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val knobsToShow = minOf(pedal.knobs.size, 6)
-            repeat(knobsToShow) {
-                SelectableKnobIndicator(contentColor = contentColor)
-            }
-        }
+            Spacer(modifier = Modifier.height(16.dp))
+            // 페달 이름
+            Text(
+                text = pedal.name,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = contentColor,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp)
+            )
 
-        // 풋스위치
-        FootSwitch(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp)
-                .padding(bottom = 12.dp)
-                .height(12.dp)
-        )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // 노브들
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+                    .weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
+            ) {
+                val knobsToShow = minOf(pedal.knobs.size, 6)
+                repeat(knobsToShow) {
+                    SelectableKnobIndicator(contentColor = contentColor)
+                }
+            }
+
+            // 풋스위치
+            FootSwitch(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp)
+                    .padding(bottom = 12.dp)
+                    .height(12.dp)
+            )
+        }
     }
 }
 

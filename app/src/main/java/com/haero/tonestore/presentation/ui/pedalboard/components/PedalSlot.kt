@@ -29,7 +29,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -172,6 +174,13 @@ internal fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
         }
     }
 
+    val gradient = Brush.verticalGradient(
+        colors = listOf(
+            backgroundColor.copy(alpha = 0.9f),
+            backgroundColor.copy(alpha = 0.7f)
+        )
+    )
+
     val isLightBackground = PedalColorUtils.isLightColor(pedal.color)
     val contentColor = if (pedal.color != null) {
         if (isLightBackground) Color.Black else Color.White
@@ -179,37 +188,48 @@ internal fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
         MaterialTheme.colorScheme.onSurface
     }
 
-    val borderColor = PedalColorUtils.calculateBorderColor(backgroundColor)
+    val borderColor = backgroundColor.copy(alpha = 0.3f)
 
-    Column(
+    Box(
         modifier = modifier
-            .border(2.dp, borderColor, RoundedCornerShape(8.dp))
-            .background(backgroundColor, RoundedCornerShape(8.dp))
-            .padding(horizontal = 8.dp, vertical = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(8.dp),
+                spotColor = backgroundColor.copy(alpha = 0.4f)
+            )
+            .clip(RoundedCornerShape(8.dp))
     ) {
-        Text(
-            text = pedal.name,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold,
-            color = contentColor,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        FlowRow(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+                .fillMaxSize()
+                .background(gradient)
+                .border(2.dp, borderColor, RoundedCornerShape(8.dp))
+                .padding(horizontal = 8.dp, vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            pedal.knobs.forEach { _ ->
-                MiniKnobIndicator()
+            Text(
+                text = pedal.name,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = contentColor,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                pedal.knobs.forEach { _ ->
+                    MiniKnobIndicator()
+                }
             }
         }
     }

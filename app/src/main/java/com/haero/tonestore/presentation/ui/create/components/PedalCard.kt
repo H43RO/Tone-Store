@@ -29,6 +29,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -56,10 +58,22 @@ fun PedalCard(
         }
     }
 
-    val adjustedBackgroundColor = if (pedal.isEnabled) {
-        backgroundColor
+    val gradient = Brush.verticalGradient(
+        colors = listOf(
+            backgroundColor.copy(alpha = 0.9f),
+            backgroundColor.copy(alpha = 0.7f)
+        )
+    )
+
+    val adjustedGradient = if (pedal.isEnabled) {
+        gradient
     } else {
-        backgroundColor.copy(alpha = 0.5f)
+        Brush.verticalGradient(
+            colors = listOf(
+                backgroundColor.copy(alpha = 0.45f),
+                backgroundColor.copy(alpha = 0.35f)
+            )
+        )
     }
 
     val isLightBackground = PedalColorUtils.isLightColor(pedal.color)
@@ -76,110 +90,127 @@ fun PedalCard(
     }
 
     val borderColor = if (pedal.isEnabled) {
-        PedalColorUtils.calculateBorderColor(backgroundColor)
+        backgroundColor.copy(alpha = 0.3f)
     } else {
-        PedalColorUtils.calculateBorderColor(backgroundColor).copy(alpha = 0.3f)
+        backgroundColor.copy(alpha = 0.15f)
+    }
+
+    val shadowElevation = if (pedal.isEnabled) 12.dp else 6.dp
+    val spotColor = if (pedal.isEnabled) {
+        backgroundColor.copy(alpha = 0.5f)
+    } else {
+        backgroundColor.copy(alpha = 0.25f)
     }
 
     Card(
         modifier = modifier
             .padding(4.dp)
-            .border(2.dp, borderColor, RoundedCornerShape(12.dp)),
+            .shadow(
+                elevation = shadowElevation,
+                shape = RoundedCornerShape(12.dp),
+                spotColor = spotColor
+            ),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = adjustedBackgroundColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(
+        Box(
             modifier = Modifier
-                .padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .background(adjustedGradient)
+                .border(2.dp, borderColor, RoundedCornerShape(12.dp))
+                .padding(12.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = pedal.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = adjustedContentColor
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = pedal.name,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = adjustedContentColor
+                    )
 
-                if (isEditable) {
-                    IconButton(
-                        onClick = onRemove,
-                        modifier = Modifier.size(24.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "삭제",
-                            tint = if (isLightBackground) {
-                                Color(0xFFB71C1C)
-                            } else {
-                                Color(0xFFFF8A80)
+                    if (isEditable) {
+                        IconButton(
+                            onClick = onRemove,
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "삭제",
+                                tint = if (isLightBackground) {
+                                    Color(0xFFB71C1C)
+                                } else {
+                                    Color(0xFFFF8A80)
+                                },
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    pedal.knobs.forEachIndexed { index, knob ->
+                        RotaryKnob(
+                            value = knob.value,
+                            onValueChange = { newValue ->
+                                if (isEditable) onKnobChange(index, newValue)
                             },
-                            modifier = Modifier.size(16.dp)
+                            label = knob.name,
+                            size = 56.dp,
+                            enabled = pedal.isEnabled && isEditable,
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                            labelColor = adjustedContentColor,
+                            isPedalKnob = true
                         )
                     }
                 }
-            }
 
-            Spacer(Modifier.height(16.dp))
+                if (isEditable) {
+                    val powerButtonColor = if (pedal.isEnabled) {
+                        PedalColorUtils.calculateBorderColor(backgroundColor)
+                    } else {
+                        contentColor.copy(alpha = 0.2f)
+                    }
 
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                pedal.knobs.forEachIndexed { index, knob ->
-                    RotaryKnob(
-                        value = knob.value,
-                        onValueChange = { newValue ->
-                            if (isEditable) onKnobChange(index, newValue)
-                        },
-                        label = knob.name,
-                        size = 56.dp,
-                        enabled = pedal.isEnabled && isEditable,
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                        labelColor = adjustedContentColor,
-                        isPedalKnob = true
-                    )
-                }
-            }
-
-            if (isEditable) {
-                val powerButtonColor = if (pedal.isEnabled) {
-                    PedalColorUtils.calculateBorderColor(backgroundColor)
-                } else {
-                    contentColor.copy(alpha = 0.2f)
-                }
-
-                Box(
-                    modifier = Modifier
-                        .padding(top = 12.dp)
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(powerButtonColor)
-                        .clickable { onToggleEnabled() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Power,
-                        contentDescription = if (pedal.isEnabled) "끄기" else "켜기",
-                        tint = if (pedal.isEnabled) {
-                            if (PedalColorUtils.isLightColor(powerButtonColor)) {
-                                Color.Black
+                    Box(
+                        modifier = Modifier
+                            .padding(top = 12.dp)
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(powerButtonColor)
+                            .clickable { onToggleEnabled() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Power,
+                            contentDescription = if (pedal.isEnabled) "끄기" else "켜기",
+                            tint = if (pedal.isEnabled) {
+                                if (PedalColorUtils.isLightColor(powerButtonColor)) {
+                                    Color.Black
+                                } else {
+                                    Color.White
+                                }
                             } else {
-                                Color.White
-                            }
-                        } else {
-                            contentColor.copy(alpha = 0.5f)
-                        },
-                        modifier = Modifier.size(20.dp)
-                    )
+                                contentColor.copy(alpha = 0.5f)
+                            },
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }
