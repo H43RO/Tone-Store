@@ -1,10 +1,12 @@
 package com.haero.tonestore.presentation.ui.pedalboard.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,8 +23,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,552 +38,273 @@ import androidx.compose.ui.unit.sp
 import com.haero.tonestore.ui.designsystem.Obsidian
 import com.haero.tonestore.ui.designsystem.ObsidianBackground
 import com.haero.tonestore.ui.designsystem.ObsidianTheme
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
+
+// ═══════════════════════════════════════════════════════════════
+// 기존 MiniPedalCard + 음영 버전 쇼케이스
+// ═══════════════════════════════════════════════════════════════
 
 data class DemoPedal(
     val name: String,
-    val category: String,
     val color: Color,
     val knobs: Int = 3
 )
 
-val demoPedals = listOf(
-    DemoPedal("DS-1", "Distortion", Color(0xFFFF6B00)),
-    DemoPedal("Tube Screamer", "Overdrive", Color(0xFF4CAF50)),
-    DemoPedal("Klon", "Overdrive", Color(0xFFD4AF37)),
-    DemoPedal("DD-7", "Delay", Color(0xFF1976D2)),
+// 유명 페달 색상들
+val allDemoPedals = listOf(
+    DemoPedal("DS-1", Color(0xFFFF6B00), 3),           // Orange - Boss DS-1
+    DemoPedal("Tube Screamer", Color(0xFF4CAF50), 3), // Green - Ibanez TS
+    DemoPedal("Klon", Color(0xFFD4AF37), 3),          // Gold - Klon Centaur
+    DemoPedal("DD-7", Color(0xFF1976D2), 3),          // Blue - Boss Delay
+    DemoPedal("Big Muff", Color(0xFF424242), 3),      // Dark Gray - EHX
+    DemoPedal("Phase 90", Color(0xFFFF9800), 1),      // Orange - MXR
+    DemoPedal("CE-2", Color(0xFF03A9F4), 2),          // Light Blue - Boss Chorus
+    DemoPedal("Dyna Comp", Color(0xFFF44336), 2),     // Red - MXR
 )
 
-// 밝기 계산 유틸
 private fun Color.isLight(): Boolean {
     val luminance = 0.299f * red + 0.587f * green + 0.114f * blue
     return luminance > 0.5f
 }
 
-private fun Color.contentColor(): Color = if (isLight()) Color.Black.copy(alpha = 0.85f) else Color.White
-private fun Color.mutedContentColor(): Color = if (isLight()) Color.Black.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.6f)
+private fun Color.darken(factor: Float = 0.8f): Color = copy(
+    red = (red * factor).coerceIn(0f, 1f),
+    green = (green * factor).coerceIn(0f, 1f),
+    blue = (blue * factor).coerceIn(0f, 1f)
+)
+
+private fun Color.lighten(factor: Float = 1.2f): Color = copy(
+    red = (red * factor).coerceIn(0f, 1f),
+    green = (green * factor).coerceIn(0f, 1f),
+    blue = (blue * factor).coerceIn(0f, 1f)
+)
 
 // ═══════════════════════════════════════════════════════════════
-// 공통 노브 컴포넌트
+// 기존 스타일 (음영 없음) - 비교용
 // ═══════════════════════════════════════════════════════════════
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun SimpleKnob(
-    color: Color,
-    size: Dp = 16.dp,
-    style: KnobStyle = KnobStyle.Solid
-) {
-    val knobColor = color.contentColor()
-    
-    when (style) {
-        KnobStyle.Solid -> {
-            Box(
-                modifier = Modifier
-                    .size(size)
-                    .clip(CircleShape)
-                    .background(knobColor.copy(alpha = 0.25f))
-                    .border(1.5.dp, knobColor.copy(alpha = 0.5f), CircleShape)
-            )
-        }
-        KnobStyle.Ring -> {
-            Box(
-                modifier = Modifier
-                    .size(size)
-                    .clip(CircleShape)
-                    .border(2.dp, knobColor.copy(alpha = 0.6f), CircleShape)
-            )
-        }
-        KnobStyle.Dot -> {
-            Box(
-                modifier = Modifier
-                    .size(size * 0.6f)
-                    .clip(CircleShape)
-                    .background(knobColor.copy(alpha = 0.7f))
-            )
-        }
-        KnobStyle.Filled -> {
-            Box(
-                modifier = Modifier
-                    .size(size)
-                    .clip(CircleShape)
-                    .background(knobColor.copy(alpha = 0.4f))
-            )
-        }
-    }
-}
-
-enum class KnobStyle { Solid, Ring, Dot, Filled }
-
-@Composable
-private fun KnobRow(
-    count: Int,
-    color: Color,
-    knobSize: Dp = 14.dp,
-    spacing: Dp = 6.dp,
-    style: KnobStyle = KnobStyle.Solid
-) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(spacing),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        repeat(count.coerceAtMost(4)) {
-            SimpleKnob(color = color, size = knobSize, style = style)
-        }
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 스타일 1: 클래식 미니멀
-// 단순한 사각형, 페달색 배경, 이름 + 노브
-// ═══════════════════════════════════════════════════════════════
-
-@Composable
-fun PedalStyle1_ClassicMinimal(
+fun PedalOriginal(
     name: String, color: Color, knobs: Int,
     modifier: Modifier = Modifier
 ) {
-    val textColor = color.contentColor()
-    
-    Box(
+    val isLight = color.isLight()
+    val contentColor = if (isLight) Color.Black else Color.White
+    val borderColor = if (isLight) color.darken(0.7f) else color.lighten(1.3f)
+
+    Column(
         modifier = modifier
-            .width(88.dp)
-            .height(110.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(color)
-            .padding(10.dp)
+            .width(90.dp)
+            .height(120.dp)
+            .border(2.dp, borderColor, RoundedCornerShape(8.dp))
+            .background(color, RoundedCornerShape(8.dp))
+            .padding(horizontal = 8.dp, vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+        Text(
+            text = name,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = contentColor,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Spacer(modifier = Modifier.height(4.dp))
-            
-            KnobRow(knobs, color, knobSize = 16.dp, style = KnobStyle.Solid)
-            
-            Text(
-                text = name,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                color = textColor,
-                textAlign = TextAlign.Center,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 스타일 2: 라운드 소프트
-// 더 둥근 모서리, 부드러운 느낌
-// ═══════════════════════════════════════════════════════════════
-
-@Composable
-fun PedalStyle2_RoundSoft(
-    name: String, color: Color, knobs: Int,
-    modifier: Modifier = Modifier
-) {
-    val textColor = color.contentColor()
-    
-    Box(
-        modifier = modifier
-            .width(88.dp)
-            .height(110.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(color)
-            .padding(12.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            KnobRow(knobs, color, knobSize = 18.dp, style = KnobStyle.Ring)
-            
-            Text(
-                text = name,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = textColor,
-                textAlign = TextAlign.Center,
-                maxLines = 2
-            )
-        }
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 스타일 3: 그라데이션 페이드
-// 위→아래 그라데이션
-// ═══════════════════════════════════════════════════════════════
-
-@Composable
-fun PedalStyle3_GradientFade(
-    name: String, color: Color, knobs: Int,
-    modifier: Modifier = Modifier
-) {
-    val textColor = color.contentColor()
-    val darkerColor = color.copy(
-        red = (color.red * 0.75f).coerceIn(0f, 1f),
-        green = (color.green * 0.75f).coerceIn(0f, 1f),
-        blue = (color.blue * 0.75f).coerceIn(0f, 1f)
-    )
-    
-    Box(
-        modifier = modifier
-            .width(88.dp)
-            .height(110.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(Brush.verticalGradient(listOf(color, darkerColor)))
-            .padding(10.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Spacer(modifier = Modifier.height(4.dp))
-            
-            KnobRow(knobs, color, knobSize = 15.dp, style = KnobStyle.Filled)
-            
-            Text(
-                text = name,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                color = textColor,
-                textAlign = TextAlign.Center,
-                maxLines = 2
-            )
-        }
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 스타일 4: 인너 보더
-// 안쪽 테두리 효과
-// ═══════════════════════════════════════════════════════════════
-
-@Composable
-fun PedalStyle4_InnerBorder(
-    name: String, color: Color, knobs: Int,
-    modifier: Modifier = Modifier
-) {
-    val textColor = color.contentColor()
-    
-    Box(
-        modifier = modifier
-            .width(88.dp)
-            .height(110.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(color)
-            .padding(4.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(9.dp))
-                .border(1.5.dp, textColor.copy(alpha = 0.2f), RoundedCornerShape(9.dp))
-                .padding(8.dp)
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                KnobRow(knobs, color, knobSize = 14.dp, style = KnobStyle.Ring)
-                
-                Text(
-                    text = name,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = textColor,
-                    textAlign = TextAlign.Center,
-                    maxLines = 2
-                )
+            repeat(knobs) {
+                MiniKnob(isLightBg = isLight)
             }
         }
     }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// 스타일 5: 쉐도우 리프트
-// 컬러 섀도우로 띄운 느낌
+// 음영 버전 - 위→아래 그라데이션
 // ═══════════════════════════════════════════════════════════════
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun PedalStyle5_ShadowLift(
+fun PedalWithShading(
     name: String, color: Color, knobs: Int,
     modifier: Modifier = Modifier
 ) {
-    val textColor = color.contentColor()
+    val isLight = color.isLight()
+    val contentColor = if (isLight) Color.Black else Color.White
+    val borderColor = if (isLight) color.darken(0.7f) else color.lighten(1.3f)
     
-    Box(
+    // 음영: 위는 밝게, 아래는 어둡게
+    val topColor = color.lighten(1.1f)
+    val bottomColor = color.darken(0.85f)
+
+    Column(
         modifier = modifier
-            .width(88.dp)
-            .height(110.dp)
-            .shadow(
-                elevation = 12.dp,
-                shape = RoundedCornerShape(14.dp),
-                spotColor = color.copy(alpha = 0.5f)
-            )
-            .clip(RoundedCornerShape(14.dp))
-            .background(color)
-            .padding(10.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Spacer(modifier = Modifier.height(4.dp))
-            
-            KnobRow(knobs, color, knobSize = 16.dp, style = KnobStyle.Solid)
-            
-            Text(
-                text = name,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                color = textColor,
-                textAlign = TextAlign.Center,
-                maxLines = 2
-            )
-        }
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 스타일 6: 탑 LED
-// 상단에 LED 인디케이터
-// ═══════════════════════════════════════════════════════════════
-
-@Composable
-fun PedalStyle6_TopLED(
-    name: String, color: Color, knobs: Int,
-    modifier: Modifier = Modifier
-) {
-    val textColor = color.contentColor()
-    val ledColor = if (color.isLight()) Color.Red else Color(0xFFFF4444)
-    
-    Box(
-        modifier = modifier
-            .width(88.dp)
-            .height(110.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(color)
-            .padding(10.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            // LED
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .shadow(4.dp, CircleShape, spotColor = ledColor)
-                    .clip(CircleShape)
-                    .background(ledColor)
-            )
-            
-            KnobRow(knobs, color, knobSize = 15.dp, style = KnobStyle.Solid)
-            
-            Text(
-                text = name,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                color = textColor,
-                textAlign = TextAlign.Center,
-                maxLines = 2
-            )
-        }
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 스타일 7: 풋스위치
-// 하단에 풋스위치 표시
-// ═══════════════════════════════════════════════════════════════
-
-@Composable
-fun PedalStyle7_Footswitch(
-    name: String, color: Color, knobs: Int,
-    modifier: Modifier = Modifier
-) {
-    val textColor = color.contentColor()
-    
-    Box(
-        modifier = modifier
-            .width(88.dp)
-            .height(115.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(color)
-            .padding(10.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = name,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                color = textColor,
-                textAlign = TextAlign.Center,
-                maxLines = 1
-            )
-            
-            KnobRow(knobs, color, knobSize = 14.dp, style = KnobStyle.Solid)
-            
-            // 풋스위치
-            Box(
-                modifier = Modifier
-                    .width(32.dp)
-                    .height(10.dp)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(textColor.copy(alpha = 0.3f))
-                    .border(1.dp, textColor.copy(alpha = 0.4f), RoundedCornerShape(3.dp))
-            )
-        }
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 스타일 8: 글로우 에지
-// 가장자리 글로우 효과
-// ═══════════════════════════════════════════════════════════════
-
-@Composable
-fun PedalStyle8_GlowEdge(
-    name: String, color: Color, knobs: Int,
-    modifier: Modifier = Modifier
-) {
-    val textColor = color.contentColor()
-    
-    Box(
-        modifier = modifier
-            .width(92.dp)
-            .height(114.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(
-                Brush.radialGradient(
-                    colors = listOf(
-                        color,
-                        color.copy(alpha = 0.7f)
-                    )
-                )
-            )
-            .border(
-                2.dp,
-                Brush.verticalGradient(
-                    listOf(
-                        Color.White.copy(alpha = 0.3f),
-                        Color.White.copy(alpha = 0.05f)
-                    )
-                ),
-                RoundedCornerShape(14.dp)
-            )
-            .padding(10.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Spacer(modifier = Modifier.height(4.dp))
-            
-            KnobRow(knobs, color, knobSize = 16.dp, style = KnobStyle.Ring)
-            
-            Text(
-                text = name,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                color = textColor,
-                textAlign = TextAlign.Center,
-                maxLines = 2
-            )
-        }
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 스타일 9: 컴팩트 스퀘어
-// 정사각형에 가까운 컴팩트
-// ═══════════════════════════════════════════════════════════════
-
-@Composable
-fun PedalStyle9_CompactSquare(
-    name: String, color: Color, knobs: Int,
-    modifier: Modifier = Modifier
-) {
-    val textColor = color.contentColor()
-    
-    Box(
-        modifier = modifier
-            .size(85.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(color)
-            .padding(8.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            KnobRow(knobs.coerceAtMost(3), color, knobSize = 12.dp, spacing = 4.dp, style = KnobStyle.Dot)
-            
-            Text(
-                text = name,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                color = textColor,
-                textAlign = TextAlign.Center,
-                maxLines = 2,
-                lineHeight = 11.sp
-            )
-        }
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 스타일 10: 플랫 모던
-// 완전 플랫, 미니멀
-// ═══════════════════════════════════════════════════════════════
-
-@Composable
-fun PedalStyle10_FlatModern(
-    name: String, color: Color, knobs: Int,
-    modifier: Modifier = Modifier
-) {
-    val textColor = color.contentColor()
-    
-    Box(
-        modifier = modifier
-            .width(88.dp)
-            .height(105.dp)
+            .width(90.dp)
+            .height(120.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(color)
-            .padding(10.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            KnobRow(knobs, color, knobSize = 14.dp, spacing = 8.dp, style = KnobStyle.Ring)
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            Text(
-                text = name,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
-                color = textColor,
-                textAlign = TextAlign.Center,
-                maxLines = 2
+            .border(2.dp, borderColor, RoundedCornerShape(8.dp))
+            .background(
+                Brush.verticalGradient(listOf(topColor, bottomColor))
             )
+            .padding(horizontal = 8.dp, vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = name,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = contentColor,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            repeat(knobs) {
+                MiniKnob(isLightBg = isLight)
+            }
         }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 음영 + 그림자 버전
+// ═══════════════════════════════════════════════════════════════
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun PedalWithShadingAndShadow(
+    name: String, color: Color, knobs: Int,
+    modifier: Modifier = Modifier
+) {
+    val isLight = color.isLight()
+    val contentColor = if (isLight) Color.Black else Color.White
+    val borderColor = if (isLight) color.darken(0.7f) else color.lighten(1.3f)
+    
+    val topColor = color.lighten(1.1f)
+    val bottomColor = color.darken(0.85f)
+
+    Column(
+        modifier = modifier
+            .width(90.dp)
+            .height(120.dp)
+            .shadow(6.dp, RoundedCornerShape(8.dp), spotColor = color.darken(0.5f))
+            .clip(RoundedCornerShape(8.dp))
+            .border(2.dp, borderColor, RoundedCornerShape(8.dp))
+            .background(
+                Brush.verticalGradient(listOf(topColor, bottomColor))
+            )
+            .padding(horizontal = 8.dp, vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = name,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = contentColor,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            repeat(knobs) {
+                MiniKnob(isLightBg = isLight)
+            }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 기존 MiniKnob 그대로
+// ═══════════════════════════════════════════════════════════════
+
+@Composable
+private fun MiniKnob(
+    size: Dp = 18.dp,
+    isLightBg: Boolean = false
+) {
+    val knobColor = Color.Black
+    val trackColor = Color.Black.copy(alpha = 0.3f)
+    val indicatorColor = Color.White
+
+    val normalizedValue = 0.5f
+    val startAngle = -90f
+    val sweepAngle = 300f
+    val currentAngle = startAngle + (normalizedValue * sweepAngle)
+
+    Canvas(modifier = Modifier.size(size)) {
+        val strokeWidth = size.toPx() * 0.12f
+        val radius = (size.toPx() - strokeWidth) / 2f
+        val center = Offset(size.toPx() / 2f, size.toPx() / 2f)
+
+        drawArc(
+            color = trackColor,
+            startAngle = startAngle,
+            sweepAngle = sweepAngle,
+            useCenter = false,
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+            topLeft = Offset(strokeWidth / 2f, strokeWidth / 2f),
+            size = androidx.compose.ui.geometry.Size(radius * 2f, radius * 2f)
+        )
+
+        drawArc(
+            color = knobColor,
+            startAngle = startAngle,
+            sweepAngle = normalizedValue * sweepAngle,
+            useCenter = false,
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+            topLeft = Offset(strokeWidth / 2f, strokeWidth / 2f),
+            size = androidx.compose.ui.geometry.Size(radius * 2f, radius * 2f)
+        )
+
+        drawCircle(
+            color = knobColor,
+            radius = radius * 0.6f,
+            center = center
+        )
+
+        val pointerAngle = currentAngle * (PI.toFloat() / 180f)
+        val pointerLength = radius * 0.4f
+        val pointerStart = Offset(
+            center.x + cos(pointerAngle) * (radius * 0.2f),
+            center.y + sin(pointerAngle) * (radius * 0.2f)
+        )
+        val pointerEnd = Offset(
+            center.x + cos(pointerAngle) * pointerLength,
+            center.y + sin(pointerAngle) * pointerLength
+        )
+        drawLine(
+            color = indicatorColor,
+            start = pointerStart,
+            end = pointerEnd,
+            strokeWidth = strokeWidth * 0.4f,
+            cap = StrokeCap.Round
+        )
     }
 }
 
@@ -587,41 +312,43 @@ fun PedalStyle10_FlatModern(
 // 📱 PREVIEW
 // ═══════════════════════════════════════════════════════════════
 
-@Preview(showBackground = true, backgroundColor = 0xFF0C0C0E, heightDp = 1400)
+@Preview(showBackground = true, backgroundColor = 0xFF0C0C0E, heightDp = 900)
 @Composable
-private fun AllPedalStylesPreview() {
+private fun PedalShadingComparisonPreview() {
     ObsidianTheme {
         ObsidianBackground {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 item {
                     Text(
-                        "페달 디자인 10가지",
+                        "기존 디자인 vs 음영 적용",
                         style = Obsidian.typography.headlineMedium,
                         color = Obsidian.colors.textPrimary
                     )
-                    Text(
-                        "페달 색상 배경 + 이름 + 노브",
-                        fontSize = 12.sp,
-                        color = Obsidian.colors.textMuted
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
                 
-                item { StylePreviewRow("1. 클래식 미니멀") { p -> PedalStyle1_ClassicMinimal(p.name, p.color, p.knobs) } }
-                item { StylePreviewRow("2. 라운드 소프트") { p -> PedalStyle2_RoundSoft(p.name, p.color, p.knobs) } }
-                item { StylePreviewRow("3. 그라데이션") { p -> PedalStyle3_GradientFade(p.name, p.color, p.knobs) } }
-                item { StylePreviewRow("4. 인너 보더") { p -> PedalStyle4_InnerBorder(p.name, p.color, p.knobs) } }
-                item { StylePreviewRow("5. 쉐도우 리프트") { p -> PedalStyle5_ShadowLift(p.name, p.color, p.knobs) } }
-                item { StylePreviewRow("6. 탑 LED") { p -> PedalStyle6_TopLED(p.name, p.color, p.knobs) } }
-                item { StylePreviewRow("7. 풋스위치") { p -> PedalStyle7_Footswitch(p.name, p.color, p.knobs) } }
-                item { StylePreviewRow("8. 글로우 에지") { p -> PedalStyle8_GlowEdge(p.name, p.color, p.knobs) } }
-                item { StylePreviewRow("9. 컴팩트 스퀘어") { p -> PedalStyle9_CompactSquare(p.name, p.color, p.knobs) } }
-                item { StylePreviewRow("10. 플랫 모던") { p -> PedalStyle10_FlatModern(p.name, p.color, p.knobs) } }
+                // 기존 (Original)
+                item {
+                    SectionTitle("기존 (플랫)")
+                    PedalRow { p -> PedalOriginal(p.name, p.color, p.knobs) }
+                }
+                
+                // 음영 적용
+                item {
+                    SectionTitle("음영 적용 (위 밝음 → 아래 어두움)")
+                    PedalRow { p -> PedalWithShading(p.name, p.color, p.knobs) }
+                }
+                
+                // 음영 + 그림자
+                item {
+                    SectionTitle("음영 + 그림자")
+                    PedalRow { p -> PedalWithShadingAndShadow(p.name, p.color, p.knobs) }
+                }
                 
                 item { Spacer(modifier = Modifier.height(32.dp)) }
             }
@@ -630,20 +357,29 @@ private fun AllPedalStylesPreview() {
 }
 
 @Composable
-private fun StylePreviewRow(
-    label: String,
-    content: @Composable (DemoPedal) -> Unit
-) {
-    Column {
-        Text(label, fontSize = 11.sp, color = Obsidian.colors.textSecondary)
-        Spacer(modifier = Modifier.height(8.dp))
+private fun SectionTitle(text: String) {
+    Text(
+        text = text,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Medium,
+        color = Obsidian.colors.textSecondary
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+}
+
+@Composable
+private fun PedalRow(content: @Composable (DemoPedal) -> Unit) {
+    // 4개씩 두 줄로
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            demoPedals.forEach { pedal ->
-                content(pedal)
-            }
+            allDemoPedals.take(4).forEach { content(it) }
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            allDemoPedals.drop(4).forEach { content(it) }
         }
     }
 }
