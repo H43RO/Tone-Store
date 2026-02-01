@@ -79,6 +79,7 @@
     <string name="duplicate">복제</string>
     <string name="duplicate_suffix"> (복사본)</string>
     <string name="duplicate_success">톤 세팅이 복제되었습니다!</string>
+    <string name="view_signal_chain">시그널 체인 보기</string>
     <string name="delete_confirm_title">톤 세팅을 삭제할까요?</string>
     <string name="delete_confirm_message">\"%1$s\"을(를) 삭제할까요? 이 작업은 되돌릴 수 없어요.</string>
     <string name="delete_pedalboard_confirm_title">페달보드를 삭제할까요?</string>
