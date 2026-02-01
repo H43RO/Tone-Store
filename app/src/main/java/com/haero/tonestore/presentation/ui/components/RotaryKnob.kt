@@ -94,35 +94,26 @@ fun RotaryKnob(
     var previousStep by remember { mutableIntStateOf((value * steps / 10f).roundToInt()) }
 
     // 노브 색상: 페달용은 검정/흰색 고정, 그 외는 테마 색상
+    // enabled=false 일 때도 primary 색상 유지 (상세화면에서 시인성 확보)
     val actualKnobColor = if (isPedalKnob) {
         androidx.compose.ui.graphics.Color.Black
-    } else if (enabled) {
-        MaterialTheme.colorScheme.primary
     } else {
-        MaterialTheme.colorScheme.outline
+        MaterialTheme.colorScheme.primary
     }
 
     val trackColor = if (isPedalKnob) {
         androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.3f)
-    } else if (enabled) {
-        MaterialTheme.colorScheme.surfaceVariant
     } else {
-        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        MaterialTheme.colorScheme.surfaceVariant
     }
 
     val indicatorColor = if (isPedalKnob) {
         androidx.compose.ui.graphics.Color.White
-    } else if (enabled) {
-        MaterialTheme.colorScheme.onPrimary
     } else {
-        MaterialTheme.colorScheme.surface
+        MaterialTheme.colorScheme.onPrimary
     }
 
-    val actualLabelColor = labelColor ?: if (enabled) {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    } else {
-        MaterialTheme.colorScheme.outline
-    }
+    val actualLabelColor = labelColor ?: MaterialTheme.colorScheme.onSurfaceVariant
 
     // 드르륵 햅틱 피드백 함수
     fun performTickHaptic() {
@@ -255,11 +246,7 @@ fun RotaryKnob(
             text = String.format("%.1f", value),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
-            color = labelColor ?: if (enabled) {
-                MaterialTheme.colorScheme.onSurface
-            } else {
-                MaterialTheme.colorScheme.outline
-            }
+            color = labelColor ?: MaterialTheme.colorScheme.onSurface
         )
 
         // 레이블

@@ -249,7 +249,7 @@ private fun StickyBottomAddButton(
                 )
             )
             .padding(horizontal = Obsidian.spacing.screenPadding)
-            .padding(top = 20.dp, bottom = 100.dp)
+            .padding(top = 20.dp, bottom = 116.dp)
     ) {
         Box(
             modifier = Modifier

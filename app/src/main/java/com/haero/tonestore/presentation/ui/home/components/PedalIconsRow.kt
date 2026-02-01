@@ -82,11 +82,8 @@ private fun GlassPedalIcon(pedal: Pedal, modifier: Modifier = Modifier) {
     }
 
     val isLightBackground = PedalColorUtils.isLightColor(pedal.color)
-    val contentColor = if (pedal.color != null) {
-        if (isLightBackground) Color.Black.copy(alpha = 0.8f) else Color.White
-    } else {
-        Color.White
-    }
+    // 항상 흰색 사용 (다크 테마에서 시인성 확보)
+    val contentColor = Color.White
 
     // 페달 이름의 첫 3글자
     val abbreviation = pedal.name.take(3).uppercase()
@@ -98,8 +95,8 @@ private fun GlassPedalIcon(pedal: Pedal, modifier: Modifier = Modifier) {
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        pedalColor.copy(alpha = 0.5f),
-                        pedalColor.copy(alpha = 0.3f)
+                        pedalColor.copy(alpha = 0.85f),
+                        pedalColor.copy(alpha = 0.7f)
                     )
                 )
             )
@@ -107,8 +104,8 @@ private fun GlassPedalIcon(pedal: Pedal, modifier: Modifier = Modifier) {
                 width = 1.dp,
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color.White.copy(alpha = 0.4f),
-                        pedalColor.copy(alpha = 0.3f)
+                        Color.White.copy(alpha = 0.3f),
+                        pedalColor.copy(alpha = 0.4f)
                     )
                 ),
                 shape = RoundedCornerShape(8.dp)
