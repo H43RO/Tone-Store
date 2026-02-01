@@ -84,6 +84,7 @@ fun PedalBoardListScreen(
 
     ObsidianBackground {
         Box(modifier = Modifier.fillMaxSize()) {
+            // 메인 콘텐츠 Column
             Column(modifier = Modifier.fillMaxSize()) {
                 ObsidianPedalBoardHeader(totalCount = state.pedalBoards.size)
 
@@ -121,17 +122,18 @@ fun PedalBoardListScreen(
                         }
                     }
                 }
+            }
 
-                // Sticky Bottom Button - 로그인 상태이고 페달보드가 있을 때만 표시
-                AnimatedVisibility(
-                    visible = state.isLoggedIn && state.pedalBoards.isNotEmpty(),
-                    enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
-                ) {
-                    StickyBottomAddButton(
-                        onClick = onNavigateToCreate
-                    )
-                }
+            // Sticky Bottom Button - 화면 위에 overlay로 표시
+            AnimatedVisibility(
+                visible = state.isLoggedIn && state.pedalBoards.isNotEmpty(),
+                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                modifier = Modifier.align(Alignment.BottomCenter)
+            ) {
+                StickyBottomAddButton(
+                    onClick = onNavigateToCreate
+                )
             }
         }
     }
@@ -169,19 +171,8 @@ private fun StickyBottomAddButton(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color.Transparent,
-                        Obsidian.colors.bgPrimary.copy(alpha = 0.9f),
-                        Obsidian.colors.bgPrimary
-                    ),
-                    startY = 0f,
-                    endY = 80f
-                )
-            )
             .padding(horizontal = Obsidian.spacing.screenPadding)
-            .padding(top = 20.dp, bottom = 116.dp)
+            .padding(bottom = 116.dp)
     ) {
         Box(
             modifier = Modifier
