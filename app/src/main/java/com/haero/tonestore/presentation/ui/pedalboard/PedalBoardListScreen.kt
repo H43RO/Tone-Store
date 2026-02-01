@@ -42,7 +42,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -88,24 +87,10 @@ fun PedalBoardListScreen(
         }
     }
 
-    // 스크롤 방향 감지 - 스크롤 내리면 expanded, 올리면 collapsed
-    var previousScrollOffset by remember { mutableIntStateOf(0) }
-    var previousFirstVisibleIndex by remember { mutableIntStateOf(0) }
+    // 스크롤하면 축소, 멈추거나 맨 위면 확장
     val isExpanded by remember {
         derivedStateOf {
-            val currentIndex = listState.firstVisibleItemIndex
-            val currentOffset = listState.firstVisibleItemScrollOffset
-
-            val isScrollingDown = when {
-                currentIndex > previousFirstVisibleIndex -> true
-                currentIndex < previousFirstVisibleIndex -> false
-                else -> currentOffset > previousScrollOffset
-            }
-
-            previousFirstVisibleIndex = currentIndex
-            previousScrollOffset = currentOffset
-
-            isScrollingDown || currentIndex == 0
+            listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset < 50
         }
     }
 
