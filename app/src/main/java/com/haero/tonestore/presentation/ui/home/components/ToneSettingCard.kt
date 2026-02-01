@@ -4,8 +4,9 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,18 +20,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.rounded.GraphicEq
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
@@ -50,9 +48,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.ToneSetting
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.haero.tonestore.ui.components.GlassCard
+import com.haero.tonestore.ui.components.LocalEmberGlassTheme
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -64,18 +61,17 @@ fun ToneSettingCard(
     sharedElementKey: String,
     modifier: Modifier = Modifier
 ) {
+    val theme = LocalEmberGlassTheme.current
     var isPressed by remember { mutableStateOf(false) }
-    val dateFormat = SimpleDateFormat("MM.dd", Locale.getDefault())
-    val formattedDate = dateFormat.format(Date(toneSetting.updatedAt))
     val pedalCount = toneSetting.pedalBoard.pedals.size
     val configuration = LocalConfiguration.current
     val isKorean = configuration.locales[0].language == "ko"
 
     val favoriteColor by animateColorAsState(
         targetValue = if (toneSetting.isFavorite) {
-            MaterialTheme.colorScheme.error
+            theme.secondary
         } else {
-            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            theme.textMuted
         },
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
         label = "favoriteColor"
@@ -90,8 +86,7 @@ fun ToneSettingCard(
         label = "cardScale"
     )
 
-    Card(
-        onClick = onClick,
+    GlassCard(
         modifier = modifier
             .fillMaxWidth()
             .scale(scale)
@@ -101,18 +96,12 @@ fun ToneSettingCard(
                         isPressed = true
                         tryAwaitRelease()
                         isPressed = false
-                    }
+                    },
+                    onTap = { onClick() }
                 )
             },
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
+        cornerRadius = 24.dp,
+        glassAlpha = 0.12f
     ) {
         Row(
             modifier = Modifier
@@ -120,17 +109,22 @@ fun ToneSettingCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.Top
         ) {
+            // Glass Icon Container with gradient
             Box(
                 modifier = Modifier
                     .size(52.dp)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer),
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(theme.primary, theme.accent)
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.GraphicEq,
+                    imageVector = Icons.Default.MusicNote,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    tint = theme.background,
                     modifier = Modifier.size(26.dp)
                 )
             }
@@ -140,11 +134,11 @@ fun ToneSettingCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = toneSetting.songName,
-                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = theme.textPrimary
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -158,15 +152,15 @@ fun ToneSettingCard(
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         toneSetting.tags.take(3).forEach { tag ->
-                            TagChip(
+                            GlassTagChip(
                                 text = if (isKorean) tag.displayNameKo else tag.displayName
                             )
                         }
                         if (toneSetting.tags.size > 3) {
                             Text(
                                 text = "+${toneSetting.tags.size - 3}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 11.sp,
+                                color = theme.textSecondary,
                                 modifier = Modifier
                                     .align(Alignment.CenterVertically)
                                     .padding(start = 2.dp)
@@ -176,9 +170,13 @@ fun ToneSettingCard(
                 }
             }
 
-            IconButton(
-                onClick = onFavoriteClick,
-                modifier = Modifier.size(40.dp)
+            // Favorite button
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .clickable { onFavoriteClick() },
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = if (toneSetting.isFavorite) {
@@ -192,14 +190,18 @@ fun ToneSettingCard(
                 )
             }
 
-            IconButton(
-                onClick = onDeleteClick,
-                modifier = Modifier.size(40.dp)
+            // Delete button
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .clickable { onDeleteClick() },
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Outlined.DeleteOutline,
                     contentDescription = stringResource(R.string.delete),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    tint = theme.textMuted,
                     modifier = Modifier.size(22.dp)
                 )
             }
@@ -208,35 +210,27 @@ fun ToneSettingCard(
 }
 
 @Composable
-private fun MetaChip(
+private fun GlassTagChip(
     text: String,
     modifier: Modifier = Modifier
 ) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        fontSize = 11.sp,
-        modifier = modifier
-    )
-}
+    val theme = LocalEmberGlassTheme.current
 
-@Composable
-private fun TagChip(
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(theme.primary.copy(alpha = 0.15f))
+            .border(
+                width = 1.dp,
+                color = theme.primary.copy(alpha = 0.2f),
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(horizontal = 10.dp, vertical = 5.dp)
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
             fontSize = 11.sp,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+            color = theme.primary
         )
     }
 }

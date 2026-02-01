@@ -5,6 +5,8 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,14 +31,8 @@ import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -51,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,9 +59,12 @@ import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.SavedPedalBoard
 import com.haero.tonestore.presentation.ui.pedalboard.components.PedalBoardPreview
 import com.haero.tonestore.presentation.viewmodel.PedalBoardListViewModel
+import com.haero.tonestore.ui.components.GlassBackground
+import com.haero.tonestore.ui.components.GlassButton
+import com.haero.tonestore.ui.components.GlassCard
+import com.haero.tonestore.ui.components.LocalEmberGlassTheme
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PedalBoardListScreen(
     onNavigateToCreate: () -> Unit,
@@ -73,6 +73,7 @@ fun PedalBoardListScreen(
     viewModel: PedalBoardListViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val theme = LocalEmberGlassTheme.current
     val listState = rememberLazyListState()
 
     val isScrolling by remember {
@@ -89,60 +90,56 @@ fun PedalBoardListScreen(
         }
     }
 
-    Scaffold(
-        floatingActionButton = {
+    GlassBackground {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                GlassPedalBoardHeader(totalCount = state.pedalBoards.size)
+
+                Box(modifier = Modifier.fillMaxSize()) {
+                    when {
+                        state.isLoading -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier.align(Alignment.Center),
+                                color = theme.primary
+                            )
+                        }
+                        !state.isLoggedIn -> {
+                            GlassLoginRequiredState(
+                                onLoginClick = { viewModel.navigateToLogin() },
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+                        state.pedalBoards.isEmpty() -> {
+                            GlassEmptyPedalBoardState(
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+                        else -> {
+                            GlassPedalBoardList(
+                                pedalBoards = state.pedalBoards,
+                                listState = listState,
+                                onItemClick = onNavigateToEdit,
+                                onDeleteRequest = { pedalBoard ->
+                                    pedalBoardToDelete = pedalBoard
+                                    showDeleteDialog = true
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            // FAB
             if (state.isLoggedIn) {
-                ExtendedFab(
+                GlassExtendedFab(
                     expanded = isScrolling.not(),
                     onClick = onNavigateToCreate,
                     icon = Icons.Default.Add,
                     text = stringResource(R.string.create_pedalboard),
-                    modifier = Modifier.padding(bottom = 80.dp)
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 100.dp, end = 20.dp)
                 )
-            }
-        },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            PedalBoardHeader(
-                totalCount = state.pedalBoards.size
-            )
-
-            Box(modifier = Modifier.fillMaxSize()) {
-                when {
-                    state.isLoading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    !state.isLoggedIn -> {
-                        LoginRequiredState(
-                            onLoginClick = { viewModel.navigateToLogin() },
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                    state.pedalBoards.isEmpty() -> {
-                        EmptyPedalBoardState(
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                    else -> {
-                        PedalBoardList(
-                            pedalBoards = state.pedalBoards,
-                            listState = listState,
-                            onItemClick = onNavigateToEdit,
-                            onDeleteRequest = { pedalBoard ->
-                                pedalBoardToDelete = pedalBoard
-                                showDeleteDialog = true
-                            }
-                        )
-                    }
-                }
             }
         }
     }
@@ -154,13 +151,16 @@ fun PedalBoardListScreen(
                 showDeleteDialog = false
                 pedalBoardToDelete = null
             },
-            title = { Text(stringResource(R.string.delete_pedalboard_confirm_title)) },
+            title = {
+                Text(
+                    stringResource(R.string.delete_pedalboard_confirm_title),
+                    color = theme.textPrimary
+                )
+            },
             text = {
                 Text(
-                    stringResource(
-                        R.string.delete_pedalboard_confirm_message,
-                        targetPedalBoard.name
-                    )
+                    stringResource(R.string.delete_pedalboard_confirm_message, targetPedalBoard.name),
+                    color = theme.textSecondary
                 )
             },
             confirmButton = {
@@ -171,10 +171,7 @@ fun PedalBoardListScreen(
                         pedalBoardToDelete = null
                     }
                 ) {
-                    Text(
-                        stringResource(R.string.delete),
-                        color = MaterialTheme.colorScheme.error
-                    )
+                    Text(stringResource(R.string.delete), color = theme.error)
                 }
             },
             dismissButton = {
@@ -184,18 +181,22 @@ fun PedalBoardListScreen(
                         pedalBoardToDelete = null
                     }
                 ) {
-                    Text(stringResource(R.string.cancel))
+                    Text(stringResource(R.string.cancel), color = theme.textSecondary)
                 }
-            }
+            },
+            containerColor = theme.surfaceElevated,
+            shape = RoundedCornerShape(20.dp)
         )
     }
 }
 
 @Composable
-private fun PedalBoardHeader(
+private fun GlassPedalBoardHeader(
     totalCount: Int,
     modifier: Modifier = Modifier
 ) {
+    val theme = LocalEmberGlassTheme.current
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -205,53 +206,63 @@ private fun PedalBoardHeader(
     ) {
         Text(
             text = stringResource(R.string.pedalboard_list_title),
-            style = MaterialTheme.typography.headlineMedium,
+            fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
+            color = theme.textPrimary
         )
         if (totalCount > 0) {
             Text(
                 text = stringResource(R.string.pedalboards_saved_count, totalCount),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                fontSize = 14.sp,
+                color = theme.textSecondary
             )
         }
     }
 }
 
 @Composable
-private fun EmptyPedalBoardState(modifier: Modifier = Modifier) {
+private fun GlassEmptyPedalBoardState(modifier: Modifier = Modifier) {
+    val theme = LocalEmberGlassTheme.current
+
     Column(
         modifier = modifier.padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Surface(
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
-            modifier = Modifier.size(120.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Outlined.Dashboard,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(56.dp)
+        Box(
+            modifier = Modifier
+                .size(120.dp)
+                .clip(CircleShape)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            theme.secondary.copy(alpha = 0.2f),
+                            theme.secondary.copy(alpha = 0.05f)
+                        )
+                    )
                 )
-            }
+                .border(1.dp, theme.secondary.copy(alpha = 0.3f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Dashboard,
+                contentDescription = null,
+                tint = theme.secondary,
+                modifier = Modifier.size(56.dp)
+            )
         }
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = stringResource(R.string.empty_pedalboard_title),
-            style = MaterialTheme.typography.titleLarge,
+            fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onBackground
+            color = theme.textPrimary
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = stringResource(R.string.empty_pedalboard_subtitle),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 14.sp,
+            color = theme.textSecondary,
             textAlign = TextAlign.Center,
             lineHeight = 22.sp
         )
@@ -260,7 +271,7 @@ private fun EmptyPedalBoardState(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun PedalBoardList(
+private fun GlassPedalBoardList(
     pedalBoards: List<SavedPedalBoard>,
     listState: androidx.compose.foundation.lazy.LazyListState,
     onItemClick: (String) -> Unit,
@@ -275,7 +286,7 @@ private fun PedalBoardList(
             items = pedalBoards,
             key = { it.id }
         ) { pedalBoard ->
-            PedalBoardCard(
+            GlassPedalBoardCard(
                 pedalBoard = pedalBoard,
                 onClick = { onItemClick(pedalBoard.id) },
                 onDeleteClick = { onDeleteRequest(pedalBoard) }
@@ -283,28 +294,29 @@ private fun PedalBoardList(
         }
 
         item {
-            Spacer(modifier = Modifier.height(80.dp))
+            Spacer(modifier = Modifier.height(100.dp))
         }
     }
 }
 
 @Composable
-private fun PedalBoardCard(
+private fun GlassPedalBoardCard(
     pedalBoard: SavedPedalBoard,
     onClick: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val theme = LocalEmberGlassTheme.current
     val pedalCount = pedalBoard.slots.count { it != null }
     val totalSlots = pedalBoard.columns * pedalBoard.rows
     val isKorean = LocalConfiguration.current.locales[0].language == "ko"
 
-    Surface(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 1.dp
+    GlassCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        cornerRadius = 20.dp,
+        glassAlpha = 0.12f
     ) {
         Column(
             modifier = Modifier
@@ -325,17 +337,22 @@ private fun PedalBoardCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Glass icon
                 Box(
                     modifier = Modifier
                         .size(52.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(MaterialTheme.colorScheme.secondaryContainer),
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(theme.secondary, theme.accent)
+                            )
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.GridView,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        tint = theme.background,
                         modifier = Modifier.size(26.dp)
                     )
                 }
@@ -345,17 +362,17 @@ private fun PedalBoardCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = pedalBoard.name,
-                        style = MaterialTheme.typography.titleMedium,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = theme.textPrimary
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        MetaChip(text = "${pedalBoard.columns}×${pedalBoard.rows}")
-                        MetaChip(
+                        GlassMetaChip(text = "${pedalBoard.columns}×${pedalBoard.rows}")
+                        GlassMetaChip(
                             text = if (isKorean) {
                                 "$pedalCount/$totalSlots 페달"
                             } else {
@@ -365,14 +382,17 @@ private fun PedalBoardCard(
                     }
                 }
 
-                IconButton(
-                    onClick = onDeleteClick,
-                    modifier = Modifier.size(40.dp)
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .clickable { onDeleteClick() },
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.DeleteOutline,
                         contentDescription = stringResource(R.string.delete),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        tint = theme.textMuted,
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -382,27 +402,35 @@ private fun PedalBoardCard(
 }
 
 @Composable
-private fun MetaChip(
+private fun GlassMetaChip(
     text: String,
     modifier: Modifier = Modifier
 ) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        fontSize = 11.sp,
+    val theme = LocalEmberGlassTheme.current
+
+    Box(
         modifier = modifier
-    )
+            .clip(RoundedCornerShape(6.dp))
+            .background(theme.primary.copy(alpha = 0.1f))
+            .padding(horizontal = 8.dp, vertical = 3.dp)
+    ) {
+        Text(
+            text = text,
+            fontSize = 11.sp,
+            color = theme.primary
+        )
+    }
 }
 
 @Composable
-private fun ExtendedFab(
+private fun GlassExtendedFab(
     expanded: Boolean,
     onClick: () -> Unit,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     text: String,
     modifier: Modifier = Modifier
 ) {
+    val theme = LocalEmberGlassTheme.current
     val rotation by animateFloatAsState(
         targetValue = if (expanded) 0f else 90f,
         animationSpec = spring(
@@ -412,32 +440,33 @@ private fun ExtendedFab(
         label = "rotation"
     )
 
-    Surface(
-        onClick = onClick,
+    Box(
         modifier = modifier
             .shadow(
-                elevation = 12.dp,
-                shape = RoundedCornerShape(24.dp),
-                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-            ),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.onPrimary
-    ) {
-        Row(
-            modifier = Modifier.padding(
+                elevation = 16.dp,
+                shape = RoundedCornerShape(if (expanded) 24.dp else 20.dp),
+                spotColor = theme.primary.copy(alpha = 0.5f)
+            )
+            .clip(RoundedCornerShape(if (expanded) 24.dp else 20.dp))
+            .background(
+                Brush.linearGradient(listOf(theme.primary, theme.accent))
+            )
+            .clickable(onClick = onClick)
+            .animateContentSize(alignment = Alignment.CenterEnd)
+            .padding(
                 horizontal = if (expanded) 20.dp else 16.dp,
                 vertical = 16.dp
-            ).animateContentSize(
-                alignment = Alignment.CenterEnd
             ),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = text,
+                tint = theme.background,
                 modifier = Modifier
                     .size(24.dp)
                     .rotate(rotation)
@@ -447,7 +476,8 @@ private fun ExtendedFab(
                 Text(
                     text = text,
                     fontWeight = FontWeight.SemiBold,
-                    style = MaterialTheme.typography.labelLarge
+                    fontSize = 15.sp,
+                    color = theme.background
                 )
             }
         }
@@ -455,71 +485,65 @@ private fun ExtendedFab(
 }
 
 @Composable
-private fun LoginRequiredState(
+private fun GlassLoginRequiredState(
     onLoginClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val theme = LocalEmberGlassTheme.current
+
     Column(
         modifier = modifier.padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Surface(
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.primaryContainer,
-            modifier = Modifier.size(80.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Outlined.Dashboard,
-                    contentDescription = null,
-                    modifier = Modifier.size(40.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .clip(CircleShape)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            theme.primary.copy(alpha = 0.25f),
+                            theme.primary.copy(alpha = 0.05f)
+                        )
+                    )
                 )
-            }
+                .border(1.dp, theme.primary.copy(alpha = 0.4f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Dashboard,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                tint = theme.primary
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
             text = stringResource(R.string.login_required),
-            style = MaterialTheme.typography.titleLarge,
+            fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = theme.textPrimary
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
             text = stringResource(R.string.login_required_pedalboard_message),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 14.sp,
+            color = theme.textSecondary,
             textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Button(
+        GlassButton(
+            text = "로그인하기",
             onClick = onLoginClick,
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text("로그인하기")
-        }
-    }
-}
-
-@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
-@Composable
-private fun PedalBoardHeaderPreview() {
-    com.haero.tonestore.ui.theme.ToneStoreTheme {
-        PedalBoardHeader(totalCount = 3)
-    }
-}
-
-@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
-@Composable
-private fun EmptyPedalBoardStatePreview() {
-    com.haero.tonestore.ui.theme.ToneStoreTheme {
-        EmptyPedalBoardState()
+            modifier = Modifier.fillMaxWidth(0.6f)
+        )
     }
 }

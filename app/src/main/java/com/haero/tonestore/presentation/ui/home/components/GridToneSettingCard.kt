@@ -4,8 +4,8 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,16 +15,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.rounded.GraphicEq
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,21 +32,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.haero.tonestore.R
-import com.haero.tonestore.domain.model.AmpSetting
-import com.haero.tonestore.domain.model.GenreTag
-import com.haero.tonestore.domain.model.GuitarSetting
-import com.haero.tonestore.domain.model.Pedal
-import com.haero.tonestore.domain.model.PedalBoard
-import com.haero.tonestore.domain.model.PedalType
-import com.haero.tonestore.domain.model.PickupPosition
 import com.haero.tonestore.domain.model.ToneSetting
+import com.haero.tonestore.ui.components.GlassCard
+import com.haero.tonestore.ui.components.LocalEmberGlassTheme
 
 @Composable
 fun GridToneSettingCard(
@@ -59,13 +52,14 @@ fun GridToneSettingCard(
     sharedElementKey: String,
     modifier: Modifier = Modifier
 ) {
+    val theme = LocalEmberGlassTheme.current
     var isPressed by remember { mutableStateOf(false) }
 
     val favoriteColor by animateColorAsState(
         targetValue = if (toneSetting.isFavorite) {
-            MaterialTheme.colorScheme.error
+            theme.secondary
         } else {
-            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            theme.textMuted
         },
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
         label = "gridFavoriteColor"
@@ -80,8 +74,7 @@ fun GridToneSettingCard(
         label = "gridCardScale"
     )
 
-    Card(
-        onClick = onClick,
+    GlassCard(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(0.85f)
@@ -92,18 +85,12 @@ fun GridToneSettingCard(
                         isPressed = true
                         tryAwaitRelease()
                         isPressed = false
-                    }
+                    },
+                    onTap = { onClick() }
                 )
             },
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
+        cornerRadius = 24.dp,
+        glassAlpha = 0.12f
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             Column(
@@ -112,17 +99,22 @@ fun GridToneSettingCard(
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Glass Icon with gradient
                 Box(
                     modifier = Modifier
                         .size(56.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer),
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(theme.primary, theme.accent)
+                            )
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.GraphicEq,
+                        imageVector = Icons.Default.MusicNote,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        tint = theme.background,
                         modifier = Modifier.size(30.dp)
                     )
                 }
@@ -131,11 +123,11 @@ fun GridToneSettingCard(
 
                 Text(
                     text = toneSetting.songName,
-                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = theme.textPrimary,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -147,12 +139,15 @@ fun GridToneSettingCard(
                 )
             }
 
-            IconButton(
-                onClick = onFavoriteClick,
+            // Favorite button
+            Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(8.dp)
                     .size(36.dp)
+                    .clip(CircleShape)
+                    .clickable { onFavoriteClick() },
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = if (toneSetting.isFavorite) {
@@ -166,72 +161,5 @@ fun GridToneSettingCard(
                 )
             }
         }
-    }
-}
-
-@Preview
-@Composable
-private fun GridToneSettingCardPreview() {
-    MaterialTheme {
-        GridToneSettingCard(
-            toneSetting = ToneSetting(
-                id = "preview-1",
-                songName = "Sweet Child O' Mine",
-                createdAt = System.currentTimeMillis(),
-                updatedAt = System.currentTimeMillis(),
-                pedalBoard = PedalBoard(
-                    pedals = listOf(
-                        Pedal(
-                            id = "1",
-                            name = "Overdrive",
-                            type = PedalType.PRESET,
-                            knobs = emptyList(),
-                            order = 0,
-                            isEnabled = true,
-                            color = 0xFFFF6B6B
-                        ),
-                        Pedal(
-                            id = "2",
-                            name = "Delay",
-                            type = PedalType.PRESET,
-                            knobs = emptyList(),
-                            order = 1,
-                            isEnabled = true,
-                            color = 0xFFFFE66D
-                        ),
-                        Pedal(
-                            id = "3",
-                            name = "Reverb",
-                            type = PedalType.PRESET,
-                            knobs = emptyList(),
-                            order = 2,
-                            isEnabled = true,
-                            color = 0xFF95E1D3
-                        )
-                    )
-                ),
-                ampSetting = AmpSetting(
-                    gain = 5f,
-                    bass = 5f,
-                    middle = 5f,
-                    treble = 5f,
-                    presence = 5f,
-                    reverb = 3f,
-                    masterVolume = 4f,
-                    ampModel = "Marshall JCM800"
-                ),
-                guitarSetting = GuitarSetting(
-                    pickupSelector = PickupPosition.BRIDGE,
-                    toneKnob = 7f,
-                    volumeKnob = 10f,
-                    guitarModel = "Gibson Les Paul"
-                ),
-                isFavorite = true,
-                tags = listOf(GenreTag.ROCK)
-            ),
-            onClick = {},
-            onFavoriteClick = {},
-            sharedElementKey = "preview-1"
-        )
     }
 }

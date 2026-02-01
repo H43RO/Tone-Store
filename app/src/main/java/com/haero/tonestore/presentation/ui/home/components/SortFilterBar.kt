@@ -4,6 +4,8 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -13,13 +15,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,20 +31,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.haero.tonestore.R
 import com.haero.tonestore.presentation.ui.home.SortOption
 import com.haero.tonestore.presentation.ui.home.ViewMode
+import com.haero.tonestore.ui.components.LocalEmberGlassTheme
 
 /**
- * SortFilterBar - 홈 화면의 정렬 및 뷰 모드 토글 바
- *
- * @param viewMode 현재 선택된 뷰 모드 (LIST, GRID)
- * @param sortOption 현재 선택된 정렬 옵션 (FAVORITES_FIRST, DATE_FIRST)
- * @param onViewModeChange 뷰 모드 변경 콜백
- * @param onSortOptionChange 정렬 옵션 변경 콜백
- * @param modifier Compose Modifier
+ * SortFilterBar - Glassmorphism 스타일 정렬 및 뷰 모드 토글 바
  */
 @Composable
 fun SortFilterBar(
@@ -54,6 +49,7 @@ fun SortFilterBar(
     onSortOptionChange: (SortOption) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val theme = LocalEmberGlassTheme.current
     var sortExpanded by remember { mutableStateOf(false) }
 
     Row(
@@ -63,21 +59,22 @@ fun SortFilterBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Left: View toggle (list/grid icons)
+        // Glass View toggle
         Row(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
                 .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                .background(Color.White.copy(alpha = 0.1f))
+                .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
                 .padding(4.dp)
         ) {
-            ViewToggleButton(
+            GlassViewToggleButton(
                 isSelected = viewMode == ViewMode.LIST,
                 icon = Icons.Default.ViewList,
                 contentDescription = stringResource(R.string.view_list),
                 onClick = { onViewModeChange(ViewMode.LIST) }
             )
-            ViewToggleButton(
+            GlassViewToggleButton(
                 isSelected = viewMode == ViewMode.GRID,
                 icon = Icons.Default.GridView,
                 contentDescription = stringResource(R.string.view_grid),
@@ -85,33 +82,60 @@ fun SortFilterBar(
             )
         }
 
-        // Right: Sort dropdown
+        // Glass Sort dropdown
         Box {
-            FilterChip(
-                selected = true,
-                onClick = { sortExpanded = !sortExpanded },
-                label = {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(theme.primary.copy(alpha = 0.15f))
+                    .border(1.dp, theme.primary.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                    .clickable { sortExpanded = !sortExpanded }
+                    .padding(horizontal = 14.dp, vertical = 10.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
                     Text(
                         text = when (sortOption) {
                             SortOption.FAVORITES_FIRST -> stringResource(R.string.sort_favorites_first)
                             SortOption.DATE_FIRST -> stringResource(R.string.sort_date_first)
-                        }
+                        },
+                        color = theme.primary,
+                        fontSize = 13.sp
+                    )
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = null,
+                        tint = theme.primary,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
-            )
+            }
             DropdownMenu(
                 expanded = sortExpanded,
-                onDismissRequest = { sortExpanded = false }
+                onDismissRequest = { sortExpanded = false },
+                modifier = Modifier.background(theme.surfaceElevated)
             ) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.sort_favorites_first)) },
+                    text = {
+                        Text(
+                            stringResource(R.string.sort_favorites_first),
+                            color = theme.textPrimary
+                        )
+                    },
                     onClick = {
                         onSortOptionChange(SortOption.FAVORITES_FIRST)
                         sortExpanded = false
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.sort_date_first)) },
+                    text = {
+                        Text(
+                            stringResource(R.string.sort_date_first),
+                            color = theme.textPrimary
+                        )
+                    },
                     onClick = {
                         onSortOptionChange(SortOption.DATE_FIRST)
                         sortExpanded = false
@@ -123,19 +147,21 @@ fun SortFilterBar(
 }
 
 /**
- * ViewToggleButton - 뷰 모드 토글 버튼 (리스트/그리드)
+ * GlassViewToggleButton - Glassmorphism 뷰 모드 토글 버튼
  */
 @Composable
-private fun ViewToggleButton(
+private fun GlassViewToggleButton(
     isSelected: Boolean,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val theme = LocalEmberGlassTheme.current
+
     val backgroundColor by animateColorAsState(
         targetValue = if (isSelected) {
-            MaterialTheme.colorScheme.primaryContainer
+            theme.primary.copy(alpha = 0.2f)
         } else {
             Color.Transparent
         },
@@ -148,9 +174,9 @@ private fun ViewToggleButton(
 
     val iconTint by animateColorAsState(
         targetValue = if (isSelected) {
-            MaterialTheme.colorScheme.onPrimaryContainer
+            theme.primary
         } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
+            theme.textSecondary
         },
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -159,43 +185,26 @@ private fun ViewToggleButton(
         label = "viewToggleIcon"
     )
 
-    IconButton(
-        onClick = onClick,
+    Box(
         modifier = modifier
+            .size(40.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(backgroundColor)
+            .then(
+                if (isSelected) {
+                    Modifier.border(1.dp, theme.primary.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                } else {
+                    Modifier
+                }
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
             tint = iconTint,
             modifier = Modifier.size(20.dp)
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun SortFilterBarPreview_ListView_FavoritesFirst() {
-    MaterialTheme {
-        SortFilterBar(
-            viewMode = ViewMode.LIST,
-            sortOption = SortOption.FAVORITES_FIRST,
-            onViewModeChange = {},
-            onSortOptionChange = {}
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun SortFilterBarPreview_GridView_DateFirst() {
-    MaterialTheme {
-        SortFilterBar(
-            viewMode = ViewMode.GRID,
-            sortOption = SortOption.DATE_FIRST,
-            onViewModeChange = {},
-            onSortOptionChange = {}
         )
     }
 }

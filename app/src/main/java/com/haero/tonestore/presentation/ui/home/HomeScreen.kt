@@ -15,6 +15,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,25 +40,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.SearchOff
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -65,16 +59,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.ToneSetting
@@ -82,9 +76,10 @@ import com.haero.tonestore.presentation.ui.home.components.GridToneSettingCard
 import com.haero.tonestore.presentation.ui.home.components.SortFilterBar
 import com.haero.tonestore.presentation.ui.home.components.ToneSettingCard
 import com.haero.tonestore.presentation.viewmodel.HomeViewModel
+import com.haero.tonestore.ui.designsystem.*
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun HomeScreen(
     onNavigateToCreate: () -> Unit,
@@ -131,117 +126,111 @@ fun HomeScreen(
         }
     }
 
-    Scaffold(
-        floatingActionButton = {
-            if (state.isLoggedIn) {
-                ExtendedFab(
-                    expanded = isScrolling.not(),
-                    onClick = { viewModel.handleIntent(HomeIntent.NavigateToCreate) },
-                    icon = Icons.Default.Add,
-                    text = stringResource(R.string.add_tone_setting),
-                    modifier = Modifier.padding(bottom = 80.dp)
+    ObsidianBackground {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                ObsidianHomeHeader(
+                    isSearchActive = state.isSearchActive,
+                    searchQuery = state.searchQuery,
+                    totalCount = state.toneSettings.size,
+                    onSearchQueryChange = { viewModel.handleIntent(HomeIntent.UpdateSearchQuery(it)) },
+                    onSearchActiveChange = { viewModel.handleIntent(HomeIntent.SetSearchActive(it)) }
                 )
-            }
-        },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            HomeHeader(
-                isSearchActive = state.isSearchActive,
-                searchQuery = state.searchQuery,
-                totalCount = state.toneSettings.size,
-                onSearchQueryChange = { viewModel.handleIntent(HomeIntent.UpdateSearchQuery(it)) },
-                onSearchActiveChange = { viewModel.handleIntent(HomeIntent.SetSearchActive(it)) }
-            )
 
-            if (state.toneSettings.isNotEmpty()) {
-                SortFilterBar(
-                    viewMode = state.viewMode,
-                    sortOption = state.sortOption,
-                    onViewModeChange = { viewModel.handleIntent(HomeIntent.SetViewMode(it)) },
-                    onSortOptionChange = { viewModel.handleIntent(HomeIntent.SetSortOption(it)) }
-                )
-            }
+                if (state.toneSettings.isNotEmpty()) {
+                    SortFilterBar(
+                        viewMode = state.viewMode,
+                        sortOption = state.sortOption,
+                        onViewModeChange = { viewModel.handleIntent(HomeIntent.SetViewMode(it)) },
+                        onSortOptionChange = { viewModel.handleIntent(HomeIntent.SetSortOption(it)) }
+                    )
+                }
 
-            Box(modifier = Modifier.fillMaxSize()) {
-                when {
-                    state.isLoading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    !state.isLoggedIn -> {
-                        // 로그인 필요 상태
-                        LoginRequiredState(
-                            onLoginClick = { viewModel.handleIntent(HomeIntent.NavigateToLogin) },
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                    state.filteredToneSettings.isEmpty() && state.searchQuery.isNotBlank() -> {
-                        EmptySearchState(
-                            onClearSearch = {
-                                viewModel.handleIntent(HomeIntent.UpdateSearchQuery(""))
-                            },
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                    state.toneSettings.isEmpty() -> {
-                        EmptyState(
-                            onCreateClick = {
-                                viewModel.handleIntent(HomeIntent.NavigateToCreate)
-                            },
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                    else -> {
-                        Crossfade(
-                            targetState = state.viewMode,
-                            label = "viewModeTransition",
-                            animationSpec = tween(durationMillis = 300)
-                        ) { viewMode ->
-                            when (viewMode) {
-                                ViewMode.LIST -> {
-                                    ToneSettingList(
-                                        toneSettings = state.filteredToneSettings,
-                                        listState = listState,
-                                        onItemClick = { id ->
-                                            viewModel.handleIntent(HomeIntent.SelectToneSetting(id))
-                                        },
-                                        onDelete = { id ->
-                                            viewModel.handleIntent(HomeIntent.DeleteToneSetting(id))
-                                        },
-                                        onFavoriteClick = { id ->
-                                            viewModel.handleIntent(HomeIntent.ToggleFavorite(id))
-                                        }
-                                    )
-                                }
-                                ViewMode.GRID -> {
-                                    ToneSettingGrid(
-                                        toneSettings = state.filteredToneSettings,
-                                        onItemClick = { id ->
-                                            viewModel.handleIntent(HomeIntent.SelectToneSetting(id))
-                                        },
-                                        onFavoriteClick = { id ->
-                                            viewModel.handleIntent(HomeIntent.ToggleFavorite(id))
-                                        }
-                                    )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    when {
+                        state.isLoading -> {
+                            ObsidianLoadingIndicator()
+                        }
+                        !state.isLoggedIn -> {
+                            ObsidianLoginRequiredState(
+                                onLoginClick = { viewModel.handleIntent(HomeIntent.NavigateToLogin) },
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+                        state.filteredToneSettings.isEmpty() && state.searchQuery.isNotBlank() -> {
+                            ObsidianEmptySearchState(
+                                onClearSearch = {
+                                    viewModel.handleIntent(HomeIntent.UpdateSearchQuery(""))
+                                },
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+                        state.toneSettings.isEmpty() -> {
+                            ObsidianEmptyToneState(
+                                onCreateClick = {
+                                    viewModel.handleIntent(HomeIntent.NavigateToCreate)
+                                },
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+                        else -> {
+                            Crossfade(
+                                targetState = state.viewMode,
+                                label = "viewModeTransition",
+                                animationSpec = tween(durationMillis = 300)
+                            ) { viewMode ->
+                                when (viewMode) {
+                                    ViewMode.LIST -> {
+                                        ToneSettingList(
+                                            toneSettings = state.filteredToneSettings,
+                                            listState = listState,
+                                            onItemClick = { id ->
+                                                viewModel.handleIntent(HomeIntent.SelectToneSetting(id))
+                                            },
+                                            onDelete = { id ->
+                                                viewModel.handleIntent(HomeIntent.DeleteToneSetting(id))
+                                            },
+                                            onFavoriteClick = { id ->
+                                                viewModel.handleIntent(HomeIntent.ToggleFavorite(id))
+                                            }
+                                        )
+                                    }
+                                    ViewMode.GRID -> {
+                                        ToneSettingGrid(
+                                            toneSettings = state.filteredToneSettings,
+                                            onItemClick = { id ->
+                                                viewModel.handleIntent(HomeIntent.SelectToneSetting(id))
+                                            },
+                                            onFavoriteClick = { id ->
+                                                viewModel.handleIntent(HomeIntent.ToggleFavorite(id))
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+
+            // Obsidian FAB
+            if (state.isLoggedIn) {
+                ObsidianExtendedFab(
+                    expanded = isScrolling.not(),
+                    onClick = { viewModel.handleIntent(HomeIntent.NavigateToCreate) },
+                    icon = Icons.Rounded.Add,
+                    text = stringResource(R.string.add_tone_setting),
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 100.dp, end = 20.dp)
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun HomeHeader(
+private fun ObsidianHomeHeader(
     isSearchActive: Boolean,
     searchQuery: String,
     totalCount: Int,
@@ -253,8 +242,8 @@ private fun HomeHeader(
         modifier = modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(horizontal = 20.dp)
-            .padding(top = 16.dp, bottom = 8.dp)
+            .padding(horizontal = Obsidian.spacing.screenPadding)
+            .padding(top = Obsidian.spacing.lg, bottom = Obsidian.spacing.sm)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -264,42 +253,23 @@ private fun HomeHeader(
             Column {
                 Text(
                     text = stringResource(R.string.app_name),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    style = Obsidian.typography.displaySmall,
+                    color = Obsidian.colors.textPrimary
                 )
                 if (totalCount > 0 && !isSearchActive) {
                     Text(
                         text = stringResource(R.string.tones_saved_count, totalCount),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = Obsidian.typography.bodySmall,
+                        color = Obsidian.colors.textSecondary
                     )
                 }
             }
 
-            Surface(
+            ObsidianIconButton(
                 onClick = { onSearchActiveChange(!isSearchActive) },
-                shape = CircleShape,
-                color = if (isSearchActive) {
-                    MaterialTheme.colorScheme.primaryContainer
-                } else {
-                    MaterialTheme.colorScheme.surfaceVariant
-                },
-                modifier = Modifier.size(48.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = if (isSearchActive) Icons.Default.Close else Icons.Default.Search,
-                        contentDescription = stringResource(R.string.search),
-                        tint = if (isSearchActive) {
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-            }
+                icon = if (isSearchActive) Icons.Rounded.Close else Icons.Rounded.Search,
+                tint = if (isSearchActive) Obsidian.colors.primary else Obsidian.colors.textSecondary
+            )
         }
 
         AnimatedVisibility(
@@ -315,71 +285,23 @@ private fun HomeHeader(
                 }
             }
 
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            ) {
-                Row(
+            Box(modifier = Modifier.padding(top = Obsidian.spacing.lg)) {
+                ObsidianSearchField(
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    BasicTextField(
-                        value = searchQuery,
-                        onValueChange = onSearchQueryChange,
-                        modifier = Modifier
-                            .weight(1f)
-                            .focusRequester(focusRequester),
-                        textStyle = MaterialTheme.typography.bodyLarge.copy(
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
-                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                        singleLine = true,
-                        decorationBox = { innerTextField ->
-                            Box {
-                                if (searchQuery.isEmpty()) {
-                                    Text(
-                                        text = stringResource(R.string.search_hint),
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                                innerTextField()
-                            }
-                        }
-                    )
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(
-                            onClick = { onSearchQueryChange("") },
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-                }
+                        .focusRequester(focusRequester),
+                    placeholder = stringResource(R.string.search_hint),
+                    onClear = { onSearchQueryChange("") }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun EmptyState(
+private fun ObsidianEmptyToneState(
     onCreateClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -393,59 +315,60 @@ private fun EmptyState(
         modifier = modifier
     ) {
         Column(
-            modifier = modifier.padding(32.dp),
+            modifier = Modifier.padding(Obsidian.spacing.xxxl),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                modifier = Modifier.size(120.dp)
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .background(Obsidian.colors.primaryMuted)
+                    .border(1.dp, Obsidian.colors.primary.copy(alpha = 0.3f), CircleShape),
+                contentAlignment = Alignment.Center
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Default.MusicNote,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(56.dp)
-                    )
-                }
+                androidx.compose.material3.Icon(
+                    imageVector = Icons.Rounded.MusicNote,
+                    contentDescription = null,
+                    tint = Obsidian.colors.primary,
+                    modifier = Modifier.size(48.dp)
+                )
             }
-            Spacer(modifier = Modifier.height(24.dp))
+
+            Spacer(modifier = Modifier.height(Obsidian.spacing.xxl))
+
             Text(
                 text = stringResource(R.string.empty_state_title_v2),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onBackground
+                style = Obsidian.typography.headlineMedium,
+                color = Obsidian.colors.textPrimary
             )
-            Spacer(modifier = Modifier.height(8.dp))
+
+            Spacer(modifier = Modifier.height(Obsidian.spacing.sm))
+
             Text(
                 text = stringResource(R.string.empty_state_subtitle_v2),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                lineHeight = 22.sp
+                style = Obsidian.typography.bodyMedium,
+                color = Obsidian.colors.textSecondary,
+                textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(24.dp))
-            Button(
+
+            Spacer(modifier = Modifier.height(Obsidian.spacing.xxl))
+
+            ObsidianButton(
                 onClick = onCreateClick,
-                shape = RoundedCornerShape(16.dp)
+                icon = Icons.Rounded.Add,
+                modifier = Modifier.fillMaxWidth(0.7f)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
                 Text(stringResource(R.string.add_first_tone))
             }
+
             Spacer(Modifier.height(64.dp))
         }
     }
 }
 
 @Composable
-private fun EmptySearchState(
+private fun ObsidianEmptySearchState(
     onClearSearch: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -459,49 +382,103 @@ private fun EmptySearchState(
         modifier = modifier
     ) {
         Column(
-            modifier = Modifier.padding(32.dp),
+            modifier = Modifier.padding(Obsidian.spacing.xxxl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                modifier = Modifier.size(100.dp)
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .background(Obsidian.colors.surfaceHighlight),
+                contentAlignment = Alignment.Center
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Outlined.SearchOff,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(48.dp)
-                    )
-                }
+                androidx.compose.material3.Icon(
+                    imageVector = Icons.Outlined.SearchOff,
+                    contentDescription = null,
+                    tint = Obsidian.colors.textMuted,
+                    modifier = Modifier.size(36.dp)
+                )
             }
-            Spacer(modifier = Modifier.height(20.dp))
+
+            Spacer(modifier = Modifier.height(Obsidian.spacing.xl))
+
             Text(
                 text = stringResource(R.string.no_results_found),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onBackground
+                style = Obsidian.typography.headlineSmall,
+                color = Obsidian.colors.textPrimary
             )
-            Spacer(modifier = Modifier.height(4.dp))
+
+            Spacer(modifier = Modifier.height(Obsidian.spacing.xs))
+
             Text(
                 text = stringResource(R.string.empty_search_subtitle_v2),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = Obsidian.typography.bodyMedium,
+                color = Obsidian.colors.textSecondary
             )
-            Spacer(modifier = Modifier.height(20.dp))
-            OutlinedButton(
+
+            Spacer(modifier = Modifier.height(Obsidian.spacing.xl))
+
+            ObsidianOutlinedButton(
                 onClick = onClearSearch,
-                shape = RoundedCornerShape(12.dp)
+                icon = Icons.Rounded.Close
             ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
                 Text(stringResource(R.string.clear_search_button))
             }
+        }
+    }
+}
+
+@Composable
+private fun ObsidianLoginRequiredState(
+    onLoginClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.padding(Obsidian.spacing.xxxl),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .clip(CircleShape)
+                .background(Obsidian.colors.primaryMuted)
+                .border(1.dp, Obsidian.colors.primary.copy(alpha = 0.4f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            androidx.compose.material3.Icon(
+                imageVector = Icons.Rounded.Person,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                tint = Obsidian.colors.primary
+            )
+        }
+
+        Spacer(modifier = Modifier.height(Obsidian.spacing.xxl))
+
+        Text(
+            text = stringResource(R.string.login_required),
+            style = Obsidian.typography.headlineMedium,
+            textAlign = TextAlign.Center,
+            color = Obsidian.colors.textPrimary
+        )
+
+        Spacer(modifier = Modifier.height(Obsidian.spacing.sm))
+
+        Text(
+            text = stringResource(R.string.login_required_tone_message),
+            style = Obsidian.typography.bodyMedium,
+            color = Obsidian.colors.textSecondary,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(Obsidian.spacing.xxl))
+
+        ObsidianButton(
+            onClick = onLoginClick,
+            modifier = Modifier.fillMaxWidth(0.6f)
+        ) {
+            Text("로그인하기")
         }
     }
 }
@@ -518,8 +495,8 @@ private fun ToneSettingList(
 
     LazyColumn(
         state = listState,
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(horizontal = Obsidian.spacing.screenPadding, vertical = Obsidian.spacing.md),
+        verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
     ) {
         items(
             items = toneSettings,
@@ -536,41 +513,24 @@ private fun ToneSettingList(
         }
 
         item {
-            Spacer(modifier = Modifier.height(80.dp).animateItem())
+            Spacer(modifier = Modifier.height(100.dp).animateItem())
         }
     }
 
     showDeleteDialog?.let { id ->
         val toneSetting = toneSettings.find { it.id == id }
-        AlertDialog(
+        ObsidianAlertDialog(
             onDismissRequest = { showDeleteDialog = null },
-            title = { Text(stringResource(R.string.delete_confirm_title)) },
-            text = {
-                Text(
-                    stringResource(
-                        R.string.delete_confirm_message,
-                        toneSetting?.songName ?: ""
-                    )
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDelete(id)
-                        showDeleteDialog = null
-                    }
-                ) {
-                    Text(
-                        stringResource(R.string.delete),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = null }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
+            title = stringResource(R.string.delete_confirm_title),
+            message = stringResource(
+                R.string.delete_confirm_message,
+                toneSetting?.songName ?: ""
+            ),
+            confirmText = stringResource(R.string.delete),
+            dismissText = stringResource(R.string.cancel),
+            onConfirm = { onDelete(id) },
+            onDismiss = { showDeleteDialog = null },
+            isDangerous = true
         )
     }
 }
@@ -586,9 +546,9 @@ private fun ToneSettingGrid(
     LazyVerticalGrid(
         columns = GridCells.Adaptive(160.dp),
         state = gridState,
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(horizontal = Obsidian.spacing.screenPadding, vertical = Obsidian.spacing.md),
+        horizontalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap),
+        verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
     ) {
         items(
             items = toneSettings,
@@ -603,13 +563,13 @@ private fun ToneSettingGrid(
         }
 
         item {
-            Spacer(modifier = Modifier.height(80.dp))
+            Spacer(modifier = Modifier.height(100.dp))
         }
     }
 }
 
 @Composable
-private fun ExtendedFab(
+private fun ObsidianExtendedFab(
     expanded: Boolean,
     onClick: () -> Unit,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
@@ -625,128 +585,47 @@ private fun ExtendedFab(
         label = "rotation"
     )
 
-    Surface(
-        onClick = onClick,
+    Box(
         modifier = modifier
             .shadow(
-                elevation = 12.dp,
-                shape = RoundedCornerShape(24.dp),
-                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                elevation = 16.dp,
+                shape = RoundedCornerShape(if (expanded) 20.dp else 16.dp),
+                spotColor = Obsidian.colors.primary.copy(alpha = 0.4f)
+            )
+            .clip(RoundedCornerShape(if (expanded) 20.dp else 16.dp))
+            .background(
+                Brush.linearGradient(
+                    listOf(Obsidian.colors.primary, Obsidian.colors.primaryDark)
+                )
+            )
+            .clickable(onClick = onClick)
+            .animateContentSize(alignment = Alignment.CenterEnd)
+            .padding(
+                horizontal = if (expanded) 20.dp else 16.dp,
+                vertical = 14.dp
             ),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.onPrimary
+        contentAlignment = Alignment.Center
     ) {
         Row(
-            modifier = Modifier.padding(
-                horizontal = if (expanded) 20.dp else 16.dp,
-                vertical = 16.dp
-            ).animateContentSize(
-                alignment = Alignment.CenterEnd
-            ),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
+            androidx.compose.material3.Icon(
                 imageVector = icon,
                 contentDescription = text,
+                tint = Color.White,
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(22.dp)
                     .rotate(rotation)
             )
             if (expanded) {
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     text = text,
-                    fontWeight = FontWeight.SemiBold,
-                    style = MaterialTheme.typography.labelLarge
+                    style = Obsidian.typography.labelLarge,
+                    color = Color.White
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun LoginRequiredState(
-    onLoginClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Surface(
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.primaryContainer,
-            modifier = Modifier.size(80.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Default.MusicNote,
-                    contentDescription = null,
-                    modifier = Modifier.size(40.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = stringResource(R.string.login_required),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = stringResource(R.string.login_required_tone_message),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = onLoginClick,
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text("로그인하기")
-        }
-    }
-}
-
-@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
-@Composable
-private fun HomeHeaderPreview() {
-    com.haero.tonestore.ui.theme.ToneStoreTheme {
-        HomeHeader(
-            isSearchActive = false,
-            searchQuery = "",
-            totalCount = 5,
-            onSearchQueryChange = {},
-            onSearchActiveChange = {}
-        )
-    }
-}
-
-@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
-@Composable
-private fun EmptyStatePreview() {
-    com.haero.tonestore.ui.theme.ToneStoreTheme {
-        EmptyState(onCreateClick = {})
-    }
-}
-
-@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
-@Composable
-private fun EmptySearchStatePreview() {
-    com.haero.tonestore.ui.theme.ToneStoreTheme {
-        EmptySearchState(onClearSearch = {})
     }
 }

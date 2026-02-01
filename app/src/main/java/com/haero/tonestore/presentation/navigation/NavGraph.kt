@@ -10,6 +10,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -32,10 +33,12 @@ import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.rounded.Dashboard
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Public
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -71,6 +74,7 @@ import com.haero.tonestore.presentation.ui.pedalboard.PedalBoardScreen
 import com.haero.tonestore.presentation.ui.preset_detail.PresetDetailScreen
 import com.haero.tonestore.presentation.ui.settings.SettingsScreen
 import com.haero.tonestore.presentation.ui.share.ShareToneScreen
+import com.haero.tonestore.ui.designsystem.ObsidianColors
 import kotlinx.coroutines.launch
 
 sealed class Screen(val route: String) {
@@ -108,25 +112,25 @@ sealed class BottomNavTab(
         index = 0,
         titleResId = R.string.tab_home,
         icon = Icons.Outlined.Home,
-        selectedIcon = Icons.Filled.Home
+        selectedIcon = Icons.Rounded.Home
     )
     data object PedalBoard : BottomNavTab(
         index = 1,
         titleResId = R.string.tab_pedalboard,
         icon = Icons.Outlined.Dashboard,
-        selectedIcon = Icons.Outlined.Dashboard
+        selectedIcon = Icons.Rounded.Dashboard
     )
     data object Community : BottomNavTab(
         index = 2,
         titleResId = R.string.tab_community,
         icon = Icons.Outlined.Public,
-        selectedIcon = Icons.Filled.Public
+        selectedIcon = Icons.Rounded.Public
     )
     data object Settings : BottomNavTab(
         index = 3,
         titleResId = R.string.tab_settings,
         icon = Icons.Outlined.Settings,
-        selectedIcon = Icons.Filled.Settings
+        selectedIcon = Icons.Rounded.Settings
     )
 }
 
@@ -371,7 +375,6 @@ fun ToneStoreNavGraph(navController: NavHostController = rememberNavController()
                 toneSettingId = toneSettingId,
                 onNavigateBack = { navController.popBackStack() },
                 onShareSuccess = { presetId ->
-                    // 공유 완료 후 커뮤니티 상세 화면으로 이동
                     navController.navigate(Screen.PresetDetail.createRoute(presetId)) {
                         popUpTo(Screen.ShareTone.route) { inclusive = true }
                     }
@@ -428,8 +431,9 @@ private fun MainTabScreen(
     val scope = rememberCoroutineScope()
 
     Scaffold(
+        containerColor = ObsidianColors.bgPrimary,
         bottomBar = {
-            FloatingBottomNavBar(
+            ObsidianBottomNavBar(
                 tabs = bottomNavTabs,
                 selectedIndex = pagerState.currentPage,
                 onTabSelected = { index ->
@@ -468,6 +472,7 @@ private fun MainTabScreen(
                 }
             }
 
+            // Gradient fade at bottom
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -477,8 +482,8 @@ private fun MainTabScreen(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
-                                MaterialTheme.colorScheme.background
+                                ObsidianColors.bgPrimary.copy(alpha = 0.9f),
+                                ObsidianColors.bgPrimary
                             )
                         )
                     )
@@ -488,7 +493,7 @@ private fun MainTabScreen(
 }
 
 @Composable
-private fun FloatingBottomNavBar(
+private fun ObsidianBottomNavBar(
     tabs: List<BottomNavTab>,
     selectedIndex: Int,
     onTabSelected: (Int) -> Unit,
@@ -497,30 +502,28 @@ private fun FloatingBottomNavBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp)
+            .padding(horizontal = 20.dp, vertical = 12.dp)
             .navigationBarsPadding(),
         contentAlignment = Alignment.Center
     ) {
-        Surface(
+        Box(
             modifier = Modifier
                 .shadow(
                     elevation = 16.dp,
-                    shape = RoundedCornerShape(28.dp),
-                    ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                    spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                ),
-            shape = RoundedCornerShape(28.dp),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 2.dp
+                    shape = RoundedCornerShape(24.dp),
+                    spotColor = Color.Black
+                )
+                .clip(RoundedCornerShape(24.dp))
+                .background(ObsidianColors.surface)
+                .border(1.dp, ObsidianColors.border, RoundedCornerShape(24.dp))
         ) {
             Row(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 tabs.forEach { tab ->
-                    FloatingNavItem(
+                    ObsidianNavItem(
                         tab = tab,
                         selected = selectedIndex == tab.index,
                         onClick = { onTabSelected(tab.index) }
@@ -532,28 +535,20 @@ private fun FloatingBottomNavBar(
 }
 
 @Composable
-private fun FloatingNavItem(
+private fun ObsidianNavItem(
     tab: BottomNavTab,
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val backgroundColor by animateColorAsState(
-        targetValue = if (selected) {
-            MaterialTheme.colorScheme.primaryContainer
-        } else {
-            Color.Transparent
-        },
+        targetValue = if (selected) ObsidianColors.primaryMuted else Color.Transparent,
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
         label = "backgroundColor"
     )
 
     val contentColor by animateColorAsState(
-        targetValue = if (selected) {
-            MaterialTheme.colorScheme.onPrimaryContainer
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        },
+        targetValue = if (selected) ObsidianColors.primary else ObsidianColors.textMuted,
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
         label = "contentColor"
     )
@@ -568,7 +563,7 @@ private fun FloatingNavItem(
     )
 
     val horizontalPadding by animateDpAsState(
-        targetValue = if (selected) 16.dp else 12.dp,
+        targetValue = if (selected) 16.dp else 14.dp,
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
         label = "horizontalPadding"
     )
@@ -576,14 +571,25 @@ private fun FloatingNavItem(
     Box(
         modifier = modifier
             .scale(scale)
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(16.dp))
             .background(backgroundColor)
+            .then(
+                if (selected) {
+                    Modifier.border(
+                        1.dp,
+                        ObsidianColors.primary.copy(alpha = 0.3f),
+                        RoundedCornerShape(16.dp)
+                    )
+                } else {
+                    Modifier
+                }
+            )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick
             )
-            .padding(horizontal = horizontalPadding, vertical = 12.dp),
+            .padding(horizontal = horizontalPadding, vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(
@@ -601,7 +607,7 @@ private fun FloatingNavItem(
                 Text(
                     text = stringResource(tab.titleResId),
                     color = contentColor,
-                    fontSize = 13.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold
                 )
             }
