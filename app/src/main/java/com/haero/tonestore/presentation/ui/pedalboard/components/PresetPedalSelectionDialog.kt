@@ -14,14 +14,12 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -94,9 +92,8 @@ fun PresetPedalSelectionDialog(
         }
     }
 
-    val navigationBarPadding = WindowInsets.navigationBars.asPaddingValues()
-
     ModalBottomSheet(
+        modifier = Modifier.statusBarsPadding(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface,
@@ -121,7 +118,6 @@ fun PresetPedalSelectionDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .padding(bottom = navigationBarPadding.calculateBottomPadding())
         ) {
             // Header
             Row(
@@ -184,17 +180,8 @@ fun PresetPedalSelectionDialog(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Pedal Grid
-            Text(
-                text = "프리셋 이펙터",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
             LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
+                columns = GridCells.Fixed(4),
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
@@ -353,14 +340,14 @@ private fun SelectablePedalCard(
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick
-            )
-            .padding(10.dp),
+            ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(16.dp))
         // 페달 이름
         Text(
             text = pedal.name,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold,
             color = contentColor,
             textAlign = TextAlign.Center,
@@ -375,37 +362,16 @@ private fun SelectablePedalCard(
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 24.dp)
                 .weight(1f),
             horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
         ) {
-            val knobsToShow = minOf(pedal.knobs.size, 4)
+            val knobsToShow = minOf(pedal.knobs.size, 6)
             repeat(knobsToShow) {
                 SelectableKnobIndicator(contentColor = contentColor)
             }
-            if (pedal.knobs.size > 4) {
-                Text(
-                    text = "+${pedal.knobs.size - 4}",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = contentColor.copy(alpha = 0.7f)
-                )
-            }
-            if (pedal.knobs.isEmpty()) {
-                Text(
-                    text = "튜너",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = contentColor.copy(alpha = 0.7f)
-                )
-            }
         }
-
-        // 풋스위치 (검은색, 가로 스트라이프 패턴)
-        FootSwitch(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(14.dp)
-        )
     }
 }
 
@@ -478,40 +444,6 @@ private fun SelectableKnobIndicator(
             strokeWidth = strokeWidth * 0.4f,
             cap = StrokeCap.Round
         )
-    }
-}
-
-/**
- * 풋스위치 - 검은색 직사각형 + 가로 스트라이프 패턴
- */
-@Composable
-private fun FootSwitch(modifier: Modifier = Modifier) {
-    Canvas(
-        modifier = modifier
-            .clip(RoundedCornerShape(4.dp))
-    ) {
-        val width = size.width
-        val height = size.height
-
-        // 베이스 검은색
-        drawRoundRect(
-            color = Color(0xFF1A1A1A),
-            cornerRadius = androidx.compose.ui.geometry.CornerRadius(4.dp.toPx())
-        )
-
-        // 가로 스트라이프 패턴
-        val stripeCount = 6
-        val stripeSpacing = width / (stripeCount + 1)
-        for (i in 1..stripeCount) {
-            val x = stripeSpacing * i
-            drawLine(
-                color = Color(0xFF3A3A3A),
-                start = Offset(x, height * 0.2f),
-                end = Offset(x, height * 0.8f),
-                strokeWidth = 2.dp.toPx(),
-                cap = StrokeCap.Round
-            )
-        }
     }
 }
 
