@@ -1,13 +1,10 @@
 package com.haero.tonestore.presentation.ui.pedalboard.components
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,9 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -27,369 +22,484 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haero.tonestore.ui.designsystem.Obsidian
 import com.haero.tonestore.ui.designsystem.ObsidianBackground
 import com.haero.tonestore.ui.designsystem.ObsidianTheme
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
 
 /**
- * 유명 페달들의 시그니처 색상 레퍼런스
- *
- * Distortion/Overdrive:
- * - Boss DS-1 Distortion: Orange (#FF6B00)
- * - Ibanez Tube Screamer: Green (#4CAF50)
- * - ProCo RAT: Black with yellow text
- * - Boss BD-2 Blues Driver: Blue (#2196F3)
- * - Fulltone OCD: Cream/Tan (#D4C4A8)
- * - Klon Centaur: Gold (#FFD700)
- *
- * Delay/Reverb:
- * - Boss DD-3 Digital Delay: Blue (#1976D2)
- * - MXR Carbon Copy: Green (#2E7D32)
- * - TC Electronic Flashback: Orange-Red (#FF5722)
- * - Strymon BigSky: Blue-Gray (#607D8B)
- *
- * Modulation:
- * - Boss CE-2 Chorus: Light Blue (#03A9F4)
- * - MXR Phase 90: Orange (#FF9800)
- * - Boss BF-3 Flanger: Purple (#9C27B0)
- * - EHX Small Clone: Teal (#009688)
- *
- * Compressor/EQ:
- * - Boss CS-3: Blue (#1565C0)
- * - MXR Dyna Comp: Red (#F44336)
- * - Boss GE-7 EQ: White/Silver (#E0E0E0)
- *
- * Fuzz:
- * - Big Muff Pi: Silver/Black (#424242)
- * - Fuzz Face: Red/Blue variants
- *
- * Wah:
- * - Dunlop Cry Baby: Black (#212121)
- * - Vox Wah: Chrome/Black
+ * 모던 페달 디자인 스타일 5가지
  */
 
 data class ShowcasePedal(
     val name: String,
     val category: String,
     val primaryColor: Color,
-    val knobCount: Int = 3,
-    val knobValues: List<Float> = listOf(0.5f, 0.7f, 0.3f)
+    val knobCount: Int = 3
 )
 
-val showcasePedals = listOf(
-    // Distortion/Overdrive
-    ShowcasePedal("DS-1", "Distortion", Color(0xFFFF6B00), 3, listOf(0.6f, 0.7f, 0.5f)),
-    ShowcasePedal("Tube Screamer", "Overdrive", Color(0xFF4CAF50), 3, listOf(0.4f, 0.8f, 0.6f)),
-    ShowcasePedal("Blues Driver", "Overdrive", Color(0xFF2196F3), 2, listOf(0.5f, 0.6f)),
-    ShowcasePedal("Klon", "Overdrive", Color(0xFFD4AF37), 3, listOf(0.3f, 0.5f, 0.7f)),
-
-    // Delay/Reverb
-    ShowcasePedal("DD-3", "Delay", Color(0xFF1976D2), 3, listOf(0.4f, 0.6f, 0.5f)),
-    ShowcasePedal("Carbon Copy", "Delay", Color(0xFF2E7D32), 3, listOf(0.5f, 0.5f, 0.4f)),
-
-    // Modulation
-    ShowcasePedal("CE-2", "Chorus", Color(0xFF03A9F4), 2, listOf(0.6f, 0.5f)),
-    ShowcasePedal("Phase 90", "Phaser", Color(0xFFFF9800), 1, listOf(0.5f)),
-
-    // Compressor
-    ShowcasePedal("Dyna Comp", "Compressor", Color(0xFFF44336), 2, listOf(0.7f, 0.4f)),
-
-    // Fuzz
-    ShowcasePedal("Big Muff", "Fuzz", Color(0xFF424242), 3, listOf(0.8f, 0.5f, 0.6f))
+// 샘플 페달 (시그니처 색상)
+val samplePedals = listOf(
+    ShowcasePedal("DS-1", "Distortion", Color(0xFFFF6B00), 3),
+    ShowcasePedal("Tube Screamer", "Overdrive", Color(0xFF4CAF50), 3),
+    ShowcasePedal("Klon", "Overdrive", Color(0xFFD4AF37), 3),
 )
 
-/**
- * Obsidian 테마에 맞는 새 페달 디자인
- * - 페달 고유 색상 유지
- * - 다크 테마와 조화로운 그라데이션
- * - 미니멀한 노브 디자인
- * - 세련된 그림자 효과
- */
-@OptIn(ExperimentalLayoutApi::class)
+// =====================================================
+// STYLE 1: Pill Badge - 알약형 뱃지 스타일
+// 특징: 초미니멀, 색상 포인트, 텍스트 중심
+// =====================================================
 @Composable
-fun ObsidianPedalCard(
+fun PedalStyle1_PillBadge(
     name: String,
     category: String,
     primaryColor: Color,
-    knobValues: List<Float>,
     modifier: Modifier = Modifier
 ) {
-    // 페달 색상 기반으로 그라데이션 생성
-    val darkerColor = primaryColor.copy(
-        red = (primaryColor.red * 0.7f).coerceIn(0f, 1f),
-        green = (primaryColor.green * 0.7f).coerceIn(0f, 1f),
-        blue = (primaryColor.blue * 0.7f).coerceIn(0f, 1f)
-    )
-
-    // 텍스트/노브 색상 결정 (밝은 배경 vs 어두운 배경)
-    val luminance = 0.299f * primaryColor.red + 0.587f * primaryColor.green + 0.114f * primaryColor.blue
-    val contentColor = if (luminance > 0.5f) Color.Black.copy(alpha = 0.9f) else Color.White
-    val secondaryContentColor = if (luminance > 0.5f) Color.Black.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.7f)
-
     Box(
         modifier = modifier
             .width(100.dp)
-            .height(130.dp)
-            .shadow(
-                elevation = 8.dp,
-                shape = RoundedCornerShape(12.dp),
-                spotColor = primaryColor.copy(alpha = 0.4f),
-                ambientColor = Color.Black.copy(alpha = 0.3f)
-            )
-            .clip(RoundedCornerShape(12.dp))
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        primaryColor,
-                        darkerColor
-                    )
-                )
-            )
+            .height(44.dp)
+            .clip(RoundedCornerShape(22.dp))
+            .background(Obsidian.colors.surface)
             .border(
-                width = 1.dp,
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color.White.copy(alpha = 0.3f),
-                        Color.Black.copy(alpha = 0.2f)
-                    )
-                ),
-                shape = RoundedCornerShape(12.dp)
+                width = 2.dp,
+                color = primaryColor,
+                shape = RoundedCornerShape(22.dp)
             )
+            .padding(horizontal = 12.dp),
+        contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 카테고리 라벨
-            Text(
-                text = category.uppercase(),
-                fontSize = 8.sp,
-                fontWeight = FontWeight.Medium,
-                color = secondaryContentColor,
-                letterSpacing = 1.sp
-            )
-
-            // 노브 영역
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                knobValues.forEach { value ->
-                    ObsidianMiniKnob(
-                        value = value,
-                        knobColor = contentColor,
-                        indicatorColor = if (luminance > 0.5f) primaryColor else Color.White,
-                        size = 22.dp
-                    )
-                }
-            }
-
-            // 페달 이름
             Text(
                 text = name,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                color = contentColor,
-                textAlign = TextAlign.Center,
+                color = primaryColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-
-            // 풋스위치 (LED 포함)
-            ObsidianFootswitch(
-                isOn = true,
-                ledColor = if (luminance > 0.5f) Color.Red else primaryColor.copy(
-                    red = (primaryColor.red * 1.3f).coerceIn(0f, 1f),
-                    green = (primaryColor.green * 1.3f).coerceIn(0f, 1f),
-                    blue = (primaryColor.blue * 1.3f).coerceIn(0f, 1f)
-                )
+            Text(
+                text = category,
+                fontSize = 8.sp,
+                color = Obsidian.colors.textMuted
             )
         }
     }
 }
 
+// =====================================================
+// STYLE 2: Color Block - 색상 블록 스타일
+// 특징: 페달 색상 배경, 심플 사각형, Figma 느낌
+// =====================================================
 @Composable
-private fun ObsidianMiniKnob(
-    value: Float,
-    knobColor: Color,
-    indicatorColor: Color,
-    size: Dp = 20.dp
-) {
-    val startAngle = 135f  // 7시 방향
-    val sweepAngle = 270f  // 5시 방향까지
-    val currentAngle = startAngle + (value * sweepAngle)
-
-    Canvas(modifier = Modifier.size(size)) {
-        val strokeWidth = size.toPx() * 0.1f
-        val radius = (size.toPx() - strokeWidth) / 2f
-        val center = Offset(size.toPx() / 2f, size.toPx() / 2f)
-
-        // 노브 베이스 (원형)
-        drawCircle(
-            color = knobColor,
-            radius = radius * 0.85f,
-            center = center
-        )
-
-        // 노브 하이라이트 (상단)
-        drawCircle(
-            brush = Brush.verticalGradient(
-                colors = listOf(
-                    Color.White.copy(alpha = 0.3f),
-                    Color.Transparent
-                ),
-                startY = 0f,
-                endY = size.toPx() * 0.5f
-            ),
-            radius = radius * 0.75f,
-            center = center
-        )
-
-        // 포인터 (값 표시)
-        val pointerAngle = currentAngle * (PI.toFloat() / 180f)
-        val pointerLength = radius * 0.6f
-        val pointerStart = Offset(
-            center.x + cos(pointerAngle) * (radius * 0.15f),
-            center.y + sin(pointerAngle) * (radius * 0.15f)
-        )
-        val pointerEnd = Offset(
-            center.x + cos(pointerAngle) * pointerLength,
-            center.y + sin(pointerAngle) * pointerLength
-        )
-        drawLine(
-            color = indicatorColor,
-            start = pointerStart,
-            end = pointerEnd,
-            strokeWidth = strokeWidth * 0.8f,
-            cap = StrokeCap.Round
-        )
-    }
-}
-
-@Composable
-private fun ObsidianFootswitch(
-    isOn: Boolean,
-    ledColor: Color = Color.Red,
+fun PedalStyle2_ColorBlock(
+    name: String,
+    category: String,
+    primaryColor: Color,
+    knobCount: Int,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+    val luminance = 0.299f * primaryColor.red + 0.587f * primaryColor.green + 0.114f * primaryColor.blue
+    val textColor = if (luminance > 0.5f) Color.Black.copy(alpha = 0.85f) else Color.White
+
+    Box(
+        modifier = modifier
+            .width(90.dp)
+            .height(110.dp)
+            .shadow(4.dp, RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(12.dp))
+            .background(primaryColor)
+            .padding(10.dp)
     ) {
-        // LED
-        Box(
-            modifier = Modifier
-                .size(6.dp)
-                .clip(CircleShape)
-                .background(
-                    if (isOn) {
-                        Brush.radialGradient(
-                            colors = listOf(
-                                ledColor,
-                                ledColor.copy(alpha = 0.6f)
-                            )
-                        )
-                    } else {
-                        Brush.radialGradient(
-                            colors = listOf(
-                                Color.Gray.copy(alpha = 0.5f),
-                                Color.Gray.copy(alpha = 0.3f)
-                            )
-                        )
-                    }
-                )
-        )
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            // 카테고리
+            Text(
+                text = category.uppercase(),
+                fontSize = 7.sp,
+                fontWeight = FontWeight.Medium,
+                color = textColor.copy(alpha = 0.6f),
+                letterSpacing = 0.5.sp
+            )
 
-        Spacer(modifier = Modifier.width(6.dp))
-
-        // 풋스위치 버튼
-        Box(
-            modifier = Modifier
-                .size(width = 28.dp, height = 10.dp)
-                .clip(RoundedCornerShape(3.dp))
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFF4A4A4A),
-                            Color(0xFF2A2A2A)
-                        )
+            // 노브 (단순 원)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                repeat(knobCount.coerceAtMost(3)) {
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 3.dp)
+                            .size(16.dp)
+                            .clip(CircleShape)
+                            .background(textColor.copy(alpha = 0.3f))
+                            .border(1.5.dp, textColor.copy(alpha = 0.5f), CircleShape)
                     )
-                )
-                .border(
-                    width = 0.5.dp,
-                    color = Color.White.copy(alpha = 0.2f),
-                    shape = RoundedCornerShape(3.dp)
-                )
-        )
+                }
+            }
+
+            // 이름
+            Text(
+                text = name,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = textColor,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 
-// ===== Preview =====
-
-@Preview(showBackground = true, backgroundColor = 0xFF0C0C0E)
+// =====================================================
+// STYLE 3: Outline Card - 아웃라인 카드 스타일
+// 특징: 다크 배경, 컬러 테두리, 깔끔한 구조
+// =====================================================
 @Composable
-private fun ObsidianPedalShowcasePreview() {
-    ObsidianTheme {
-        ObsidianBackground {
-            Column(
+fun PedalStyle3_OutlineCard(
+    name: String,
+    category: String,
+    primaryColor: Color,
+    knobCount: Int,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .width(90.dp)
+            .height(110.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(Obsidian.colors.bgSecondary)
+            .border(
+                width = 1.5.dp,
+                color = primaryColor.copy(alpha = 0.7f),
+                shape = RoundedCornerShape(10.dp)
+            )
+            .padding(10.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            // 상단 컬러 바
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(primaryColor)
+            )
+
+            // 노브
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                repeat(knobCount.coerceAtMost(3)) {
+                    Box(
+                        modifier = Modifier
+                            .size(14.dp)
+                            .clip(CircleShape)
+                            .background(Obsidian.colors.bgTertiary)
+                            .border(1.dp, primaryColor.copy(alpha = 0.5f), CircleShape)
+                    )
+                }
+            }
+
+            // 이름
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Obsidian Pedal Design",
-                    style = Obsidian.typography.headlineMedium,
+                    text = name,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Obsidian.colors.textPrimary,
+                    maxLines = 1
+                )
+                Text(
+                    text = category,
+                    fontSize = 8.sp,
+                    color = primaryColor.copy(alpha = 0.8f)
+                )
+            }
+        }
+    }
+}
+
+// =====================================================
+// STYLE 4: Glow Accent - 글로우 포인트 스타일
+// 특징: 어두운 카드, 컬러 LED 글로우, 프리미엄 느낌
+// =====================================================
+@Composable
+fun PedalStyle4_GlowAccent(
+    name: String,
+    category: String,
+    primaryColor: Color,
+    knobCount: Int,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .width(90.dp)
+            .height(110.dp)
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(12.dp),
+                spotColor = primaryColor.copy(alpha = 0.4f)
+            )
+            .clip(RoundedCornerShape(12.dp))
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Obsidian.colors.bgSecondary,
+                        Obsidian.colors.bgPrimary
+                    )
+                )
+            )
+            .padding(10.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            // LED 글로우
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .shadow(4.dp, CircleShape, spotColor = primaryColor)
+                    .clip(CircleShape)
+                    .background(primaryColor)
+            )
+
+            // 노브
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                repeat(knobCount.coerceAtMost(3)) {
+                    Box(
+                        modifier = Modifier
+                            .size(18.dp)
+                            .clip(CircleShape)
+                            .background(Obsidian.colors.bgTertiary)
+                            .border(1.dp, Obsidian.colors.border, CircleShape)
+                    )
+                }
+            }
+
+            // 이름
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = name,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
                     color = Obsidian.colors.textPrimary
                 )
-
                 Text(
-                    text = "각 페달의 시그니처 색상 유지",
-                    style = Obsidian.typography.bodySmall,
-                    color = Obsidian.colors.textSecondary
+                    text = category,
+                    fontSize = 8.sp,
+                    color = Obsidian.colors.textMuted
                 )
+            }
+        }
+    }
+}
 
-                Spacer(modifier = Modifier.height(24.dp))
+// =====================================================
+// STYLE 5: Gradient Edge - 그라데이션 엣지 스타일
+// 특징: 다크 카드, 컬러 그라데이션 테두리, 모던
+// =====================================================
+@Composable
+fun PedalStyle5_GradientEdge(
+    name: String,
+    category: String,
+    primaryColor: Color,
+    knobCount: Int,
+    modifier: Modifier = Modifier
+) {
+    val gradientBorder = Brush.verticalGradient(
+        colors = listOf(
+            primaryColor,
+            primaryColor.copy(alpha = 0.3f)
+        )
+    )
 
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(110.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+    Box(
+        modifier = modifier
+            .width(90.dp)
+            .height(110.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(gradientBorder)
+            .padding(2.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(12.dp))
+                .background(Obsidian.colors.surface)
+                .padding(10.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                // 카테고리 태그
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(primaryColor.copy(alpha = 0.15f))
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
-                    items(showcasePedals) { pedal ->
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            ObsidianPedalCard(
+                    Text(
+                        text = category,
+                        fontSize = 7.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = primaryColor
+                    )
+                }
+
+                // 노브
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    repeat(knobCount.coerceAtMost(3)) {
+                        Box(
+                            modifier = Modifier
+                                .size(16.dp)
+                                .clip(CircleShape)
+                                .background(Obsidian.colors.bgSecondary)
+                                .border(1.dp, Obsidian.colors.border, CircleShape)
+                        )
+                    }
+                }
+
+                // 이름
+                Text(
+                    text = name,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Obsidian.colors.textPrimary,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+// =====================================================
+// PREVIEW - 5가지 스타일 비교
+// =====================================================
+@Preview(showBackground = true, backgroundColor = 0xFF0C0C0E)
+@Composable
+private fun PedalStylesComparisonPreview() {
+    ObsidianTheme {
+        ObsidianBackground {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(32.dp)
+            ) {
+                // Style 1: Pill Badge
+                item {
+                    StyleSection(
+                        number = 1,
+                        name = "Pill Badge",
+                        description = "초미니멀, 텍스트 중심"
+                    ) {
+                        samplePedals.forEach { pedal ->
+                            PedalStyle1_PillBadge(
+                                name = pedal.name,
+                                category = pedal.category,
+                                primaryColor = pedal.primaryColor
+                            )
+                        }
+                    }
+                }
+
+                // Style 2: Color Block
+                item {
+                    StyleSection(
+                        number = 2,
+                        name = "Color Block",
+                        description = "페달 색상 배경, Figma 스타일"
+                    ) {
+                        samplePedals.forEach { pedal ->
+                            PedalStyle2_ColorBlock(
                                 name = pedal.name,
                                 category = pedal.category,
                                 primaryColor = pedal.primaryColor,
-                                knobValues = pedal.knobValues
+                                knobCount = pedal.knobCount
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = pedal.category,
-                                fontSize = 10.sp,
-                                color = Obsidian.colors.textMuted
+                        }
+                    }
+                }
+
+                // Style 3: Outline Card
+                item {
+                    StyleSection(
+                        number = 3,
+                        name = "Outline Card",
+                        description = "다크 배경, 컬러 테두리"
+                    ) {
+                        samplePedals.forEach { pedal ->
+                            PedalStyle3_OutlineCard(
+                                name = pedal.name,
+                                category = pedal.category,
+                                primaryColor = pedal.primaryColor,
+                                knobCount = pedal.knobCount
+                            )
+                        }
+                    }
+                }
+
+                // Style 4: Glow Accent
+                item {
+                    StyleSection(
+                        number = 4,
+                        name = "Glow Accent",
+                        description = "LED 글로우, 프리미엄"
+                    ) {
+                        samplePedals.forEach { pedal ->
+                            PedalStyle4_GlowAccent(
+                                name = pedal.name,
+                                category = pedal.category,
+                                primaryColor = pedal.primaryColor,
+                                knobCount = pedal.knobCount
+                            )
+                        }
+    }
+                }
+
+                // Style 5: Gradient Edge
+                item {
+                    StyleSection(
+                        number = 5,
+                        name = "Gradient Edge",
+                        description = "그라데이션 테두리, 모던"
+                    ) {
+                        samplePedals.forEach { pedal ->
+                            PedalStyle5_GradientEdge(
+                                name = pedal.name,
+                                category = pedal.category,
+                                primaryColor = pedal.primaryColor,
+                                knobCount = pedal.knobCount
                             )
                         }
                     }
@@ -399,42 +509,52 @@ private fun ObsidianPedalShowcasePreview() {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0C0C0E)
 @Composable
-private fun SinglePedalPreview() {
-    ObsidianTheme {
-        Box(
-            modifier = Modifier
-                .background(Obsidian.colors.bgPrimary)
-                .padding(24.dp)
+private fun StyleSection(
+    number: Int,
+    name: String,
+    description: String,
+    content: @Composable () -> Unit
+) {
+    Column {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(Obsidian.colors.primary),
+                contentAlignment = Alignment.Center
             ) {
-                // DS-1 (Orange)
-                ObsidianPedalCard(
-                    name = "DS-1",
-                    category = "Distortion",
-                    primaryColor = Color(0xFFFF6B00),
-                    knobValues = listOf(0.6f, 0.7f, 0.5f)
-                )
-
-                // Tube Screamer (Green)
-                ObsidianPedalCard(
-                    name = "Tube Screamer",
-                    category = "Overdrive",
-                    primaryColor = Color(0xFF4CAF50),
-                    knobValues = listOf(0.4f, 0.8f, 0.6f)
-                )
-
-                // Klon (Gold)
-                ObsidianPedalCard(
-                    name = "Klon",
-                    category = "Overdrive",
-                    primaryColor = Color(0xFFD4AF37),
-                    knobValues = listOf(0.3f, 0.5f, 0.7f)
+                Text(
+                    text = "$number",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
                 )
             }
+            Spacer(modifier = Modifier.width(8.dp))
+            Column {
+                Text(
+                    text = name,
+                    style = Obsidian.typography.titleMedium,
+                    color = Obsidian.colors.textPrimary
+                )
+                Text(
+                    text = description,
+                    fontSize = 11.sp,
+                    color = Obsidian.colors.textMuted
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            content()
         }
     }
 }
