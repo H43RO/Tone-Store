@@ -183,7 +183,7 @@ private fun CustomColorButton(
     modifier: Modifier = Modifier
 ) {
     val isCustomColor = currentColor != null && presetColors.none { it.color == currentColor }
-    val displayColor = if (isCustomColor) Color(currentColor!!) else null
+    val displayColor = if (isCustomColor && currentColor != null) Color(currentColor) else null
 
     Box(
         modifier = modifier

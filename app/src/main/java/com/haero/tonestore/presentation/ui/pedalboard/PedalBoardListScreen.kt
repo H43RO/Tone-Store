@@ -129,6 +129,7 @@ fun PedalBoardListScreen(
     }
 
     if (showDeleteDialog && pedalBoardToDelete != null) {
+        val targetPedalBoard = pedalBoardToDelete ?: return@PedalBoardListScreen
         AlertDialog(
             onDismissRequest = {
                 showDeleteDialog = false
@@ -139,7 +140,7 @@ fun PedalBoardListScreen(
                 Text(
                     stringResource(
                         R.string.delete_pedalboard_confirm_message,
-                        pedalBoardToDelete!!.name
+                        targetPedalBoard.name
                     )
                 )
             },

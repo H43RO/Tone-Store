@@ -137,7 +137,7 @@ fun DetailScreen(
                         )
                     }
                     state.toneSetting != null -> {
-                        val toneSetting = state.toneSetting!!
+                        val toneSetting = state.toneSetting ?: return@Box
 
                         Column(modifier = Modifier.fillMaxSize()) {
                             DetailTabBar(
@@ -423,7 +423,7 @@ private fun DetailAmpContent(
     ) {
         if (ampSetting.ampModel.isNullOrBlank().not()) {
             Text(
-                text = ampSetting.ampModel!!,
+                text = ampSetting.ampModel.orEmpty(),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -509,7 +509,7 @@ private fun DetailGuitarContent(
     ) {
         if (guitarSetting.guitarModel.isNullOrBlank().not()) {
             Text(
-                text = guitarSetting.guitarModel!!,
+                text = guitarSetting.guitarModel.orEmpty(),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface

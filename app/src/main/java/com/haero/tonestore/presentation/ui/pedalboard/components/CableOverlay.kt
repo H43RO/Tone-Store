@@ -27,9 +27,8 @@ fun CableOverlay(
 
                 if (col < columns - 1) {
                     val nextIndex = index + 1
-                    if (slotPositions.containsKey(nextIndex)) {
-                        val nextPos = slotPositions[nextIndex]!!
-
+                    val nextPos = slotPositions[nextIndex]
+                    if (nextPos != null) {
                         drawLine(
                             color = cableColor,
                             start = position,

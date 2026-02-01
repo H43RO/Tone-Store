@@ -234,28 +234,35 @@ fun PedalBoardScreen(
                 )
             }
 
-            PedalboardInfoEditor(
-                name = state.name,
-                columns = state.columns,
-                rows = state.rows,
-                pedalCount = state.pedalCount,
-                totalSlots = state.totalSlots,
-                nameError = state.nameError,
-                onNameChange = { viewModel.handleIntent(PedalBoardIntent.UpdateName(it)) },
-                onColumnsChange = { newColumns ->
-                    viewModel.handleIntent(PedalBoardIntent.UpdateLayout(newColumns, state.rows))
-                },
-                onRowsChange = { newRows ->
-                    viewModel.handleIntent(PedalBoardIntent.UpdateLayout(state.columns, newRows))
-                }
-            )
+            AnimatedVisibility(
+                visible = isEditingPedal.not(),
+                enter = expandVertically(expandFrom = Alignment.Bottom) + fadeIn(),
+                exit = shrinkVertically(shrinkTowards = Alignment.Bottom) + fadeOut()
+            ) {
+                PedalboardInfoEditor(
+                    name = state.name,
+                    columns = state.columns,
+                    rows = state.rows,
+                    pedalCount = state.pedalCount,
+                    totalSlots = state.totalSlots,
+                    nameError = state.nameError,
+                    onNameChange = { viewModel.handleIntent(PedalBoardIntent.UpdateName(it)) },
+                    onColumnsChange = { newColumns ->
+                        viewModel.handleIntent(PedalBoardIntent.UpdateLayout(newColumns, state.rows))
+                    },
+                    onRowsChange = { newRows ->
+                        viewModel.handleIntent(PedalBoardIntent.UpdateLayout(state.columns, newRows))
+                    }
+                )
+            }
         }
     }
 
     if (showAddPedalDialog && addingToSlotIndex != null) {
+        val slotIndex = addingToSlotIndex ?: return@PedalBoardScreen
         PresetPedalSelectionDialog(
             onPedalSelect = { pedal ->
-                viewModel.handleIntent(PedalBoardIntent.AddPedalToSlot(addingToSlotIndex!!, pedal))
+                viewModel.handleIntent(PedalBoardIntent.AddPedalToSlot(slotIndex, pedal))
                 showAddPedalDialog = false
                 addingToSlotIndex = null
             },
@@ -271,10 +278,11 @@ fun PedalBoardScreen(
     }
 
     if (showCustomPedalDialog && addingToSlotIndex != null) {
+        val slotIndex = addingToSlotIndex ?: return@PedalBoardScreen
         CustomPedalDialog(
             onConfirm = { name, knobs ->
                 viewModel.handleIntent(
-                    PedalBoardIntent.AddCustomPedalToSlot(addingToSlotIndex!!, name, knobs)
+                    PedalBoardIntent.AddCustomPedalToSlot(slotIndex, name, knobs)
                 )
                 showCustomPedalDialog = false
                 addingToSlotIndex = null
