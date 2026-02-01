@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -34,59 +35,291 @@ import com.haero.tonestore.ui.designsystem.Obsidian
 import com.haero.tonestore.ui.designsystem.ObsidianBackground
 import com.haero.tonestore.ui.designsystem.ObsidianTheme
 
-/**
- * 모던 페달 디자인 스타일 5가지
- */
-
-data class ShowcasePedal(
+data class SamplePedal(
     val name: String,
     val category: String,
-    val primaryColor: Color,
-    val knobCount: Int = 3
+    val color: Color,
+    val knobs: Int = 3
 )
 
-// 샘플 페달 (시그니처 색상)
-val samplePedals = listOf(
-    ShowcasePedal("DS-1", "Distortion", Color(0xFFFF6B00), 3),
-    ShowcasePedal("Tube Screamer", "Overdrive", Color(0xFF4CAF50), 3),
-    ShowcasePedal("Klon", "Overdrive", Color(0xFFD4AF37), 3),
+val demoPedals = listOf(
+    SamplePedal("DS-1", "Distortion", Color(0xFFFF6B00)),
+    SamplePedal("Tube Screamer", "Overdrive", Color(0xFF4CAF50)),
+    SamplePedal("Klon", "Overdrive", Color(0xFFD4AF37)),
+    SamplePedal("DD-7", "Delay", Color(0xFF1976D2)),
 )
 
-// =====================================================
-// STYLE 1: Pill Badge - 알약형 뱃지 스타일
-// 특징: 초미니멀, 색상 포인트, 텍스트 중심
-// =====================================================
+// ═══════════════════════════════════════════════════════════════
+// 🎨 CATEGORY A: ToneSettingCard 통일 스타일 (앱 내 카드와 동일)
+// ═══════════════════════════════════════════════════════════════
+
+/** A1: 기본 통일 카드 - surface 배경, 컬러 아이콘 박스 */
 @Composable
-fun PedalStyle1_PillBadge(
-    name: String,
-    category: String,
-    primaryColor: Color,
+fun PedalA1_UnifiedCard(
+    name: String, category: String, color: Color, knobs: Int,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
-            .width(100.dp)
-            .height(44.dp)
-            .clip(RoundedCornerShape(22.dp))
+            .width(90.dp)
+            .height(100.dp)
+            .clip(RoundedCornerShape(16.dp))
             .background(Obsidian.colors.surface)
-            .border(
-                width = 2.dp,
-                color = primaryColor,
-                shape = RoundedCornerShape(22.dp)
-            )
-            .padding(horizontal = 12.dp),
-        contentAlignment = Alignment.Center
+            .border(1.dp, Obsidian.colors.border, RoundedCornerShape(16.dp))
+            .padding(10.dp)
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            // 컬러 아이콘 박스 (ToneSettingCard 스타일)
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(color),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("⚡", fontSize = 14.sp)
+            }
+            
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = name,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Obsidian.colors.textPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = category,
+                    fontSize = 9.sp,
+                    color = Obsidian.colors.textMuted
+                )
+            }
+        }
+    }
+}
+
+/** A2: 컬러 탑바 - 상단에 페달 색상 바 */
+@Composable
+fun PedalA2_ColorTopBar(
+    name: String, category: String, color: Color, knobs: Int,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .width(90.dp)
+            .height(100.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(Obsidian.colors.surface)
+            .border(1.dp, Obsidian.colors.border, RoundedCornerShape(14.dp))
+    ) {
+        Column {
+            // 상단 컬러 바
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .background(color)
+            )
+            
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = name,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Obsidian.colors.textPrimary,
+                    maxLines = 1
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = category,
+                    fontSize = 9.sp,
+                    color = color.copy(alpha = 0.8f)
+                )
+            }
+        }
+    }
+}
+
+/** A3: 컬러 사이드 라인 */
+@Composable
+fun PedalA3_SideLine(
+    name: String, category: String, color: Color, knobs: Int,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .width(90.dp)
+            .height(100.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Obsidian.colors.surface)
+            .border(1.dp, Obsidian.colors.border, RoundedCornerShape(12.dp))
+    ) {
+        // 좌측 컬러 라인
+        Box(
+            modifier = Modifier
+                .width(4.dp)
+                .height(100.dp)
+                .background(color)
+        )
+        
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 12.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = name,
                 fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Obsidian.colors.textPrimary,
+                maxLines = 1
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = category,
+                fontSize = 9.sp,
+                color = Obsidian.colors.textMuted
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            // 노브 도트
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                repeat(knobs.coerceAtMost(4)) {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .clip(CircleShape)
+                            .background(color.copy(alpha = 0.5f))
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** A4: 컬러 코너 뱃지 */
+@Composable
+fun PedalA4_CornerBadge(
+    name: String, category: String, color: Color, knobs: Int,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .width(90.dp)
+            .height(100.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(Obsidian.colors.surface)
+            .border(1.dp, Obsidian.colors.border, RoundedCornerShape(14.dp))
+    ) {
+        // 우상단 컬러 뱃지
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(6.dp)
+                .size(12.dp)
+                .clip(CircleShape)
+                .background(color)
+        )
+        
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = name,
+                fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = primaryColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                color = Obsidian.colors.textPrimary,
+                textAlign = TextAlign.Center,
+                maxLines = 2
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = category,
+                fontSize = 9.sp,
+                color = Obsidian.colors.textMuted
+            )
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🎨 CATEGORY B: 초미니멀 스타일 (텍스트 + 최소 색상)
+// ═══════════════════════════════════════════════════════════════
+
+/** B1: 텍스트 + 언더라인 */
+@Composable
+fun PedalB1_Underline(
+    name: String, category: String, color: Color, knobs: Int,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .width(80.dp)
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = name,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = Obsidian.colors.textPrimary,
+            maxLines = 1
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Box(
+            modifier = Modifier
+                .width(40.dp)
+                .height(2.dp)
+                .clip(RoundedCornerShape(1.dp))
+                .background(color)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = category,
+            fontSize = 8.sp,
+            color = Obsidian.colors.textMuted
+        )
+    }
+}
+
+/** B2: 도트 + 텍스트 */
+@Composable
+fun PedalB2_DotText(
+    name: String, category: String, color: Color, knobs: Int,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(color)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Column {
+            Text(
+                text = name,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                color = Obsidian.colors.textPrimary
             )
             Text(
                 text = category,
@@ -97,216 +330,358 @@ fun PedalStyle1_PillBadge(
     }
 }
 
-// =====================================================
-// STYLE 2: Color Block - 색상 블록 스타일
-// 특징: 페달 색상 배경, 심플 사각형, Figma 느낌
-// =====================================================
+/** B3: 컬러 텍스트 온리 */
 @Composable
-fun PedalStyle2_ColorBlock(
-    name: String,
-    category: String,
-    primaryColor: Color,
-    knobCount: Int,
+fun PedalB3_ColorText(
+    name: String, category: String, color: Color, knobs: Int,
     modifier: Modifier = Modifier
 ) {
-    val luminance = 0.299f * primaryColor.red + 0.587f * primaryColor.green + 0.114f * primaryColor.blue
-    val textColor = if (luminance > 0.5f) Color.Black.copy(alpha = 0.85f) else Color.White
-
-    Box(
+    Column(
         modifier = modifier
-            .width(90.dp)
-            .height(110.dp)
-            .shadow(4.dp, RoundedCornerShape(12.dp))
-            .clip(RoundedCornerShape(12.dp))
-            .background(primaryColor)
-            .padding(10.dp)
+            .width(80.dp)
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            // 카테고리
-            Text(
-                text = category.uppercase(),
-                fontSize = 7.sp,
-                fontWeight = FontWeight.Medium,
-                color = textColor.copy(alpha = 0.6f),
-                letterSpacing = 0.5.sp
-            )
-
-            // 노브 (단순 원)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                repeat(knobCount.coerceAtMost(3)) {
-                    Box(
-                        modifier = Modifier
-                            .padding(horizontal = 3.dp)
-                            .size(16.dp)
-                            .clip(CircleShape)
-                            .background(textColor.copy(alpha = 0.3f))
-                            .border(1.5.dp, textColor.copy(alpha = 0.5f), CircleShape)
-                    )
-                }
-            }
-
-            // 이름
-            Text(
-                text = name,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                color = textColor,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+        Text(
+            text = name,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = color
+        )
+        Text(
+            text = category,
+            fontSize = 8.sp,
+            color = Obsidian.colors.textMuted
+        )
     }
 }
 
-// =====================================================
-// STYLE 3: Outline Card - 아웃라인 카드 스타일
-// 특징: 다크 배경, 컬러 테두리, 깔끔한 구조
-// =====================================================
+/** B4: 심플 칩 */
 @Composable
-fun PedalStyle3_OutlineCard(
-    name: String,
-    category: String,
-    primaryColor: Color,
-    knobCount: Int,
+fun PedalB4_SimpleChip(
+    name: String, category: String, color: Color, knobs: Int,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(color.copy(alpha = 0.15f))
+            .border(1.dp, color.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = name,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium,
+            color = color
+        )
+    }
+}
+
+/** B5: 링 뱃지 */
+@Composable
+fun PedalB5_RingBadge(
+    name: String, category: String, color: Color, knobs: Int,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .border(2.dp, color, CircleShape)
+                .background(Obsidian.colors.bgSecondary),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = name.take(2),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = color
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = name,
+            fontSize = 9.sp,
+            color = Obsidian.colors.textSecondary,
+            maxLines = 1
+        )
+    }
+}
+
+/** B6: 버티컬 바 */
+@Composable
+fun PedalB6_VerticalBar(
+    name: String, category: String, color: Color, knobs: Int,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .width(3.dp)
+                .height(32.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(color)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = name,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Obsidian.colors.textPrimary
+        )
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🎨 CATEGORY C: 글래스모피즘 스타일 (반투명 + 블러)
+// ═══════════════════════════════════════════════════════════════
+
+/** C1: 프로스트 글래스 */
+@Composable
+fun PedalC1_FrostGlass(
+    name: String, category: String, color: Color, knobs: Int,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .width(90.dp)
-            .height(110.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(Obsidian.colors.bgSecondary)
+            .height(100.dp)
+            .shadow(8.dp, RoundedCornerShape(16.dp), spotColor = color.copy(alpha = 0.3f))
+            .clip(RoundedCornerShape(16.dp))
+            .background(Obsidian.colors.bgSecondary.copy(alpha = 0.7f))
             .border(
-                width = 1.5.dp,
-                color = primaryColor.copy(alpha = 0.7f),
-                shape = RoundedCornerShape(10.dp)
+                1.dp,
+                Brush.verticalGradient(
+                    listOf(Color.White.copy(alpha = 0.2f), Color.White.copy(alpha = 0.05f))
+                ),
+                RoundedCornerShape(16.dp)
             )
-            .padding(10.dp)
+            .padding(12.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // 상단 컬러 바
+            // 글로우 LED
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(primaryColor)
+                    .size(10.dp)
+                    .shadow(6.dp, CircleShape, spotColor = color)
+                    .clip(CircleShape)
+                    .background(color)
             )
-
-            // 노브
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                repeat(knobCount.coerceAtMost(3)) {
-                    Box(
-                        modifier = Modifier
-                            .size(14.dp)
-                            .clip(CircleShape)
-                            .background(Obsidian.colors.bgTertiary)
-                            .border(1.dp, primaryColor.copy(alpha = 0.5f), CircleShape)
-                    )
-                }
-            }
-
-            // 이름
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = name,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Obsidian.colors.textPrimary,
-                    maxLines = 1
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Obsidian.colors.textPrimary
                 )
                 Text(
                     text = category,
                     fontSize = 8.sp,
-                    color = primaryColor.copy(alpha = 0.8f)
+                    color = Obsidian.colors.textSecondary
                 )
             }
         }
     }
 }
 
-// =====================================================
-// STYLE 4: Glow Accent - 글로우 포인트 스타일
-// 특징: 어두운 카드, 컬러 LED 글로우, 프리미엄 느낌
-// =====================================================
+/** C2: 컬러 글로우 배경 */
 @Composable
-fun PedalStyle4_GlowAccent(
-    name: String,
-    category: String,
-    primaryColor: Color,
-    knobCount: Int,
+fun PedalC2_ColorGlow(
+    name: String, category: String, color: Color, knobs: Int,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .width(90.dp)
-            .height(110.dp)
-            .shadow(
-                elevation = 8.dp,
-                shape = RoundedCornerShape(12.dp),
-                spotColor = primaryColor.copy(alpha = 0.4f)
-            )
+            .height(100.dp)
+    ) {
+        // 블러 글로우 배경
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(4.dp)
+                .blur(16.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(color.copy(alpha = 0.3f))
+        )
+        
+        // 실제 카드
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Obsidian.colors.bgSecondary.copy(alpha = 0.85f))
+                .border(1.dp, color.copy(alpha = 0.3f), RoundedCornerShape(14.dp))
+                .padding(12.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = name,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Obsidian.colors.textPrimary
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = category,
+                    fontSize = 9.sp,
+                    color = color
+                )
+            }
+        }
+    }
+}
+
+/** C3: 그라데이션 보더 글래스 */
+@Composable
+fun PedalC3_GradientBorderGlass(
+    name: String, category: String, color: Color, knobs: Int,
+    modifier: Modifier = Modifier
+) {
+    val gradientBorder = Brush.linearGradient(
+        colors = listOf(
+            color.copy(alpha = 0.6f),
+            color.copy(alpha = 0.1f),
+            color.copy(alpha = 0.4f)
+        )
+    )
+    
+    Box(
+        modifier = modifier
+            .width(90.dp)
+            .height(100.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(gradientBorder)
+            .padding(1.5.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(12.5.dp))
+                .background(Obsidian.colors.bgPrimary.copy(alpha = 0.9f))
+                .padding(12.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = name,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Obsidian.colors.textPrimary
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = category,
+                    fontSize = 9.sp,
+                    color = Obsidian.colors.textMuted
+                )
+            }
+        }
+    }
+}
+
+/** C4: 네온 엣지 */
+@Composable
+fun PedalC4_NeonEdge(
+    name: String, category: String, color: Color, knobs: Int,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .width(90.dp)
+            .height(100.dp)
+            .shadow(12.dp, RoundedCornerShape(12.dp), spotColor = color.copy(alpha = 0.5f))
             .clip(RoundedCornerShape(12.dp))
+            .background(Obsidian.colors.bgPrimary)
+            .border(1.5.dp, color.copy(alpha = 0.7f), RoundedCornerShape(12.dp))
+            .padding(12.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = name,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = color
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = category,
+                fontSize = 9.sp,
+                color = Obsidian.colors.textMuted
+            )
+        }
+    }
+}
+
+/** C5: 소프트 섀도우 글래스 */
+@Composable
+fun PedalC5_SoftShadowGlass(
+    name: String, category: String, color: Color, knobs: Int,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .width(90.dp)
+            .height(100.dp)
+            .shadow(
+                elevation = 16.dp,
+                shape = RoundedCornerShape(16.dp),
+                spotColor = color.copy(alpha = 0.25f),
+                ambientColor = Color.Black.copy(alpha = 0.1f)
+            )
+            .clip(RoundedCornerShape(16.dp))
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(
-                        Obsidian.colors.bgSecondary,
-                        Obsidian.colors.bgPrimary
+                    listOf(
+                        Obsidian.colors.surface,
+                        Obsidian.colors.bgSecondary
                     )
                 )
             )
-            .padding(10.dp)
+            .padding(12.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // LED 글로우
+            // 탑 인디케이터
             Box(
                 modifier = Modifier
-                    .size(8.dp)
-                    .shadow(4.dp, CircleShape, spotColor = primaryColor)
-                    .clip(CircleShape)
-                    .background(primaryColor)
+                    .width(24.dp)
+                    .height(3.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(color)
             )
-
-            // 노브
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                repeat(knobCount.coerceAtMost(3)) {
-                    Box(
-                        modifier = Modifier
-                            .size(18.dp)
-                            .clip(CircleShape)
-                            .background(Obsidian.colors.bgTertiary)
-                            .border(1.dp, Obsidian.colors.border, CircleShape)
-                    )
-                }
-            }
-
-            // 이름
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = name,
-                    fontSize = 10.sp,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     color = Obsidian.colors.textPrimary
                 )
@@ -320,189 +695,217 @@ fun PedalStyle4_GlowAccent(
     }
 }
 
-// =====================================================
-// STYLE 5: Gradient Edge - 그라데이션 엣지 스타일
-// 특징: 다크 카드, 컬러 그라데이션 테두리, 모던
-// =====================================================
+/** C6: 아우라 글래스 */
 @Composable
-fun PedalStyle5_GradientEdge(
-    name: String,
-    category: String,
-    primaryColor: Color,
-    knobCount: Int,
+fun PedalC6_AuraGlass(
+    name: String, category: String, color: Color, knobs: Int,
     modifier: Modifier = Modifier
 ) {
-    val gradientBorder = Brush.verticalGradient(
-        colors = listOf(
-            primaryColor,
-            primaryColor.copy(alpha = 0.3f)
-        )
-    )
-
     Box(
         modifier = modifier
             .width(90.dp)
-            .height(110.dp)
+            .height(100.dp)
             .clip(RoundedCornerShape(14.dp))
-            .background(gradientBorder)
-            .padding(2.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(12.dp))
-                .background(Obsidian.colors.surface)
-                .padding(10.dp)
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                // 카테고리 태그
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(primaryColor.copy(alpha = 0.15f))
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = category,
-                        fontSize = 7.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = primaryColor
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(
+                        color.copy(alpha = 0.15f),
+                        Obsidian.colors.bgSecondary
                     )
-                }
-
-                // 노브
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
-                    repeat(knobCount.coerceAtMost(3)) {
-                        Box(
-                            modifier = Modifier
-                                .size(16.dp)
-                                .clip(CircleShape)
-                                .background(Obsidian.colors.bgSecondary)
-                                .border(1.dp, Obsidian.colors.border, CircleShape)
-                        )
-                    }
-                }
-
-                // 이름
-                Text(
-                    text = name,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Obsidian.colors.textPrimary,
-                    textAlign = TextAlign.Center
                 )
-            }
+            )
+            .border(
+                1.dp,
+                Brush.verticalGradient(
+                    listOf(color.copy(alpha = 0.4f), color.copy(alpha = 0.1f))
+                ),
+                RoundedCornerShape(14.dp)
+            )
+            .padding(12.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = name,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = Obsidian.colors.textPrimary
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = category,
+                fontSize = 9.sp,
+                color = color.copy(alpha = 0.8f)
+            )
         }
     }
 }
 
-// =====================================================
-// PREVIEW - 5가지 스타일 비교
-// =====================================================
-@Preview(showBackground = true, backgroundColor = 0xFF0C0C0E)
+// ═══════════════════════════════════════════════════════════════
+// 📱 PREVIEW
+// ═══════════════════════════════════════════════════════════════
+
+@Preview(showBackground = true, backgroundColor = 0xFF0C0C0E, heightDp = 1800)
 @Composable
-private fun PedalStylesComparisonPreview() {
+private fun AllPedalStylesPreview() {
     ObsidianTheme {
         ObsidianBackground {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(32.dp)
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                // Style 1: Pill Badge
+                // ═══ Category A: 통일 스타일 ═══
                 item {
-                    StyleSection(
-                        number = 1,
-                        name = "Pill Badge",
-                        description = "초미니멀, 텍스트 중심"
-                    ) {
-                        samplePedals.forEach { pedal ->
-                            PedalStyle1_PillBadge(
-                                name = pedal.name,
-                                category = pedal.category,
-                                primaryColor = pedal.primaryColor
-                            )
+                    CategoryHeader("A", "ToneSettingCard 통일", "앱 내 카드와 동일한 느낌")
+                }
+                
+                item {
+                    StyleRow("A1: 기본 통일") {
+                        demoPedals.forEach { p ->
+                            PedalA1_UnifiedCard(p.name, p.category, p.color, p.knobs)
                         }
                     }
                 }
-
-                // Style 2: Color Block
+                
                 item {
-                    StyleSection(
-                        number = 2,
-                        name = "Color Block",
-                        description = "페달 색상 배경, Figma 스타일"
-                    ) {
-                        samplePedals.forEach { pedal ->
-                            PedalStyle2_ColorBlock(
-                                name = pedal.name,
-                                category = pedal.category,
-                                primaryColor = pedal.primaryColor,
-                                knobCount = pedal.knobCount
-                            )
+                    StyleRow("A2: 컬러 탑바") {
+                        demoPedals.forEach { p ->
+                            PedalA2_ColorTopBar(p.name, p.category, p.color, p.knobs)
                         }
                     }
                 }
-
-                // Style 3: Outline Card
+                
                 item {
-                    StyleSection(
-                        number = 3,
-                        name = "Outline Card",
-                        description = "다크 배경, 컬러 테두리"
-                    ) {
-                        samplePedals.forEach { pedal ->
-                            PedalStyle3_OutlineCard(
-                                name = pedal.name,
-                                category = pedal.category,
-                                primaryColor = pedal.primaryColor,
-                                knobCount = pedal.knobCount
-                            )
+                    StyleRow("A3: 사이드 라인") {
+                        demoPedals.forEach { p ->
+                            PedalA3_SideLine(p.name, p.category, p.color, p.knobs)
                         }
                     }
                 }
-
-                // Style 4: Glow Accent
+                
                 item {
-                    StyleSection(
-                        number = 4,
-                        name = "Glow Accent",
-                        description = "LED 글로우, 프리미엄"
-                    ) {
-                        samplePedals.forEach { pedal ->
-                            PedalStyle4_GlowAccent(
-                                name = pedal.name,
-                                category = pedal.category,
-                                primaryColor = pedal.primaryColor,
-                                knobCount = pedal.knobCount
-                            )
-                        }
-    }
-                }
-
-                // Style 5: Gradient Edge
-                item {
-                    StyleSection(
-                        number = 5,
-                        name = "Gradient Edge",
-                        description = "그라데이션 테두리, 모던"
-                    ) {
-                        samplePedals.forEach { pedal ->
-                            PedalStyle5_GradientEdge(
-                                name = pedal.name,
-                                category = pedal.category,
-                                primaryColor = pedal.primaryColor,
-                                knobCount = pedal.knobCount
-                            )
+                    StyleRow("A4: 코너 뱃지") {
+                        demoPedals.forEach { p ->
+                            PedalA4_CornerBadge(p.name, p.category, p.color, p.knobs)
                         }
                     }
+                }
+                
+                // ═══ Category B: 미니멀 스타일 ═══
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    CategoryHeader("B", "초미니멀", "텍스트 중심, 최소 색상")
+                }
+                
+                item {
+                    StyleRow("B1: 언더라인") {
+                        demoPedals.forEach { p ->
+                            PedalB1_Underline(p.name, p.category, p.color, p.knobs)
+                        }
+                    }
+                }
+                
+                item {
+                    StyleRow("B2: 도트 + 텍스트") {
+                        demoPedals.forEach { p ->
+                            PedalB2_DotText(p.name, p.category, p.color, p.knobs)
+                        }
+                    }
+                }
+                
+                item {
+                    StyleRow("B3: 컬러 텍스트") {
+                        demoPedals.forEach { p ->
+                            PedalB3_ColorText(p.name, p.category, p.color, p.knobs)
+                        }
+                    }
+                }
+                
+                item {
+                    StyleRow("B4: 심플 칩") {
+                        demoPedals.forEach { p ->
+                            PedalB4_SimpleChip(p.name, p.category, p.color, p.knobs)
+                        }
+                    }
+                }
+                
+                item {
+                    StyleRow("B5: 링 뱃지") {
+                        demoPedals.forEach { p ->
+                            PedalB5_RingBadge(p.name, p.category, p.color, p.knobs)
+                        }
+                    }
+                }
+                
+                item {
+                    StyleRow("B6: 버티컬 바") {
+                        demoPedals.forEach { p ->
+                            PedalB6_VerticalBar(p.name, p.category, p.color, p.knobs)
+                        }
+                    }
+                }
+                
+                // ═══ Category C: 글래스모피즘 ═══
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    CategoryHeader("C", "글래스모피즘", "반투명 + 컬러 글로우")
+                }
+                
+                item {
+                    StyleRow("C1: 프로스트 글래스") {
+                        demoPedals.forEach { p ->
+                            PedalC1_FrostGlass(p.name, p.category, p.color, p.knobs)
+                        }
+                    }
+                }
+                
+                item {
+                    StyleRow("C2: 컬러 글로우") {
+                        demoPedals.forEach { p ->
+                            PedalC2_ColorGlow(p.name, p.category, p.color, p.knobs)
+                        }
+                    }
+                }
+                
+                item {
+                    StyleRow("C3: 그라데이션 보더") {
+                        demoPedals.forEach { p ->
+                            PedalC3_GradientBorderGlass(p.name, p.category, p.color, p.knobs)
+                        }
+                    }
+                }
+                
+                item {
+                    StyleRow("C4: 네온 엣지") {
+                        demoPedals.forEach { p ->
+                            PedalC4_NeonEdge(p.name, p.category, p.color, p.knobs)
+                        }
+                    }
+                }
+                
+                item {
+                    StyleRow("C5: 소프트 섀도우") {
+                        demoPedals.forEach { p ->
+                            PedalC5_SoftShadowGlass(p.name, p.category, p.color, p.knobs)
+                        }
+                    }
+                }
+                
+                item {
+                    StyleRow("C6: 아우라 글래스") {
+                        demoPedals.forEach { p ->
+                            PedalC6_AuraGlass(p.name, p.category, p.color, p.knobs)
+                        }
+                    }
+                }
+                
+                item {
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
             }
         }
@@ -510,50 +913,31 @@ private fun PedalStylesComparisonPreview() {
 }
 
 @Composable
-private fun StyleSection(
-    number: Int,
-    name: String,
-    description: String,
-    content: @Composable () -> Unit
-) {
-    Column {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
+private fun CategoryHeader(code: String, title: String, desc: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(Obsidian.colors.primary),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .background(Obsidian.colors.primary),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "$number",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text(
-                    text = name,
-                    style = Obsidian.typography.titleMedium,
-                    color = Obsidian.colors.textPrimary
-                )
-                Text(
-                    text = description,
-                    fontSize = 11.sp,
-                    color = Obsidian.colors.textMuted
-                )
-            }
+            Text(code, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
         }
+        Spacer(modifier = Modifier.width(10.dp))
+        Column {
+            Text(title, style = Obsidian.typography.titleMedium, color = Obsidian.colors.textPrimary)
+            Text(desc, fontSize = 11.sp, color = Obsidian.colors.textMuted)
+        }
+    }
+}
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+@Composable
+private fun StyleRow(label: String, content: @Composable () -> Unit) {
+    Column {
+        Text(label, fontSize = 10.sp, color = Obsidian.colors.textSecondary)
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             content()
         }
     }
