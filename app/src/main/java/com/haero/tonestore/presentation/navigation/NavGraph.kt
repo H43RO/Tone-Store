@@ -444,12 +444,14 @@ private fun MainTabScreen(
                     0 -> HomeScreen(
                         onNavigateToCreate = onNavigateToCreate,
                         onNavigateToDetail = onNavigateToDetail,
+                        onNavigateToLogin = onNavigateToLogin,
                         sharedTransitionScope = null,
                         animatedVisibilityScope = null
                     )
                     1 -> PedalBoardListScreen(
                         onNavigateToCreate = onNavigateToPedalBoardCreate,
-                        onNavigateToEdit = onNavigateToPedalBoardEdit
+                        onNavigateToEdit = onNavigateToPedalBoardEdit,
+                        onNavigateToLogin = onNavigateToLogin
                     )
                     2 -> CommunityScreen(
                         onNavigateToDetail = onNavigateToPresetDetail,

@@ -89,6 +89,7 @@ import org.koin.androidx.compose.koinViewModel
 fun HomeScreen(
     onNavigateToCreate: () -> Unit,
     onNavigateToDetail: (String) -> Unit,
+    onNavigateToLogin: () -> Unit = {},
     sharedTransitionScope: SharedTransitionScope?,
     animatedVisibilityScope: AnimatedVisibilityScope?,
     viewModel: HomeViewModel = koinViewModel()
@@ -114,6 +115,13 @@ fun HomeScreen(
         }
     }
 
+    LaunchedEffect(state.navigateToLogin) {
+        if (state.navigateToLogin) {
+            onNavigateToLogin()
+            viewModel.handleIntent(HomeIntent.NavigationHandled)
+        }
+    }
+
     LaunchedEffect(state.scrollToTop) {
         if (state.scrollToTop) {
             if (listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0) {
@@ -125,13 +133,15 @@ fun HomeScreen(
 
     Scaffold(
         floatingActionButton = {
-            ExtendedFab(
-                expanded = isScrolling.not(),
-                onClick = { viewModel.handleIntent(HomeIntent.NavigateToCreate) },
-                icon = Icons.Default.Add,
-                text = stringResource(R.string.add_tone_setting),
-                modifier = Modifier.padding(bottom = 80.dp)
-            )
+            if (state.isLoggedIn) {
+                ExtendedFab(
+                    expanded = isScrolling.not(),
+                    onClick = { viewModel.handleIntent(HomeIntent.NavigateToCreate) },
+                    icon = Icons.Default.Add,
+                    text = stringResource(R.string.add_tone_setting),
+                    modifier = Modifier.padding(bottom = 80.dp)
+                )
+            }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
@@ -163,6 +173,13 @@ fun HomeScreen(
                         CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.Center),
                             color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    !state.isLoggedIn -> {
+                        // 로그인 필요 상태
+                        LoginRequiredState(
+                            onLoginClick = { viewModel.handleIntent(HomeIntent.NavigateToLogin) },
+                            modifier = Modifier.align(Alignment.Center)
                         )
                     }
                     state.filteredToneSettings.isEmpty() && state.searchQuery.isNotBlank() -> {
@@ -646,6 +663,60 @@ private fun ExtendedFab(
                     style = MaterialTheme.typography.labelLarge
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun LoginRequiredState(
+    onLoginClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            modifier = Modifier.size(80.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.MusicNote,
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "로그인이 필요합니다",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "톤 세팅을 저장하고 관리하려면\n로그인해주세요",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = onLoginClick,
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text("로그인하기")
         }
     }
 }

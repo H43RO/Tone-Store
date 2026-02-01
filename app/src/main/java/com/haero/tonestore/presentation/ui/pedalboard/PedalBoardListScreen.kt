@@ -29,6 +29,7 @@ import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,6 +40,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,6 +69,7 @@ import org.koin.androidx.compose.koinViewModel
 fun PedalBoardListScreen(
     onNavigateToCreate: () -> Unit,
     onNavigateToEdit: (String) -> Unit,
+    onNavigateToLogin: () -> Unit = {},
     viewModel: PedalBoardListViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -79,15 +82,24 @@ fun PedalBoardListScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var pedalBoardToDelete by remember { mutableStateOf<SavedPedalBoard?>(null) }
 
+    LaunchedEffect(state.navigateToLogin) {
+        if (state.navigateToLogin) {
+            onNavigateToLogin()
+            viewModel.navigationHandled()
+        }
+    }
+
     Scaffold(
         floatingActionButton = {
-            ExtendedFab(
-                expanded = isScrolling.not(),
-                onClick = onNavigateToCreate,
-                icon = Icons.Default.Add,
-                text = stringResource(R.string.create_pedalboard),
-                modifier = Modifier.padding(bottom = 80.dp)
-            )
+            if (state.isLoggedIn) {
+                ExtendedFab(
+                    expanded = isScrolling.not(),
+                    onClick = onNavigateToCreate,
+                    icon = Icons.Default.Add,
+                    text = stringResource(R.string.create_pedalboard),
+                    modifier = Modifier.padding(bottom = 80.dp)
+                )
+            }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
@@ -106,6 +118,12 @@ fun PedalBoardListScreen(
                         CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.Center),
                             color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    !state.isLoggedIn -> {
+                        LoginRequiredState(
+                            onLoginClick = { viewModel.navigateToLogin() },
+                            modifier = Modifier.align(Alignment.Center)
                         )
                     }
                     state.pedalBoards.isEmpty() -> {
@@ -432,6 +450,60 @@ private fun ExtendedFab(
                     style = MaterialTheme.typography.labelLarge
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun LoginRequiredState(
+    onLoginClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            modifier = Modifier.size(80.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Outlined.Dashboard,
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "로그인이 필요합니다",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "페달보드를 저장하고 관리하려면\n로그인해주세요",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = onLoginClick,
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text("로그인하기")
         }
     }
 }

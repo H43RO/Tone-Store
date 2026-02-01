@@ -6,9 +6,19 @@ service cloud.firestore {
     match /users/{userId} {
       // 본인만 읽기/쓰기 가능
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // 사용자의 톤 세팅
+      match /toneSettings/{toneId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // 사용자의 페달보드
+      match /pedalBoards/{boardId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
     
-    // 공유 프리셋
+    // 공유 프리셋 (커뮤니티)
     match /presets/{presetId} {
       // 누구나 읽기 가능
       allow read: if true;

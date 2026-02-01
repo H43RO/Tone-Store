@@ -32,6 +32,32 @@ fun DocumentSnapshot.toSharedToneSetting(): SharedToneSetting? {
 }
 
 /**
+ * Firestore DocumentSnapshot -> ToneSetting 변환
+ */
+@Suppress("UNCHECKED_CAST")
+fun DocumentSnapshot.toToneSetting(): ToneSetting? {
+    return try {
+        val data = this.data ?: return null
+        parseToneSetting(data.toMutableMap().apply { put("id", this@toToneSetting.id) })
+    } catch (e: Exception) {
+        null
+    }
+}
+
+/**
+ * Firestore DocumentSnapshot -> SavedPedalBoard 변환
+ */
+@Suppress("UNCHECKED_CAST")
+fun DocumentSnapshot.toSavedPedalBoard(): SavedPedalBoard? {
+    return try {
+        val data = this.data ?: return null
+        parseSavedPedalBoard(data.toMutableMap().apply { put("id", this@toSavedPedalBoard.id) })
+    } catch (e: Exception) {
+        null
+    }
+}
+
+/**
  * SharedToneSetting -> Firestore Map 변환
  */
 fun SharedToneSetting.toFirestoreMap(): Map<String, Any?> {
@@ -66,6 +92,22 @@ fun ToneSetting.toFirestoreMap(): Map<String, Any?> {
         "guitarSetting" to guitarSetting.toFirestoreMap(),
         "isFavorite" to isFavorite,
         "tags" to tags.map { it.name }
+    )
+}
+
+/**
+ * SavedPedalBoard -> Firestore Map 변환
+ */
+fun SavedPedalBoard.toFirestoreMap(): Map<String, Any?> {
+    return mapOf(
+        "id" to id,
+        "name" to name,
+        "columns" to columns,
+        "rows" to rows,
+        "slots" to slots.map { pedal -> pedal?.toFirestoreMap() },
+        "expressionPedal" to expressionPedal?.toFirestoreMap(),
+        "createdAt" to createdAt,
+        "updatedAt" to updatedAt
     )
 }
 
@@ -121,7 +163,7 @@ fun GuitarSetting.toFirestoreMap(): Map<String, Any?> {
 // ===== Parse Helpers =====
 
 @Suppress("UNCHECKED_CAST")
-private fun parseToneSetting(data: Map<String, Any>?): ToneSetting {
+fun parseToneSetting(data: Map<String, Any>?): ToneSetting {
     if (data == null) return createEmptyToneSetting()
 
     return ToneSetting(
@@ -138,33 +180,58 @@ private fun parseToneSetting(data: Map<String, Any>?): ToneSetting {
 }
 
 @Suppress("UNCHECKED_CAST")
+fun parseSavedPedalBoard(data: Map<String, Any>?): SavedPedalBoard {
+    if (data == null) return SavedPedalBoard(id = "", name = "")
+
+    val slots = (data["slots"] as? List<Map<String, Any>?>)?.map { slotData ->
+        slotData?.let { parsePedal(it) }
+    } ?: List(SavedPedalBoard.DEFAULT_COLUMNS * SavedPedalBoard.DEFAULT_ROWS) { null }
+
+    return SavedPedalBoard(
+        id = data["id"] as? String ?: "",
+        name = data["name"] as? String ?: "",
+        columns = (data["columns"] as? Long)?.toInt() ?: SavedPedalBoard.DEFAULT_COLUMNS,
+        rows = (data["rows"] as? Long)?.toInt() ?: SavedPedalBoard.DEFAULT_ROWS,
+        slots = slots,
+        expressionPedal = (data["expressionPedal"] as? Map<String, Any>)?.let { parsePedal(it) },
+        createdAt = data["createdAt"] as? Long ?: System.currentTimeMillis(),
+        updatedAt = data["updatedAt"] as? Long ?: System.currentTimeMillis()
+    )
+}
+
+@Suppress("UNCHECKED_CAST")
 private fun parsePedalBoard(data: Map<String, Any>?): PedalBoard {
     if (data == null) return PedalBoard()
 
     val pedals = (data["pedals"] as? List<Map<String, Any>>)?.map { pedalData ->
-        Pedal(
-            id = pedalData["id"] as? String ?: "",
-            name = pedalData["name"] as? String ?: "",
-            type = try {
-                PedalType.valueOf(pedalData["type"] as? String ?: "CUSTOM")
-            } catch (e: Exception) {
-                PedalType.CUSTOM
-            },
-            knobs = (pedalData["knobs"] as? List<Map<String, Any>>)?.map { knobData ->
-                Knob(
-                    name = knobData["name"] as? String ?: "",
-                    value = (knobData["value"] as? Number)?.toFloat() ?: 5f,
-                    minValue = (knobData["minValue"] as? Number)?.toFloat() ?: 0f,
-                    maxValue = (knobData["maxValue"] as? Number)?.toFloat() ?: 10f
-                )
-            } ?: emptyList(),
-            order = (pedalData["order"] as? Number)?.toInt() ?: 0,
-            isEnabled = pedalData["isEnabled"] as? Boolean ?: true,
-            color = pedalData["color"] as? Long
-        )
+        parsePedal(pedalData)
     } ?: emptyList()
 
     return PedalBoard(pedals = pedals)
+}
+
+@Suppress("UNCHECKED_CAST")
+private fun parsePedal(pedalData: Map<String, Any>): Pedal {
+    return Pedal(
+        id = pedalData["id"] as? String ?: "",
+        name = pedalData["name"] as? String ?: "",
+        type = try {
+            PedalType.valueOf(pedalData["type"] as? String ?: "CUSTOM")
+        } catch (e: Exception) {
+            PedalType.CUSTOM
+        },
+        knobs = (pedalData["knobs"] as? List<Map<String, Any>>)?.map { knobData ->
+            Knob(
+                name = knobData["name"] as? String ?: "",
+                value = (knobData["value"] as? Number)?.toFloat() ?: 5f,
+                minValue = (knobData["minValue"] as? Number)?.toFloat() ?: 0f,
+                maxValue = (knobData["maxValue"] as? Number)?.toFloat() ?: 10f
+            )
+        } ?: emptyList(),
+        order = (pedalData["order"] as? Number)?.toInt() ?: 0,
+        isEnabled = pedalData["isEnabled"] as? Boolean ?: true,
+        color = pedalData["color"] as? Long
+    )
 }
 
 private fun parseAmpSetting(data: Map<String, Any>?): AmpSetting {

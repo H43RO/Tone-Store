@@ -3,6 +3,7 @@ package com.haero.tonestore.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.haero.tonestore.domain.model.ToneSetting
+import com.haero.tonestore.domain.repository.AuthRepository
 import com.haero.tonestore.domain.usecase.DeleteToneSettingUseCase
 import com.haero.tonestore.domain.usecase.GetAllToneSettingsUseCase
 import com.haero.tonestore.domain.usecase.ToggleFavoriteUseCase
@@ -20,14 +21,36 @@ import kotlinx.coroutines.launch
 class HomeViewModel(
     private val getAllToneSettingsUseCase: GetAllToneSettingsUseCase,
     private val deleteToneSettingUseCase: DeleteToneSettingUseCase,
-    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state.asStateFlow()
 
     init {
-        handleIntent(HomeIntent.LoadToneSettings)
+        observeAuthState()
+    }
+
+    private fun observeAuthState() {
+        viewModelScope.launch {
+            authRepository.currentUser.collect { user ->
+                val isLoggedIn = user != null
+                _state.update { it.copy(isLoggedIn = isLoggedIn) }
+
+                if (isLoggedIn) {
+                    loadToneSettings()
+                } else {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            toneSettings = emptyList(),
+                            filteredToneSettings = emptyList()
+                        )
+                    }
+                }
+            }
+        }
     }
 
     fun handleIntent(intent: HomeIntent) {
@@ -36,6 +59,7 @@ class HomeViewModel(
             is HomeIntent.SelectToneSetting -> navigateToDetail(intent.id)
             is HomeIntent.DeleteToneSetting -> deleteToneSetting(intent.id)
             is HomeIntent.NavigateToCreate -> navigateToCreate()
+            is HomeIntent.NavigateToLogin -> navigateToLogin()
             is HomeIntent.NavigationHandled -> clearNavigation()
             is HomeIntent.SetSearchActive -> setSearchActive(intent.isActive)
             is HomeIntent.UpdateSearchQuery -> updateSearchQuery(intent.query)
@@ -47,7 +71,13 @@ class HomeViewModel(
     }
 
     private fun loadToneSettings() {
+        if (!_state.value.isLoggedIn) {
+            _state.update { it.copy(isLoading = false) }
+            return
+        }
+
         viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
             getAllToneSettingsUseCase()
                 .catch { e ->
                     _state.update { it.copy(isLoading = false, error = e.message) }
@@ -102,7 +132,9 @@ class HomeViewModel(
     private fun applySorting(settings: List<ToneSetting>, sortOption: SortOption): List<ToneSetting> {
         return when (sortOption) {
             SortOption.FAVORITES_FIRST -> {
-                settings.sortedWith(compareByDescending<ToneSetting> { it.isFavorite }.thenByDescending { it.updatedAt })
+                settings.sortedWith(
+                    compareByDescending<ToneSetting> { it.isFavorite }.thenByDescending { it.updatedAt }
+                )
             }
             SortOption.DATE_FIRST -> {
                 settings.sortedByDescending { it.updatedAt }
@@ -115,7 +147,15 @@ class HomeViewModel(
     }
 
     private fun navigateToCreate() {
+        if (!_state.value.isLoggedIn) {
+            _state.update { it.copy(navigateToLogin = true) }
+            return
+        }
         _state.update { it.copy(navigateToCreate = true) }
+    }
+
+    private fun navigateToLogin() {
+        _state.update { it.copy(navigateToLogin = true) }
     }
 
     private fun deleteToneSetting(id: String) {
@@ -140,7 +180,13 @@ class HomeViewModel(
     }
 
     private fun clearNavigation() {
-        _state.update { it.copy(navigateToDetail = null, navigateToCreate = false) }
+        _state.update {
+            it.copy(
+                navigateToDetail = null,
+                navigateToCreate = false,
+                navigateToLogin = false
+            )
+        }
     }
 
     private fun clearScrollToTop() {

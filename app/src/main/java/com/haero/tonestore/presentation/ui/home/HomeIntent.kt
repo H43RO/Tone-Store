@@ -9,6 +9,8 @@ sealed interface HomeIntent {
 
     data object NavigateToCreate : HomeIntent
 
+    data object NavigateToLogin : HomeIntent
+
     data object NavigationHandled : HomeIntent
 
     data class SetSearchActive(val isActive: Boolean) : HomeIntent

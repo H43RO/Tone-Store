@@ -18,11 +18,11 @@ import org.koin.dsl.module
  */
 val viewModelModule = module {
 
-    viewModel { HomeViewModel(get(), get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get(), get()) }
     viewModel { CreateToneViewModel(get(), get(), get(), get()) }
     viewModel { DetailViewModel(get(), get(), get()) }
     viewModel { PedalBoardViewModel(get(), get(), get(), get()) }
-    viewModel { PedalBoardListViewModel(get(), get()) }
+    viewModel { PedalBoardListViewModel(get(), get(), get()) }
     viewModel { CommunityViewModel(get(), get()) }
     viewModel { PresetDetailViewModel(get(), get(), get(), get()) }
     viewModel { ShareToneViewModel(get(), get(), get()) }
