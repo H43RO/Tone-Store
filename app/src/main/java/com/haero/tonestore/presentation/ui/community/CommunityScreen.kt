@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -47,6 +48,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun CommunityScreen(
     onNavigateToDetail: (String) -> Unit,
+    onNavigateToLogin: () -> Unit = {},
     viewModel: CommunityViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -125,6 +127,7 @@ private fun CommunityHeader(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .statusBarsPadding()
             .padding(horizontal = 20.dp)
             .padding(top = 16.dp, bottom = 8.dp)
     ) {

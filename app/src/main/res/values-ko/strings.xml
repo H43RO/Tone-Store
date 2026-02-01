@@ -5,9 +5,10 @@
     <!-- Navigation -->
     <string name="back">뒤로</string>
     <string name="detail">상세</string>
-    <string name="tab_home">톤 목록</string>
+    <string name="tab_home">톤</string>
     <string name="tab_community">커뮤니티</string>
-    <string name="tab_pedalboard">페달보드</string>
+    <string name="tab_pedalboard">보드</string>
+    <string name="tab_settings">설정</string>
     
     <!-- Home Screen -->
     <string name="home_title">나의 톤 세팅</string>

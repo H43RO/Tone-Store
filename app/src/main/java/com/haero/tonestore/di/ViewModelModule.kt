@@ -8,6 +8,7 @@ import com.haero.tonestore.presentation.viewmodel.LoginViewModel
 import com.haero.tonestore.presentation.viewmodel.PedalBoardListViewModel
 import com.haero.tonestore.presentation.viewmodel.PedalBoardViewModel
 import com.haero.tonestore.presentation.viewmodel.PresetDetailViewModel
+import com.haero.tonestore.presentation.viewmodel.SettingsViewModel
 import com.haero.tonestore.presentation.viewmodel.ShareToneViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -26,4 +27,5 @@ val viewModelModule = module {
     viewModel { PresetDetailViewModel(get(), get(), get(), get()) }
     viewModel { ShareToneViewModel(get(), get(), get()) }
     viewModel { LoginViewModel(get()) }
+    viewModel { SettingsViewModel(get()) }
 }

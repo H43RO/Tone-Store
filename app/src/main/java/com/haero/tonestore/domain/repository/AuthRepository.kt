@@ -40,9 +40,14 @@ interface AuthRepository {
     suspend fun signOut()
 
     /**
-     * 사용자 프로필 업데이트
+     * 사용자 프로필 업데이트 (닉네임)
      */
-    suspend fun updateProfile(displayName: String): Result<Unit>
+    suspend fun updateProfile(nickname: String, photoUrl: String? = null): Result<UserProfile>
+
+    /**
+     * Firestore에서 프로필 가져오기
+     */
+    suspend fun getProfile(): Result<UserProfile?>
 
     /**
      * 계정 삭제

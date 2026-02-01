@@ -27,9 +27,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -67,6 +69,7 @@ import com.haero.tonestore.presentation.ui.home.HomeScreen
 import com.haero.tonestore.presentation.ui.pedalboard.PedalBoardListScreen
 import com.haero.tonestore.presentation.ui.pedalboard.PedalBoardScreen
 import com.haero.tonestore.presentation.ui.preset_detail.PresetDetailScreen
+import com.haero.tonestore.presentation.ui.settings.SettingsScreen
 import com.haero.tonestore.presentation.ui.share.ShareToneScreen
 import kotlinx.coroutines.launch
 
@@ -107,24 +110,31 @@ sealed class BottomNavTab(
         icon = Icons.Outlined.Home,
         selectedIcon = Icons.Filled.Home
     )
-    data object Community : BottomNavTab(
+    data object PedalBoard : BottomNavTab(
         index = 1,
+        titleResId = R.string.tab_pedalboard,
+        icon = Icons.Outlined.Dashboard,
+        selectedIcon = Icons.Outlined.Dashboard
+    )
+    data object Community : BottomNavTab(
+        index = 2,
         titleResId = R.string.tab_community,
         icon = Icons.Outlined.Public,
         selectedIcon = Icons.Filled.Public
     )
-    data object PedalBoard : BottomNavTab(
-        index = 2,
-        titleResId = R.string.tab_pedalboard,
-        icon = Icons.Outlined.Dashboard,
-        selectedIcon = Icons.Outlined.Dashboard
+    data object Settings : BottomNavTab(
+        index = 3,
+        titleResId = R.string.tab_settings,
+        icon = Icons.Outlined.Settings,
+        selectedIcon = Icons.Filled.Settings
     )
 }
 
 private val bottomNavTabs = listOf(
     BottomNavTab.Home,
+    BottomNavTab.PedalBoard,
     BottomNavTab.Community,
-    BottomNavTab.PedalBoard
+    BottomNavTab.Settings
 )
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -428,9 +438,7 @@ private fun MainTabScreen(
         Box(modifier = Modifier.fillMaxSize()) {
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = innerPadding.calculateTopPadding())
+                modifier = Modifier.fillMaxSize()
             ) { page ->
                 when (page) {
                     0 -> HomeScreen(
@@ -439,12 +447,16 @@ private fun MainTabScreen(
                         sharedTransitionScope = null,
                         animatedVisibilityScope = null
                     )
-                    1 -> CommunityScreen(
-                        onNavigateToDetail = onNavigateToPresetDetail
-                    )
-                    2 -> PedalBoardListScreen(
+                    1 -> PedalBoardListScreen(
                         onNavigateToCreate = onNavigateToPedalBoardCreate,
                         onNavigateToEdit = onNavigateToPedalBoardEdit
+                    )
+                    2 -> CommunityScreen(
+                        onNavigateToDetail = onNavigateToPresetDetail,
+                        onNavigateToLogin = onNavigateToLogin
+                    )
+                    3 -> SettingsScreen(
+                        onNavigateToLogin = onNavigateToLogin
                     )
                 }
             }
@@ -549,7 +561,7 @@ private fun FloatingNavItem(
     )
 
     val horizontalPadding by animateDpAsState(
-        targetValue = if (selected) 20.dp else 16.dp,
+        targetValue = if (selected) 16.dp else 12.dp,
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
         label = "horizontalPadding"
     )
@@ -568,7 +580,7 @@ private fun FloatingNavItem(
         contentAlignment = Alignment.Center
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -578,12 +590,14 @@ private fun FloatingNavItem(
                 modifier = Modifier.size(22.dp)
             )
 
-            Text(
-                text = stringResource(tab.titleResId),
-                color = contentColor,
-                fontSize = 14.sp,
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium
-            )
+            if (selected) {
+                Text(
+                    text = stringResource(tab.titleResId),
+                    color = contentColor,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
     }
 }

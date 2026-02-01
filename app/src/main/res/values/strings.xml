@@ -5,9 +5,10 @@
     <!-- Navigation -->
     <string name="back">Back</string>
     <string name="detail">Detail</string>
-    <string name="tab_home">Tone List</string>
+    <string name="tab_home">Tone</string>
     <string name="tab_community">Community</string>
-    <string name="tab_pedalboard">Pedal Board</string>
+    <string name="tab_pedalboard">Board</string>
+    <string name="tab_settings">Settings</string>
 
     <!-- Home Screen -->
     <string name="home_title">My Tone Settings</string>
