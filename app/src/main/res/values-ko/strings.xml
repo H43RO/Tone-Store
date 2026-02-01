@@ -170,4 +170,6 @@
      <string name="tags">태그</string>
      <string name="share_to_community">커뮤니티에 공유하기</string>
      <string name="share_success">톤이 커뮤니티에 공유되었습니다!</string>
+    <string name="login_button">로그인</string>
+    <string name="create_first_pedalboard">첫 번째 페달보드 만들기</string>
  </resources>

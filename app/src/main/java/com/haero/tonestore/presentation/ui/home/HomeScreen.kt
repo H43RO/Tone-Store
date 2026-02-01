@@ -5,16 +5,13 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,6 +24,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -41,18 +39,16 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,7 +56,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -76,7 +71,14 @@ import com.haero.tonestore.presentation.ui.home.components.GridToneSettingCard
 import com.haero.tonestore.presentation.ui.home.components.SortFilterBar
 import com.haero.tonestore.presentation.ui.home.components.ToneSettingCard
 import com.haero.tonestore.presentation.viewmodel.HomeViewModel
-import com.haero.tonestore.ui.designsystem.*
+import com.haero.tonestore.ui.designsystem.Obsidian
+import com.haero.tonestore.ui.designsystem.ObsidianAlertDialog
+import com.haero.tonestore.ui.designsystem.ObsidianBackground
+import com.haero.tonestore.ui.designsystem.ObsidianButton
+import com.haero.tonestore.ui.designsystem.ObsidianIconButton
+import com.haero.tonestore.ui.designsystem.ObsidianLoadingIndicator
+import com.haero.tonestore.ui.designsystem.ObsidianOutlinedButton
+import com.haero.tonestore.ui.designsystem.ObsidianSearchField
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -91,10 +93,6 @@ fun HomeScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
-
-    val isScrolling by remember {
-        derivedStateOf { listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 100 }
-    }
 
     LaunchedEffect(state.navigateToCreate) {
         if (state.navigateToCreate) {
@@ -146,7 +144,11 @@ fun HomeScreen(
                     )
                 }
 
-                Box(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f)
+                ) {
                     when {
                         state.isLoading -> {
                             ObsidianLoadingIndicator()
@@ -211,18 +213,80 @@ fun HomeScreen(
                         }
                     }
                 }
-            }
 
-            // Obsidian FAB
-            if (state.isLoggedIn) {
-                ObsidianExtendedFab(
-                    expanded = isScrolling.not(),
-                    onClick = { viewModel.handleIntent(HomeIntent.NavigateToCreate) },
-                    icon = Icons.Rounded.Add,
+                // Sticky Bottom Button - 로그인 상태이고 톤이 있을 때만 표시
+                AnimatedVisibility(
+                    visible = state.isLoggedIn && state.toneSettings.isNotEmpty(),
+                    enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+                ) {
+                    StickyBottomAddButton(
+                        onClick = { viewModel.handleIntent(HomeIntent.NavigateToCreate) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StickyBottomAddButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color.Transparent,
+                        Obsidian.colors.bgPrimary.copy(alpha = 0.9f),
+                        Obsidian.colors.bgPrimary
+                    ),
+                    startY = 0f,
+                    endY = 80f
+                )
+            )
+            .padding(horizontal = Obsidian.spacing.screenPadding)
+            .padding(top = 20.dp, bottom = 100.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = 12.dp,
+                    shape = RoundedCornerShape(16.dp),
+                    spotColor = Obsidian.colors.primary.copy(alpha = 0.3f)
+                )
+                .clip(RoundedCornerShape(16.dp))
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            Obsidian.colors.primary,
+                            Obsidian.colors.primaryDark
+                        )
+                    )
+                )
+                .clickable(onClick = onClick)
+                .padding(vertical = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Add,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(22.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
                     text = stringResource(R.string.add_tone_setting),
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(bottom = 100.dp, end = 20.dp)
+                    style = Obsidian.typography.labelLarge,
+                    color = Color.White
                 )
             }
         }
@@ -327,7 +391,7 @@ private fun ObsidianEmptyToneState(
                     .border(1.dp, Obsidian.colors.primary.copy(alpha = 0.3f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                androidx.compose.material3.Icon(
+                Icon(
                     imageVector = Icons.Rounded.MusicNote,
                     contentDescription = null,
                     tint = Obsidian.colors.primary,
@@ -392,7 +456,7 @@ private fun ObsidianEmptySearchState(
                     .background(Obsidian.colors.surfaceHighlight),
                 contentAlignment = Alignment.Center
             ) {
-                androidx.compose.material3.Icon(
+                Icon(
                     imageVector = Icons.Outlined.SearchOff,
                     contentDescription = null,
                     tint = Obsidian.colors.textMuted,
@@ -446,7 +510,7 @@ private fun ObsidianLoginRequiredState(
                 .border(1.dp, Obsidian.colors.primary.copy(alpha = 0.4f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            androidx.compose.material3.Icon(
+            Icon(
                 imageVector = Icons.Rounded.Person,
                 contentDescription = null,
                 modifier = Modifier.size(48.dp),
@@ -478,7 +542,7 @@ private fun ObsidianLoginRequiredState(
             onClick = onLoginClick,
             modifier = Modifier.fillMaxWidth(0.6f)
         ) {
-            Text("로그인하기")
+            Text(stringResource(R.string.login_button))
         }
     }
 }
@@ -495,7 +559,12 @@ private fun ToneSettingList(
 
     LazyColumn(
         state = listState,
-        contentPadding = PaddingValues(horizontal = Obsidian.spacing.screenPadding, vertical = Obsidian.spacing.md),
+        contentPadding = PaddingValues(
+            start = Obsidian.spacing.screenPadding,
+            end = Obsidian.spacing.screenPadding,
+            top = Obsidian.spacing.md,
+            bottom = Obsidian.spacing.md
+        ),
         verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
     ) {
         items(
@@ -510,10 +579,6 @@ private fun ToneSettingList(
                 onDeleteClick = { showDeleteDialog = toneSetting.id },
                 sharedElementKey = toneSetting.id
             )
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(100.dp).animateItem())
         }
     }
 
@@ -546,7 +611,12 @@ private fun ToneSettingGrid(
     LazyVerticalGrid(
         columns = GridCells.Adaptive(160.dp),
         state = gridState,
-        contentPadding = PaddingValues(horizontal = Obsidian.spacing.screenPadding, vertical = Obsidian.spacing.md),
+        contentPadding = PaddingValues(
+            start = Obsidian.spacing.screenPadding,
+            end = Obsidian.spacing.screenPadding,
+            top = Obsidian.spacing.md,
+            bottom = Obsidian.spacing.md
+        ),
         horizontalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap),
         verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
     ) {
@@ -560,72 +630,6 @@ private fun ToneSettingGrid(
                 onFavoriteClick = { onFavoriteClick(toneSetting.id) },
                 sharedElementKey = toneSetting.id
             )
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(100.dp))
-        }
-    }
-}
-
-@Composable
-private fun ObsidianExtendedFab(
-    expanded: Boolean,
-    onClick: () -> Unit,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    val rotation by animateFloatAsState(
-        targetValue = if (expanded) 0f else 90f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "rotation"
-    )
-
-    Box(
-        modifier = modifier
-            .shadow(
-                elevation = 16.dp,
-                shape = RoundedCornerShape(if (expanded) 20.dp else 16.dp),
-                spotColor = Obsidian.colors.primary.copy(alpha = 0.4f)
-            )
-            .clip(RoundedCornerShape(if (expanded) 20.dp else 16.dp))
-            .background(
-                Brush.linearGradient(
-                    listOf(Obsidian.colors.primary, Obsidian.colors.primaryDark)
-                )
-            )
-            .clickable(onClick = onClick)
-            .animateContentSize(alignment = Alignment.CenterEnd)
-            .padding(
-                horizontal = if (expanded) 20.dp else 16.dp,
-                vertical = 14.dp
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            androidx.compose.material3.Icon(
-                imageVector = icon,
-                contentDescription = text,
-                tint = Color.White,
-                modifier = Modifier
-                    .size(22.dp)
-                    .rotate(rotation)
-            )
-            if (expanded) {
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(
-                    text = text,
-                    style = Obsidian.typography.labelLarge,
-                    color = Color.White
-                )
-            }
         }
     }
 }

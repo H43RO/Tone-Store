@@ -173,4 +173,6 @@
      <string name="tags">Tags</string>
      <string name="share_to_community">Share to Community</string>
      <string name="share_success">Tone shared to community!</string>
+    <string name="login_button">Login</string>
+    <string name="create_first_pedalboard">Create Your First Pedalboard</string>
  </resources>

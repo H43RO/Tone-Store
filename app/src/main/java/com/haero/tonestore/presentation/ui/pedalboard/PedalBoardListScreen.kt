@@ -1,9 +1,10 @@
 package com.haero.tonestore.presentation.ui.pedalboard
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,18 +27,15 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.GridView
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,24 +43,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.SavedPedalBoard
 import com.haero.tonestore.presentation.ui.pedalboard.components.PedalBoardPreview
 import com.haero.tonestore.presentation.viewmodel.PedalBoardListViewModel
-import com.haero.tonestore.ui.components.GlassBackground
-import com.haero.tonestore.ui.components.GlassButton
-import com.haero.tonestore.ui.components.GlassCard
-import com.haero.tonestore.ui.components.LocalEmberGlassTheme
+import com.haero.tonestore.ui.designsystem.Obsidian
+import com.haero.tonestore.ui.designsystem.ObsidianAlertDialog
+import com.haero.tonestore.ui.designsystem.ObsidianBackground
+import com.haero.tonestore.ui.designsystem.ObsidianButton
+import com.haero.tonestore.ui.designsystem.ObsidianLoadingIndicator
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -73,12 +70,7 @@ fun PedalBoardListScreen(
     viewModel: PedalBoardListViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val theme = LocalEmberGlassTheme.current
     val listState = rememberLazyListState()
-
-    val isScrolling by remember {
-        derivedStateOf { listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 100 }
-    }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
     var pedalBoardToDelete by remember { mutableStateOf<SavedPedalBoard?>(null) }
@@ -90,32 +82,34 @@ fun PedalBoardListScreen(
         }
     }
 
-    GlassBackground {
+    ObsidianBackground {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
-                GlassPedalBoardHeader(totalCount = state.pedalBoards.size)
+                ObsidianPedalBoardHeader(totalCount = state.pedalBoards.size)
 
-                Box(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f)
+                ) {
                     when {
                         state.isLoading -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier.align(Alignment.Center),
-                                color = theme.primary
-                            )
+                            ObsidianLoadingIndicator()
                         }
                         !state.isLoggedIn -> {
-                            GlassLoginRequiredState(
+                            ObsidianLoginRequiredState(
                                 onLoginClick = { viewModel.navigateToLogin() },
                                 modifier = Modifier.align(Alignment.Center)
                             )
                         }
                         state.pedalBoards.isEmpty() -> {
-                            GlassEmptyPedalBoardState(
+                            ObsidianEmptyPedalBoardState(
+                                onCreateClick = onNavigateToCreate,
                                 modifier = Modifier.align(Alignment.Center)
                             )
                         }
                         else -> {
-                            GlassPedalBoardList(
+                            ObsidianPedalBoardList(
                                 pedalBoards = state.pedalBoards,
                                 listState = listState,
                                 onItemClick = onNavigateToEdit,
@@ -127,151 +121,196 @@ fun PedalBoardListScreen(
                         }
                     }
                 }
-            }
 
-            // FAB
-            if (state.isLoggedIn) {
-                GlassExtendedFab(
-                    expanded = isScrolling.not(),
-                    onClick = onNavigateToCreate,
-                    icon = Icons.Default.Add,
-                    text = stringResource(R.string.create_pedalboard),
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(bottom = 100.dp, end = 20.dp)
-                )
+                // Sticky Bottom Button - 로그인 상태이고 페달보드가 있을 때만 표시
+                AnimatedVisibility(
+                    visible = state.isLoggedIn && state.pedalBoards.isNotEmpty(),
+                    enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+                ) {
+                    StickyBottomAddButton(
+                        onClick = onNavigateToCreate
+                    )
+                }
             }
         }
     }
 
     if (showDeleteDialog && pedalBoardToDelete != null) {
-        val targetPedalBoard = pedalBoardToDelete ?: return@PedalBoardListScreen
-        AlertDialog(
+        val targetPedalBoard = pedalBoardToDelete ?: return
+        ObsidianAlertDialog(
             onDismissRequest = {
                 showDeleteDialog = false
                 pedalBoardToDelete = null
             },
-            title = {
-                Text(
-                    stringResource(R.string.delete_pedalboard_confirm_title),
-                    color = theme.textPrimary
-                )
+            title = stringResource(R.string.delete_pedalboard_confirm_title),
+            message = stringResource(R.string.delete_pedalboard_confirm_message, targetPedalBoard.name),
+            confirmText = stringResource(R.string.delete),
+            dismissText = stringResource(R.string.cancel),
+            onConfirm = {
+                pedalBoardToDelete?.let { viewModel.delete(it) }
+                showDeleteDialog = false
+                pedalBoardToDelete = null
             },
-            text = {
-                Text(
-                    stringResource(R.string.delete_pedalboard_confirm_message, targetPedalBoard.name),
-                    color = theme.textSecondary
-                )
+            onDismiss = {
+                showDeleteDialog = false
+                pedalBoardToDelete = null
             },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        pedalBoardToDelete?.let { viewModel.delete(it) }
-                        showDeleteDialog = false
-                        pedalBoardToDelete = null
-                    }
-                ) {
-                    Text(stringResource(R.string.delete), color = theme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showDeleteDialog = false
-                        pedalBoardToDelete = null
-                    }
-                ) {
-                    Text(stringResource(R.string.cancel), color = theme.textSecondary)
-                }
-            },
-            containerColor = theme.surfaceElevated,
-            shape = RoundedCornerShape(20.dp)
+            isDangerous = true
         )
     }
 }
 
 @Composable
-private fun GlassPedalBoardHeader(
+private fun StickyBottomAddButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color.Transparent,
+                        Obsidian.colors.bgPrimary.copy(alpha = 0.9f),
+                        Obsidian.colors.bgPrimary
+                    ),
+                    startY = 0f,
+                    endY = 80f
+                )
+            )
+            .padding(horizontal = Obsidian.spacing.screenPadding)
+            .padding(top = 20.dp, bottom = 100.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = 12.dp,
+                    shape = RoundedCornerShape(16.dp),
+                    spotColor = Obsidian.colors.primary.copy(alpha = 0.3f)
+                )
+                .clip(RoundedCornerShape(16.dp))
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            Obsidian.colors.primary,
+                            Obsidian.colors.primaryDark
+                        )
+                    )
+                )
+                .clickable(onClick = onClick)
+                .padding(vertical = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Add,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(22.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.create_pedalboard),
+                    style = Obsidian.typography.labelLarge,
+                    color = Color.White
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ObsidianPedalBoardHeader(
     totalCount: Int,
     modifier: Modifier = Modifier
 ) {
-    val theme = LocalEmberGlassTheme.current
-
     Column(
         modifier = modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(horizontal = 20.dp)
-            .padding(top = 16.dp, bottom = 8.dp)
+            .padding(horizontal = Obsidian.spacing.screenPadding)
+            .padding(top = Obsidian.spacing.lg, bottom = Obsidian.spacing.sm)
     ) {
         Text(
             text = stringResource(R.string.pedalboard_list_title),
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = theme.textPrimary
+            style = Obsidian.typography.displaySmall,
+            color = Obsidian.colors.textPrimary
         )
         if (totalCount > 0) {
             Text(
                 text = stringResource(R.string.pedalboards_saved_count, totalCount),
-                fontSize = 14.sp,
-                color = theme.textSecondary
+                style = Obsidian.typography.bodySmall,
+                color = Obsidian.colors.textSecondary
             )
         }
     }
 }
 
 @Composable
-private fun GlassEmptyPedalBoardState(modifier: Modifier = Modifier) {
-    val theme = LocalEmberGlassTheme.current
-
+private fun ObsidianEmptyPedalBoardState(
+    onCreateClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
-        modifier = modifier.padding(32.dp),
+        modifier = modifier.padding(Obsidian.spacing.xxxl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Box(
             modifier = Modifier
-                .size(120.dp)
+                .size(100.dp)
                 .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            theme.secondary.copy(alpha = 0.2f),
-                            theme.secondary.copy(alpha = 0.05f)
-                        )
-                    )
-                )
-                .border(1.dp, theme.secondary.copy(alpha = 0.3f), CircleShape),
+                .background(Obsidian.colors.primaryMuted)
+                .border(1.dp, Obsidian.colors.primary.copy(alpha = 0.3f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Outlined.Dashboard,
                 contentDescription = null,
-                tint = theme.secondary,
-                modifier = Modifier.size(56.dp)
+                tint = Obsidian.colors.primary,
+                modifier = Modifier.size(48.dp)
             )
         }
-        Spacer(modifier = Modifier.height(24.dp))
+
+        Spacer(modifier = Modifier.height(Obsidian.spacing.xxl))
+
         Text(
             text = stringResource(R.string.empty_pedalboard_title),
-            fontSize = 20.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = theme.textPrimary
+            style = Obsidian.typography.headlineMedium,
+            color = Obsidian.colors.textPrimary
         )
-        Spacer(modifier = Modifier.height(8.dp))
+
+        Spacer(modifier = Modifier.height(Obsidian.spacing.sm))
+
         Text(
             text = stringResource(R.string.empty_pedalboard_subtitle),
-            fontSize = 14.sp,
-            color = theme.textSecondary,
-            textAlign = TextAlign.Center,
-            lineHeight = 22.sp
+            style = Obsidian.typography.bodyMedium,
+            color = Obsidian.colors.textSecondary,
+            textAlign = TextAlign.Center
         )
+
+        Spacer(modifier = Modifier.height(Obsidian.spacing.xxl))
+
+        ObsidianButton(
+            onClick = onCreateClick,
+            icon = Icons.Rounded.Add,
+            modifier = Modifier.fillMaxWidth(0.7f)
+        ) {
+            Text(stringResource(R.string.create_first_pedalboard))
+        }
+
         Spacer(Modifier.height(64.dp))
     }
 }
 
 @Composable
-private fun GlassPedalBoardList(
+private fun ObsidianPedalBoardList(
     pedalBoards: List<SavedPedalBoard>,
     listState: androidx.compose.foundation.lazy.LazyListState,
     onItemClick: (String) -> Unit,
@@ -279,49 +318,51 @@ private fun GlassPedalBoardList(
 ) {
     LazyColumn(
         state = listState,
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(
+            start = Obsidian.spacing.screenPadding,
+            end = Obsidian.spacing.screenPadding,
+            top = Obsidian.spacing.md,
+            bottom = Obsidian.spacing.md
+        ),
+        verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
     ) {
         items(
             items = pedalBoards,
             key = { it.id }
         ) { pedalBoard ->
-            GlassPedalBoardCard(
+            ObsidianPedalBoardCard(
                 pedalBoard = pedalBoard,
                 onClick = { onItemClick(pedalBoard.id) },
                 onDeleteClick = { onDeleteRequest(pedalBoard) }
             )
         }
-
-        item {
-            Spacer(modifier = Modifier.height(100.dp))
-        }
     }
 }
 
 @Composable
-private fun GlassPedalBoardCard(
+private fun ObsidianPedalBoardCard(
     pedalBoard: SavedPedalBoard,
     onClick: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val theme = LocalEmberGlassTheme.current
     val pedalCount = pedalBoard.slots.count { it != null }
     val totalSlots = pedalBoard.columns * pedalBoard.rows
     val isKorean = LocalConfiguration.current.locales[0].language == "ko"
 
-    GlassCard(
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
-        cornerRadius = 20.dp,
-        glassAlpha = 0.12f
+            .shadow(8.dp, RoundedCornerShape(Obsidian.radius.card), spotColor = Color.Black)
+            .clip(RoundedCornerShape(Obsidian.radius.card))
+            .background(Obsidian.colors.surface)
+            .border(1.dp, Obsidian.colors.border, RoundedCornerShape(Obsidian.radius.card))
+            .clickable(onClick = onClick)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(Obsidian.spacing.cardPadding)
         ) {
             PedalBoardPreview(
                 slots = pedalBoard.slots,
@@ -331,20 +372,20 @@ private fun GlassPedalBoardCard(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Obsidian.spacing.md))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Glass icon
+                // Icon
                 Box(
                     modifier = Modifier
-                        .size(52.dp)
-                        .clip(RoundedCornerShape(14.dp))
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(Obsidian.radius.md))
                         .background(
                             Brush.linearGradient(
-                                colors = listOf(theme.secondary, theme.accent)
+                                colors = listOf(Obsidian.colors.primary, Obsidian.colors.primaryDark)
                             )
                         ),
                     contentAlignment = Alignment.Center
@@ -352,27 +393,26 @@ private fun GlassPedalBoardCard(
                     Icon(
                         imageVector = Icons.Rounded.GridView,
                         contentDescription = null,
-                        tint = theme.background,
-                        modifier = Modifier.size(26.dp)
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(14.dp))
+                Spacer(modifier = Modifier.width(Obsidian.spacing.md))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = pedalBoard.name,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = theme.textPrimary
+                        style = Obsidian.typography.titleMedium,
+                        color = Obsidian.colors.textPrimary
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        GlassMetaChip(text = "${pedalBoard.columns}×${pedalBoard.rows}")
-                        GlassMetaChip(
+                        ObsidianMetaChip(text = "${pedalBoard.columns}×${pedalBoard.rows}")
+                        ObsidianMetaChip(
                             text = if (isKorean) {
                                 "$pedalCount/$totalSlots 페달"
                             } else {
@@ -386,14 +426,15 @@ private fun GlassPedalBoardCard(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
+                        .background(Obsidian.colors.surfaceHighlight.copy(alpha = 0.5f))
                         .clickable { onDeleteClick() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.DeleteOutline,
                         contentDescription = stringResource(R.string.delete),
-                        tint = theme.textMuted,
-                        modifier = Modifier.size(22.dp)
+                        tint = Obsidian.colors.textMuted,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
@@ -402,97 +443,31 @@ private fun GlassPedalBoardCard(
 }
 
 @Composable
-private fun GlassMetaChip(
+private fun ObsidianMetaChip(
     text: String,
     modifier: Modifier = Modifier
 ) {
-    val theme = LocalEmberGlassTheme.current
-
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(6.dp))
-            .background(theme.primary.copy(alpha = 0.1f))
-            .padding(horizontal = 8.dp, vertical = 3.dp)
+            .clip(RoundedCornerShape(Obsidian.radius.xs))
+            .background(Obsidian.colors.primaryMuted)
+            .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Text(
             text = text,
-            fontSize = 11.sp,
-            color = theme.primary
+            style = Obsidian.typography.labelSmall,
+            color = Obsidian.colors.primary
         )
     }
 }
 
 @Composable
-private fun GlassExtendedFab(
-    expanded: Boolean,
-    onClick: () -> Unit,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    val theme = LocalEmberGlassTheme.current
-    val rotation by animateFloatAsState(
-        targetValue = if (expanded) 0f else 90f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "rotation"
-    )
-
-    Box(
-        modifier = modifier
-            .shadow(
-                elevation = 16.dp,
-                shape = RoundedCornerShape(if (expanded) 24.dp else 20.dp),
-                spotColor = theme.primary.copy(alpha = 0.5f)
-            )
-            .clip(RoundedCornerShape(if (expanded) 24.dp else 20.dp))
-            .background(
-                Brush.linearGradient(listOf(theme.primary, theme.accent))
-            )
-            .clickable(onClick = onClick)
-            .animateContentSize(alignment = Alignment.CenterEnd)
-            .padding(
-                horizontal = if (expanded) 20.dp else 16.dp,
-                vertical = 16.dp
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = text,
-                tint = theme.background,
-                modifier = Modifier
-                    .size(24.dp)
-                    .rotate(rotation)
-            )
-            if (expanded) {
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = text,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp,
-                    color = theme.background
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun GlassLoginRequiredState(
+private fun ObsidianLoginRequiredState(
     onLoginClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val theme = LocalEmberGlassTheme.current
-
     Column(
-        modifier = modifier.padding(32.dp),
+        modifier = modifier.padding(Obsidian.spacing.xxxl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -500,50 +475,43 @@ private fun GlassLoginRequiredState(
             modifier = Modifier
                 .size(100.dp)
                 .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            theme.primary.copy(alpha = 0.25f),
-                            theme.primary.copy(alpha = 0.05f)
-                        )
-                    )
-                )
-                .border(1.dp, theme.primary.copy(alpha = 0.4f), CircleShape),
+                .background(Obsidian.colors.primaryMuted)
+                .border(1.dp, Obsidian.colors.primary.copy(alpha = 0.4f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Outlined.Dashboard,
+                imageVector = Icons.Rounded.Person,
                 contentDescription = null,
                 modifier = Modifier.size(48.dp),
-                tint = theme.primary
+                tint = Obsidian.colors.primary
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Obsidian.spacing.xxl))
 
         Text(
             text = stringResource(R.string.login_required),
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
+            style = Obsidian.typography.headlineMedium,
             textAlign = TextAlign.Center,
-            color = theme.textPrimary
+            color = Obsidian.colors.textPrimary
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Obsidian.spacing.sm))
 
         Text(
             text = stringResource(R.string.login_required_pedalboard_message),
-            fontSize = 14.sp,
-            color = theme.textSecondary,
+            style = Obsidian.typography.bodyMedium,
+            color = Obsidian.colors.textSecondary,
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Obsidian.spacing.xxl))
 
-        GlassButton(
-            text = "로그인하기",
+        ObsidianButton(
             onClick = onLoginClick,
             modifier = Modifier.fillMaxWidth(0.6f)
-        )
+        ) {
+            Text(stringResource(R.string.login_button))
+        }
     }
 }
