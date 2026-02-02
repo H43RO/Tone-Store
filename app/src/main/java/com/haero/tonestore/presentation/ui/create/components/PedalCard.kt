@@ -60,8 +60,8 @@ fun PedalCard(
 
     val gradient = Brush.verticalGradient(
         colors = listOf(
-            backgroundColor.copy(alpha = 0.9f),
-            backgroundColor.copy(alpha = 0.7f)
+            PedalColorUtils.darken(backgroundColor, 0.9f),
+            PedalColorUtils.darken(backgroundColor, 0.7f)
         )
     )
 
@@ -70,8 +70,8 @@ fun PedalCard(
     } else {
         Brush.verticalGradient(
             colors = listOf(
-                backgroundColor.copy(alpha = 0.45f),
-                backgroundColor.copy(alpha = 0.35f)
+                PedalColorUtils.darken(backgroundColor, 0.45f),
+                PedalColorUtils.darken(backgroundColor, 0.35f)
             )
         )
     }

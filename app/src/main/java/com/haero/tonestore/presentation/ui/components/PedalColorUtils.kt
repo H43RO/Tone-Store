@@ -83,4 +83,18 @@ object PedalColorUtils {
             defaultColor
         }
     }
+
+    /**
+     * 색상을 어둡게 만듭니다 (Alpha Blending 방지 및 그라데이션 품질 향상용)
+     * @param color 원본 색상
+     * @param factor 어둡게 할 비율 (0.0f ~ 1.0f). 1.0f면 변화 없음.
+     */
+    fun darken(color: Color, factor: Float = 0.8f): Color {
+        return Color(
+            red = (color.red * factor).coerceIn(0f, 1f),
+            green = (color.green * factor).coerceIn(0f, 1f),
+            blue = (color.blue * factor).coerceIn(0f, 1f),
+            alpha = color.alpha
+        )
+    }
 }

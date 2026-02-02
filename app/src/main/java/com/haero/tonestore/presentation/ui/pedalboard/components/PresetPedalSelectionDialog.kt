@@ -1,5 +1,8 @@
 package com.haero.tonestore.presentation.ui.pedalboard.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,6 +19,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,6 +36,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -39,9 +45,6 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -90,15 +93,18 @@ fun PresetPedalSelectionDialog(
     val presetPedals = remember { PresetPedals.getPresetPedals() }
     var selectedTab by remember { mutableStateOf(0) } // 0: 프리셋, 1: 커스텀
     var selectedCategory by remember { mutableStateOf<PedalCategory?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    val filteredPedals = remember(selectedCategory) {
-        if (selectedCategory == null) {
-            presetPedals
-        } else {
-            presetPedals.filter { pedal ->
-                getCategoryForPedal(pedal.name) == selectedCategory
+    val filteredPedals = remember(selectedCategory, searchQuery) {
+        presetPedals.filter { pedal ->
+            val matchesCategory = if (searchQuery.isNotBlank()) {
+                true
+            } else {
+                selectedCategory == null || getCategoryForPedal(pedal.name) == selectedCategory
             }
+            val matchesSearch = searchQuery.isBlank() || pedal.name.contains(searchQuery, ignoreCase = true)
+            matchesCategory && matchesSearch
         }
     }
 
@@ -128,6 +134,7 @@ fun PresetPedalSelectionDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight(0.85f)
                 .padding(horizontal = 16.dp)
                 .padding(bottom = navigationBarPadding.calculateBottomPadding())
         ) {
@@ -153,20 +160,54 @@ fun PresetPedalSelectionDialog(
             Spacer(modifier = Modifier.height(20.dp))
 
             // Tabs (프리셋 / 커스텀)
-            TabRow(
-                selectedTabIndex = selectedTab,
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .padding(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Tab(
-                    selected = selectedTab == 0,
-                    onClick = { selectedTab = 0 },
-                    text = { Text("프리셋 페달") }
-                )
-                Tab(
-                    selected = selectedTab == 1,
-                    onClick = { selectedTab = 1 },
-                    text = { Text("나의 커스텀 페달") }
-                )
+                val tabs = listOf("프리셋 페달", "나의 커스텀 페달")
+                tabs.forEachIndexed { index, title ->
+                    val isSelected = selectedTab == index
+                    val backgroundColor by animateColorAsState(
+                        targetValue = if (isSelected) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            Color.Transparent
+                        },
+                        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                        label = "tabBackground"
+                    )
+                    val contentColor by animateColorAsState(
+                        targetValue = if (isSelected) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                        label = "tabContent"
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(backgroundColor)
+                            .clickable { selectedTab = index }
+                            .padding(vertical = 12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                            color = contentColor,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -177,41 +218,92 @@ fun PresetPedalSelectionDialog(
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-            // 프리셋 탭: Category Filter
+            // 프리셋 탭: Search Bar & Category Filter
             if (selectedTab == 0) {
-                Text(
-                    text = stringResource(R.string.category),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                val categoryAllLabel = stringResource(R.string.category_all)
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(end = 8.dp)
+                // Search Bar
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    item {
-                        CategoryChip(
-                            label = categoryAllLabel,
-                            emoji = "🎸",
-                            selected = selectedCategory == null,
-                            onClick = { selectedCategory = null }
-                        )
-                    }
-                    items(PedalCategory.entries) { category ->
-                        CategoryChip(
-                            label = getCategoryDisplayName(category),
-                            emoji = getCategoryEmoji(category),
-                            selected = selectedCategory == category,
-                            onClick = {
-                                selectedCategory = if (selectedCategory == category) null else category
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    androidx.compose.foundation.text.BasicTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
+                        decorationBox = { innerTextField ->
+                            if (searchQuery.isEmpty()) {
+                                Text(
+                                    text = "페달 검색",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                )
                             }
+                            innerTextField()
+                        }
+                    )
+                    if (searchQuery.isNotEmpty()) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Clear",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clickable { searchQuery = "" }
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(20.dp))
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = searchQuery.isEmpty(),
+                    enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.expandVertically(),
+                    exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.shrinkVertically()
+                ) {
+                    Column {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        val categoryAllLabel = stringResource(R.string.category_all)
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            item {
+                                CategoryChip(
+                                    label = categoryAllLabel,
+                                    emoji = "🎸",
+                                    selected = selectedCategory == null,
+                                    onClick = { selectedCategory = null }
+                                )
+                            }
+                            items(PedalCategory.entries) { category ->
+                                CategoryChip(
+                                    label = getCategoryDisplayName(category),
+                                    emoji = getCategoryEmoji(category),
+                                    selected = selectedCategory == category,
+                                    onClick = {
+                                        selectedCategory = if (selectedCategory == category) null else category
+                                    }
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+                if (searchQuery.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
             }
 
             // 페달 리스트
@@ -229,7 +321,8 @@ fun PresetPedalSelectionDialog(
                     items(filteredPedals, key = { it.name }) { pedal ->
                         SelectablePedalCard(
                             pedal = pedal,
-                            onClick = { onPedalSelect(pedal) }
+                            onClick = { onPedalSelect(pedal) },
+                            modifier = Modifier.animateItem()
                         )
                     }
                 }
@@ -292,73 +385,67 @@ private fun CustomPedalCard(
     val scale = if (isPressed) 0.98f else 1f
 
     val primaryColor = MaterialTheme.colorScheme.primary
-    val tertiaryColor = MaterialTheme.colorScheme.tertiary
-    val gradientColor = androidx.compose.ui.graphics.lerp(primaryColor, tertiaryColor, 0.5f)
 
-    Surface(
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(72.dp)
+            .height(80.dp)
             .scale(scale)
-            .shadow(
-                elevation = 12.dp,
-                shape = RoundedCornerShape(16.dp),
-                spotColor = gradientColor.copy(alpha = 0.5f)
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.6f))
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        primaryColor.copy(alpha = 0.3f),
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.1f)
+                    )
+                ),
+                shape = RoundedCornerShape(20.dp)
             )
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick
-            ),
-        shape = RoundedCornerShape(16.dp),
-        color = Color.Transparent
+            )
+            .padding(16.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            primaryColor.copy(alpha = 0.9f),
-                            tertiaryColor.copy(alpha = 0.7f)
-                        )
-                    )
-                )
-                .padding(16.dp)
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(primaryColor.copy(alpha = 0.1f), CircleShape)
+                    .border(1.dp, primaryColor.copy(alpha = 0.2f), CircleShape),
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(Color.White.copy(alpha = 0.2f), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    tint = primaryColor,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
 
-                Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
-                Column {
-                    Text(
-                        text = stringResource(R.string.create_custom_effect),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                    Text(
-                        text = stringResource(R.string.custom_knob_description),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.8f)
-                    )
-                }
+            Column(
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.create_custom_effect),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = stringResource(R.string.custom_knob_description),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
@@ -414,8 +501,8 @@ private fun SelectablePedalCard(
     val backgroundColor = pedal.color?.let { Color(it) } ?: MaterialTheme.colorScheme.surfaceVariant
     val gradient = Brush.verticalGradient(
         colors = listOf(
-            backgroundColor.copy(alpha = 0.9f),
-            backgroundColor.copy(alpha = 0.7f)
+            PedalColorUtils.darken(backgroundColor, 0.9f),
+            PedalColorUtils.darken(backgroundColor, 0.7f)
         )
     )
     val isLightColor = PedalColorUtils.isLightColor(pedal.color)
