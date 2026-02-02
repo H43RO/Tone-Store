@@ -6,11 +6,9 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,8 +35,6 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GraphicEq
-import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.LinearScale
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Speaker
@@ -423,8 +419,6 @@ private fun DetailTabBar(
 private fun DetailPedalBoardContent(
     pedalBoard: PedalBoard
 ) {
-    var isSignalChainView by remember { mutableStateOf(false) }
-
     if (pedalBoard.pedals.isEmpty()) {
         Box(
             modifier = Modifier
@@ -439,57 +433,8 @@ private fun DetailPedalBoardContent(
             )
         }
     } else {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // View Toggle Button
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Surface(
-                    onClick = { isSignalChainView = !isSignalChainView },
-                    shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Icon(
-                            imageVector = if (isSignalChainView) {
-                                Icons.Default.GridView
-                            } else {
-                                Icons.Default.LinearScale
-                            },
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = if (isSignalChainView) {
-                                stringResource(R.string.view_grid)
-                            } else {
-                                stringResource(R.string.view_signal_chain)
-                            },
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-
-            if (isSignalChainView) {
-                // Signal Chain View - Horizontal scrollable
-                SignalChainView(pedals = pedalBoard.pedals)
-            } else {
-                // Grid View - Original layout
-                GridPedalView(pedals = pedalBoard.pedals)
-            }
-        }
+        // Grid View Only
+        GridPedalView(pedals = pedalBoard.pedals)
     }
 }
 
@@ -522,132 +467,6 @@ private fun GridPedalView(
                 if (rowPedals.size == 1) {
                     Spacer(modifier = Modifier.weight(1f))
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SignalChainView(
-    pedals: List<com.haero.tonestore.domain.model.Pedal>
-) {
-    val scrollState = rememberScrollState()
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(vertical = 16.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .horizontalScroll(scrollState)
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(0.dp)
-        ) {
-            // Guitar Input
-            SignalChainNode(
-                label = "IN",
-                isEndpoint = true
-            )
-
-            pedals.forEachIndexed { index, pedal ->
-                // Arrow connector
-                SignalChainArrow()
-
-                // Pedal
-                Box(modifier = Modifier.width(140.dp)) {
-                    PedalCard(
-                        pedal = pedal,
-                        onKnobChange = { _, _ -> },
-                        onToggleEnabled = {},
-                        onRemove = {},
-                        isEditable = false,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
-
-            // Arrow to output
-            SignalChainArrow()
-
-            // Amp Output
-            SignalChainNode(
-                label = "AMP",
-                isEndpoint = true
-            )
-        }
-    }
-}
-
-@Composable
-private fun SignalChainNode(
-    label: String,
-    isEndpoint: Boolean
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(
-                    if (isEndpoint) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surfaceVariant
-                    }
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = if (isEndpoint) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                }
-            )
-        }
-    }
-}
-
-@Composable
-private fun SignalChainArrow() {
-    Row(
-        modifier = Modifier.padding(horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .width(20.dp)
-                .height(3.dp)
-                .background(
-                    MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                    RoundedCornerShape(2.dp)
-                )
-        )
-        // Arrow head
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .background(Color.Transparent)
-        ) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val path = androidx.compose.ui.graphics.Path().apply {
-                    moveTo(0f, 0f)
-                    lineTo(size.width, size.height / 2)
-                    lineTo(0f, size.height)
-                    close()
-                }
-                drawPath(
-                    path = path,
-                    color = androidx.compose.ui.graphics.Color(0xFF938F99).copy(alpha = 0.5f)
-                )
             }
         }
     }

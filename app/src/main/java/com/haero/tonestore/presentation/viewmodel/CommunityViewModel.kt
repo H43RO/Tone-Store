@@ -4,6 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.haero.tonestore.domain.repository.AuthRepository
 import com.haero.tonestore.domain.repository.SharedToneSettingRepository
+import com.haero.tonestore.domain.usecase.GetUserBookmarksUseCase
+import com.haero.tonestore.domain.usecase.GetUserLikesUseCase
+import com.haero.tonestore.domain.usecase.ToggleBookmarkUseCase
+import com.haero.tonestore.domain.usecase.ToggleLikeUseCase
 import com.haero.tonestore.presentation.ui.community.CommunityIntent
 import com.haero.tonestore.presentation.ui.community.CommunityState
 import com.haero.tonestore.presentation.ui.community.CommunityTab
@@ -15,7 +19,11 @@ import kotlinx.coroutines.launch
 
 class CommunityViewModel(
     private val sharedToneSettingRepository: SharedToneSettingRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val toggleLikeUseCase: ToggleLikeUseCase,
+    private val getUserLikesUseCase: GetUserLikesUseCase,
+    private val toggleBookmarkUseCase: ToggleBookmarkUseCase,
+    private val getUserBookmarksUseCase: GetUserBookmarksUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CommunityState())
@@ -24,7 +32,7 @@ class CommunityViewModel(
     init {
         loadPresets()
         loadPopularPresets()
-        loadLikedPresets()
+        loadUserLikesAndBookmarks()
     }
 
     fun handleIntent(intent: CommunityIntent) {
@@ -34,6 +42,7 @@ class CommunityViewModel(
             is CommunityIntent.SearchByTags -> searchByTags(intent.tags)
             is CommunityIntent.SelectPreset -> selectPreset(intent.presetId)
             is CommunityIntent.ToggleLike -> toggleLike(intent.presetId)
+            is CommunityIntent.ToggleBookmark -> toggleBookmark(intent.presetId)
             is CommunityIntent.SetTab -> setTab(intent.tab)
             is CommunityIntent.NavigationHandled -> clearNavigation()
             is CommunityIntent.RefreshPresets -> refreshPresets()
@@ -57,11 +66,19 @@ class CommunityViewModel(
         }
     }
 
-    private fun loadLikedPresets() {
+    private fun loadUserLikesAndBookmarks() {
         viewModelScope.launch {
             val userId = authRepository.currentUserId ?: return@launch
-            // 좋아요한 프리셋 ID 목록 로드 (향후 구현)
-            // 현재는 로컬 상태로만 관리
+
+            // 좋아요 목록 로드
+            getUserLikesUseCase(userId).onSuccess { likedIds ->
+                _state.update { it.copy(likedPresetIds = likedIds) }
+            }
+
+            // 북마크 목록 로드
+            getUserBookmarksUseCase(userId).onSuccess { bookmarkedIds ->
+                _state.update { it.copy(bookmarkedPresetIds = bookmarkedIds) }
+            }
         }
     }
 
@@ -86,18 +103,68 @@ class CommunityViewModel(
                 return@launch
             }
 
-            val result = sharedToneSettingRepository.toggleLike(presetId, userId)
-            result.onSuccess { isLiked ->
+            // Optimistic update
+            val isCurrentlyLiked = _state.value.likedPresetIds.contains(presetId)
+            _state.update { currentState ->
+                val newLikedIds = if (isCurrentlyLiked) {
+                    currentState.likedPresetIds - presetId
+                } else {
+                    currentState.likedPresetIds + presetId
+                }
+                currentState.copy(likedPresetIds = newLikedIds)
+            }
+
+            // Backend update
+            toggleLikeUseCase(userId, presetId).onFailure { e ->
+                // Revert on failure
                 _state.update { currentState ->
-                    val newLikedIds = if (isLiked) {
+                    val revertedIds = if (isCurrentlyLiked) {
                         currentState.likedPresetIds + presetId
                     } else {
                         currentState.likedPresetIds - presetId
                     }
-                    currentState.copy(likedPresetIds = newLikedIds)
+                    currentState.copy(
+                        likedPresetIds = revertedIds,
+                        error = e.message
+                    )
                 }
-            }.onFailure { e ->
-                _state.update { it.copy(error = e.message) }
+            }
+        }
+    }
+
+    private fun toggleBookmark(presetId: String) {
+        viewModelScope.launch {
+            val userId = authRepository.currentUserId
+            if (userId == null) {
+                _state.update { it.copy(error = "로그인이 필요합니다") }
+                return@launch
+            }
+
+            // Optimistic update
+            val isCurrentlyBookmarked = _state.value.bookmarkedPresetIds.contains(presetId)
+            _state.update { currentState ->
+                val newBookmarkedIds = if (isCurrentlyBookmarked) {
+                    currentState.bookmarkedPresetIds - presetId
+                } else {
+                    currentState.bookmarkedPresetIds + presetId
+                }
+                currentState.copy(bookmarkedPresetIds = newBookmarkedIds)
+            }
+
+            // Backend update
+            toggleBookmarkUseCase(userId, presetId).onFailure { e ->
+                // Revert on failure
+                _state.update { currentState ->
+                    val revertedIds = if (isCurrentlyBookmarked) {
+                        currentState.bookmarkedPresetIds + presetId
+                    } else {
+                        currentState.bookmarkedPresetIds - presetId
+                    }
+                    currentState.copy(
+                        bookmarkedPresetIds = revertedIds,
+                        error = e.message
+                    )
+                }
             }
         }
     }

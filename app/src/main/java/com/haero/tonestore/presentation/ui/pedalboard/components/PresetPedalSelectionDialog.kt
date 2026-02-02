@@ -602,11 +602,11 @@ private fun FootSwitch(modifier: Modifier = Modifier) {
 private fun getCategoryForPedal(pedalName: String): PedalCategory {
     return when (pedalName) {
         "Overdrive", "Distortion", "Fuzz", "Boost" -> PedalCategory.DRIVE
-        "Chorus", "Flanger", "Phaser", "Tremolo" -> PedalCategory.MODULATION
-        "Delay", "Reverb" -> PedalCategory.TIME_BASED
+        "Chorus", "Flanger", "Phaser", "Tremolo", "Ring Modulator" -> PedalCategory.MODULATION
+        "Delay", "Reverb", "Looper" -> PedalCategory.TIME_BASED
         "Compressor", "Noise Gate" -> PedalCategory.DYNAMICS
-        "Tuner", "EQ", "Wah", "Bass Preamp" -> PedalCategory.UTILITY
-        "Octave", "Whammy" -> PedalCategory.PITCH
+        "Tuner", "EQ", "Wah", "Bass Preamp", "Auto-Wah", "Envelope Filter" -> PedalCategory.UTILITY
+        "Octave", "Whammy", "Harmonizer", "Pitch Shifter" -> PedalCategory.PITCH
         else -> PedalCategory.UTILITY
     }
 }

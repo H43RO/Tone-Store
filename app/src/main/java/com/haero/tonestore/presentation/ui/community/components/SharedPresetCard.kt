@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
@@ -26,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -45,8 +48,11 @@ import java.util.Locale
 fun SharedPresetCard(
     preset: SharedToneSetting,
     isLiked: Boolean,
+    isBookmarked: Boolean,
     onClick: () -> Unit,
     onLikeClick: () -> Unit,
+    onBookmarkClick: () -> Unit,
+    onAuthorClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val theme = LocalEmberGlassTheme.current
@@ -66,7 +72,9 @@ fun SharedPresetCard(
             // 작성자 정보
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onAuthorClick(preset.authorId) }
             ) {
                 // 프로필 이미지 with gradient border
                 Box(
@@ -196,16 +204,56 @@ fun SharedPresetCard(
                             .clickable { onLikeClick() }
                             .padding(4.dp)
                     ) {
+                        // Like Animation
+                        val scale = androidx.compose.animation.core.animateFloatAsState(
+                            targetValue = if (isLiked) 1.2f else 1f,
+                            animationSpec = androidx.compose.animation.core.spring(
+                                dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+                                stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+                            ),
+                            label = "LikeScale"
+                        )
+
                         Icon(
                             imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                             contentDescription = "Like",
                             tint = if (isLiked) theme.secondary else theme.textSecondary,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier
+                                .size(20.dp)
+                                .scale(scale.value)
                         )
                         Text(
                             text = "${preset.likes}",
                             fontSize = 13.sp,
                             color = if (isLiked) theme.secondary else theme.textSecondary
+                        )
+                    }
+
+                    // 북마크
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { onBookmarkClick() }
+                            .padding(4.dp)
+                    ) {
+                        val scale = androidx.compose.animation.core.animateFloatAsState(
+                            targetValue = if (isBookmarked) 1.2f else 1f,
+                            animationSpec = androidx.compose.animation.core.spring(
+                                dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+                                stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+                            ),
+                            label = "BookmarkScale"
+                        )
+
+                        Icon(
+                            imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                            contentDescription = "Bookmark",
+                            tint = if (isBookmarked) theme.primary else theme.textSecondary,
+                            modifier = Modifier
+                                .size(20.dp)
+                                .scale(scale.value)
                         )
                     }
 

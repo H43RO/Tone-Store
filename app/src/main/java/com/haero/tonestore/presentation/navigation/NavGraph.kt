@@ -72,6 +72,7 @@ import com.haero.tonestore.presentation.ui.home.HomeScreen
 import com.haero.tonestore.presentation.ui.pedalboard.PedalBoardListScreen
 import com.haero.tonestore.presentation.ui.pedalboard.PedalBoardScreen
 import com.haero.tonestore.presentation.ui.preset_detail.PresetDetailScreen
+import com.haero.tonestore.presentation.ui.profile.UserProfileScreen
 import com.haero.tonestore.presentation.ui.settings.SettingsScreen
 import com.haero.tonestore.presentation.ui.share.ShareToneScreen
 import com.haero.tonestore.ui.designsystem.ObsidianColors
@@ -98,6 +99,9 @@ sealed class Screen(val route: String) {
     }
     data object ShareTone : Screen("share_tone/{toneSettingId}") {
         fun createRoute(toneSettingId: String): String = "share_tone/$toneSettingId"
+    }
+    data object UserProfile : Screen("user_profile/{userId}") {
+        fun createRoute(userId: String): String = "user_profile/$userId"
     }
     data object Login : Screen("login")
 }
@@ -166,6 +170,9 @@ fun ToneStoreNavGraph(navController: NavHostController = rememberNavController()
                 },
                 onNavigateToPresetDetail = { presetId ->
                     navController.navigate(Screen.PresetDetail.createRoute(presetId))
+                },
+                onNavigateToUserProfile = { userId ->
+                    navController.navigate(Screen.UserProfile.createRoute(userId))
                 },
                 onNavigateToLogin = {
                     navController.navigate(Screen.Login.route)
@@ -414,6 +421,46 @@ fun ToneStoreNavGraph(navController: NavHostController = rememberNavController()
                 onLoginSuccess = { navController.popBackStack() }
             )
         }
+
+        composable(
+            route = Screen.UserProfile.route,
+            arguments = listOf(
+                navArgument("userId") { type = NavType.StringType }
+            ),
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    tween(animationDuration)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    tween(animationDuration)
+                )
+            },
+            popEnterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    tween(animationDuration)
+                )
+            },
+            popExitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    tween(animationDuration)
+                )
+            }
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
+            UserProfileScreen(
+                userId = userId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToDetail = { id ->
+                    navController.navigate(Screen.Detail.createRoute(id))
+                }
+            )
+        }
     }
 }
 
@@ -425,6 +472,7 @@ private fun MainTabScreen(
     onNavigateToPedalBoardCreate: () -> Unit,
     onNavigateToPedalBoardEdit: (String) -> Unit,
     onNavigateToPresetDetail: (String) -> Unit,
+    onNavigateToUserProfile: (String) -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
     val pagerState = rememberPagerState(pageCount = { bottomNavTabs.size })
@@ -464,6 +512,7 @@ private fun MainTabScreen(
                     )
                     2 -> CommunityScreen(
                         onNavigateToDetail = onNavigateToPresetDetail,
+                        onNavigateToProfile = onNavigateToUserProfile,
                         onNavigateToLogin = onNavigateToLogin
                     )
                     3 -> SettingsScreen(

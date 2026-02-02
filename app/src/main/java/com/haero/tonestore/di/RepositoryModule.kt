@@ -1,17 +1,23 @@
 package com.haero.tonestore.di
 
 import com.haero.tonestore.data.repository.AuthRepositoryImpl
+import com.haero.tonestore.data.repository.BookmarkRepositoryImpl
 import com.haero.tonestore.data.repository.CommentRepositoryImpl
 import com.haero.tonestore.data.repository.FirestoreCustomPedalRepositoryImpl
 import com.haero.tonestore.data.repository.FirestoreSavedPedalBoardRepositoryImpl
 import com.haero.tonestore.data.repository.FirestoreToneSettingRepositoryImpl
+import com.haero.tonestore.data.repository.LikeRepositoryImpl
 import com.haero.tonestore.data.repository.SharedToneSettingRepositoryImpl
+import com.haero.tonestore.data.repository.UserProfileRepositoryImpl
 import com.haero.tonestore.domain.repository.AuthRepository
+import com.haero.tonestore.domain.repository.BookmarkRepository
 import com.haero.tonestore.domain.repository.CommentRepository
 import com.haero.tonestore.domain.repository.CustomPedalRepository
+import com.haero.tonestore.domain.repository.LikeRepository
 import com.haero.tonestore.domain.repository.SavedPedalBoardRepository
 import com.haero.tonestore.domain.repository.SharedToneSettingRepository
 import com.haero.tonestore.domain.repository.ToneSettingRepository
+import com.haero.tonestore.domain.repository.UserProfileRepository
 import org.koin.dsl.module
 
 /**
@@ -30,4 +36,7 @@ val repositoryModule = module {
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
     single<SharedToneSettingRepository> { SharedToneSettingRepositoryImpl(get()) }
     single<CommentRepository> { CommentRepositoryImpl(get()) }
+    single<LikeRepository> { LikeRepositoryImpl(get()) }
+    single<BookmarkRepository> { BookmarkRepositoryImpl(get()) }
+    single<UserProfileRepository> { UserProfileRepositoryImpl(get()) }
 }

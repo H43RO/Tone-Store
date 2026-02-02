@@ -54,6 +54,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun CommunityScreen(
     onNavigateToDetail: (String) -> Unit,
+    onNavigateToProfile: (String) -> Unit,
     onNavigateToLogin: () -> Unit = {},
     viewModel: CommunityViewModel = koinViewModel()
 ) {
@@ -107,8 +108,11 @@ fun CommunityScreen(
                                 SharedPresetCard(
                                     preset = preset,
                                     isLiked = state.likedPresetIds.contains(preset.id),
+                                    isBookmarked = state.bookmarkedPresetIds.contains(preset.id),
                                     onClick = { viewModel.handleIntent(CommunityIntent.SelectPreset(preset.id)) },
                                     onLikeClick = { viewModel.handleIntent(CommunityIntent.ToggleLike(preset.id)) },
+                                    onBookmarkClick = { viewModel.handleIntent(CommunityIntent.ToggleBookmark(preset.id)) },
+                                    onAuthorClick = { onNavigateToProfile(it) },
                                     modifier = Modifier.animateItem()
                                 )
                             }

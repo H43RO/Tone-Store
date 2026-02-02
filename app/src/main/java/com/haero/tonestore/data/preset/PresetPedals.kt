@@ -29,7 +29,14 @@ object PresetPedals {
         createTuner(),
         createEQ(),
         createBassPreamp(),
-        createWhammy()
+        createWhammy(),
+        // 새로 추가된 페달들
+        createLooper(),
+        createRingModulator(),
+        createHarmonizer(),
+        createPitchShifter(),
+        createAutoWah(),
+        createEnvelopeFilter()
     )
 
     /**
@@ -292,5 +299,107 @@ object PresetPedals {
         ),
         order = 0,
         color = 0xFFD32F2F
+    )
+
+    /**
+     * 루퍼 - 실시간 루프 레코딩
+     * 예: Boss RC-1, TC Electronic Ditto
+     */
+    private fun createLooper() = Pedal(
+        id = UUID.randomUUID().toString(),
+        name = "Looper",
+        type = PedalType.PRESET,
+        knobs = listOf(
+            Knob(name = "Length", value = 5f),
+            Knob(name = "Overdub", value = 5f),
+            Knob(name = "Clear", value = 0f)
+        ),
+        order = 0,
+        color = 0xFF00BCD4
+    )
+
+    /**
+     * 링 모듈레이터 - 실험적이고 금속성 사운드
+     * 예: Moog MF-102, EHX Ring Thing
+     */
+    private fun createRingModulator() = Pedal(
+        id = UUID.randomUUID().toString(),
+        name = "Ring Modulator",
+        type = PedalType.PRESET,
+        knobs = listOf(
+            Knob(name = "Frequency", value = 5f),
+            Knob(name = "Depth", value = 5f),
+            Knob(name = "Mix", value = 5f)
+        ),
+        order = 0,
+        color = 0xFF9C27B0
+    )
+
+    /**
+     * 하모나이저 - 하모니 음정 생성
+     * 예: Eventide H9, Boss PS-6
+     */
+    private fun createHarmonizer() = Pedal(
+        id = UUID.randomUUID().toString(),
+        name = "Harmonizer",
+        type = PedalType.PRESET,
+        knobs = listOf(
+            Knob(name = "Interval", value = 5f),
+            Knob(name = "Mix", value = 5f),
+            Knob(name = "Key", value = 5f)
+        ),
+        order = 0,
+        color = 0xFF8BC34A
+    )
+
+    /**
+     * 피치 시프터 - 피치 변경
+     * 예: EHX Pitch Fork, DigiTech Whammy
+     */
+    private fun createPitchShifter() = Pedal(
+        id = UUID.randomUUID().toString(),
+        name = "Pitch Shifter",
+        type = PedalType.PRESET,
+        knobs = listOf(
+            Knob(name = "Shift", value = 5f),
+            Knob(name = "Mix", value = 5f),
+            Knob(name = "Detune", value = 5f)
+        ),
+        order = 0,
+        color = 0xFFFF5722
+    )
+
+    /**
+     * 오토 와우 - 자동 와우 효과
+     * 예: EHX Q-Tron, MXR Auto Q
+     */
+    private fun createAutoWah() = Pedal(
+        id = UUID.randomUUID().toString(),
+        name = "Auto-Wah",
+        type = PedalType.PRESET,
+        knobs = listOf(
+            Knob(name = "Sensitivity", value = 5f),
+            Knob(name = "Range", value = 5f),
+            Knob(name = "Q", value = 5f)
+        ),
+        order = 0,
+        color = 0xFFFFC107
+    )
+
+    /**
+     * 엔벨로프 필터 - 다이 나믹 필터 효과
+     * 예: MXR M82, EHX Micro Synth
+     */
+    private fun createEnvelopeFilter() = Pedal(
+        id = UUID.randomUUID().toString(),
+        name = "Envelope Filter",
+        type = PedalType.PRESET,
+        knobs = listOf(
+            Knob(name = "Sensitivity", value = 5f),
+            Knob(name = "Resonance", value = 5f),
+            Knob(name = "Decay", value = 5f)
+        ),
+        order = 0,
+        color = 0xFF4CAF50
     )
 }

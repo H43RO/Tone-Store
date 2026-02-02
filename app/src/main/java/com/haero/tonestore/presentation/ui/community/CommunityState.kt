@@ -12,6 +12,7 @@ data class CommunityState(
     val popularPresets: List<SharedToneSetting> = emptyList(),
     val currentTab: CommunityTab = CommunityTab.LATEST,
     val likedPresetIds: Set<String> = emptySet(),
+    val bookmarkedPresetIds: Set<String> = emptySet(),
     val navigateToDetail: String? = null,
     val error: String? = null
 ) {

@@ -9,6 +9,7 @@ sealed class CommunityIntent {
     data class SearchByTags(val tags: List<String>) : CommunityIntent()
     data class SelectPreset(val presetId: String) : CommunityIntent()
     data class ToggleLike(val presetId: String) : CommunityIntent()
+    data class ToggleBookmark(val presetId: String) : CommunityIntent()
     data class SetTab(val tab: CommunityTab) : CommunityIntent()
     data object NavigationHandled : CommunityIntent()
     data object RefreshPresets : CommunityIntent()

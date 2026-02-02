@@ -16,7 +16,9 @@ data class UserProfile(
     val nickname: String = "",
     val email: String = "",
     val photoUrl: String? = null,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val totalLikes: Int = 0,
+    val sharedPresetsCount: Int = 0
 ) {
     /**
      * 커뮤니티에서 표시할 이름 (닉네임 우선, 없으면 displayName)

@@ -10,6 +10,7 @@ import com.haero.tonestore.presentation.viewmodel.PedalBoardViewModel
 import com.haero.tonestore.presentation.viewmodel.PresetDetailViewModel
 import com.haero.tonestore.presentation.viewmodel.SettingsViewModel
 import com.haero.tonestore.presentation.viewmodel.ShareToneViewModel
+import com.haero.tonestore.presentation.viewmodel.UserProfileViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -23,9 +24,10 @@ val viewModelModule = module {
     viewModel { DetailViewModel(get(), get(), get()) }
     viewModel { PedalBoardViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { PedalBoardListViewModel(get(), get(), get()) }
-    viewModel { CommunityViewModel(get(), get()) }
+    viewModel { CommunityViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { PresetDetailViewModel(get(), get(), get(), get()) }
     viewModel { ShareToneViewModel(get(), get(), get()) }
     viewModel { LoginViewModel(get()) }
     viewModel { SettingsViewModel(get(), get()) }
+    viewModel { UserProfileViewModel(get(), get(), get(), get(), get(), get(), get()) }
 }
