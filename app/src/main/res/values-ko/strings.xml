@@ -66,6 +66,7 @@
     
     <!-- Amp Section -->
     <string name="amp_setting">앰프 세팅</string>
+    <string name="amp_and_guitar_setting">앰프 &amp; 기타</string>
     <string name="amp_model_hint">앰프 이름 (ex. 마샬, 합주실 앰프)</string>
     <string name="amp_setting_exists">앰프 설정 있음</string>
     

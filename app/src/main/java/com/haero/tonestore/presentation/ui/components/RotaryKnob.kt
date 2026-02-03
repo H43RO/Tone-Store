@@ -10,7 +10,6 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.haero.tonestore.ui.designsystem.Obsidian
 import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -98,22 +98,22 @@ fun RotaryKnob(
     val actualKnobColor = if (isPedalKnob) {
         androidx.compose.ui.graphics.Color.Black
     } else {
-        MaterialTheme.colorScheme.primary
+        Obsidian.colors.primary
     }
 
     val trackColor = if (isPedalKnob) {
         androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.3f)
     } else {
-        MaterialTheme.colorScheme.surfaceVariant
+        Obsidian.colors.surfaceHighlight
     }
 
     val indicatorColor = if (isPedalKnob) {
         androidx.compose.ui.graphics.Color.White
     } else {
-        MaterialTheme.colorScheme.onPrimary
+        Obsidian.colors.bgPrimary
     }
 
-    val actualLabelColor = labelColor ?: MaterialTheme.colorScheme.onSurfaceVariant
+    val actualLabelColor = labelColor ?: Obsidian.colors.textSecondary
 
     // 드르륵 햅틱 피드백 함수
     fun performTickHaptic() {
@@ -244,15 +244,15 @@ fun RotaryKnob(
         // 현재 값 표시
         Text(
             text = String.format("%.1f", value),
-            style = MaterialTheme.typography.labelSmall,
+            style = Obsidian.typography.labelSmall,
             fontWeight = FontWeight.Bold,
-            color = labelColor ?: MaterialTheme.colorScheme.onSurface
+            color = labelColor ?: Obsidian.colors.textPrimary
         )
 
         // 레이블
         Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+            style = Obsidian.typography.labelSmall.copy(fontSize = 10.sp),
             color = actualLabelColor,
             textAlign = TextAlign.Center,
             maxLines = 1

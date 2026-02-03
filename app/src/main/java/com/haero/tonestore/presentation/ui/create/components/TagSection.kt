@@ -8,9 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.GenreTag
 import com.haero.tonestore.presentation.ui.components.SectionHeader
+import com.haero.tonestore.ui.designsystem.Obsidian
+import com.haero.tonestore.ui.designsystem.ObsidianChip
 import java.util.Locale
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -41,12 +40,12 @@ fun TagSection(selectedTags: List<GenreTag>, onTagToggle: (GenreTag) -> Unit, mo
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = Obsidian.spacing.screenPadding)
         ) {
             Text(
                 text = stringResource(R.string.select_tags_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = Obsidian.typography.bodySmall,
+                color = Obsidian.colors.textMuted
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -58,19 +57,10 @@ fun TagSection(selectedTags: List<GenreTag>, onTagToggle: (GenreTag) -> Unit, mo
             ) {
                 GenreTag.entries.forEach { tag ->
                     val isSelected = selectedTags.contains(tag)
-                    FilterChip(
+                    ObsidianChip(
+                        label = if (isKorean) tag.displayNameKo else tag.displayName,
                         selected = isSelected,
-                        onClick = { onTagToggle(tag) },
-                        label = {
-                            Text(
-                                text = if (isKorean) tag.displayNameKo else tag.displayName,
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primary,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                        )
+                        onClick = { onTagToggle(tag) }
                     )
                 }
             }

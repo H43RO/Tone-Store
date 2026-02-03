@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,6 +25,8 @@ import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.AmpSetting
 import com.haero.tonestore.presentation.ui.components.RotaryKnob
 import com.haero.tonestore.presentation.ui.components.SectionHeader
+import com.haero.tonestore.ui.designsystem.Obsidian
+import com.haero.tonestore.ui.designsystem.ObsidianTextField
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -48,22 +48,28 @@ fun AmpSection(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = Obsidian.spacing.screenPadding)
         ) {
             if (isEditable) {
-                OutlinedTextField(
+                Text(
+                    text = stringResource(R.string.amp_model_hint),
+                    style = Obsidian.typography.labelMedium,
+                    color = Obsidian.colors.textSecondary,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                ObsidianTextField(
                     value = ampSetting.ampModel ?: "",
                     onValueChange = onAmpModelChange,
-                    label = { Text(stringResource(R.string.amp_model_hint)) },
+                    placeholder = stringResource(R.string.amp_model_hint),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-            } else if (ampSetting.ampModel.isNullOrBlank().not()) {
+            } else if (!ampSetting.ampModel.isNullOrBlank()) {
                 Text(
                     text = ampSetting.ampModel,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = Obsidian.typography.titleMedium,
+                    color = Obsidian.colors.textPrimary
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -71,12 +77,13 @@ fun AmpSection(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .clip(RoundedCornerShape(Obsidian.radius.card))
+                    .background(Obsidian.colors.surfaceHighlight)
                     .padding(16.dp)
             ) {
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
+                    maxItemsInEachRow = 4,
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {

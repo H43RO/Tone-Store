@@ -33,16 +33,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,10 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -69,6 +61,13 @@ import com.haero.tonestore.presentation.ui.create.components.GuitarSection
 import com.haero.tonestore.presentation.ui.create.components.PedalBoardSection
 import com.haero.tonestore.presentation.ui.create.components.TagSection
 import com.haero.tonestore.presentation.viewmodel.CreateToneViewModel
+import com.haero.tonestore.ui.designsystem.Obsidian
+import com.haero.tonestore.ui.designsystem.ObsidianBackground
+import com.haero.tonestore.ui.designsystem.ObsidianButton
+import com.haero.tonestore.ui.designsystem.ObsidianIconButton
+import com.haero.tonestore.ui.designsystem.ObsidianOutlinedButton
+import com.haero.tonestore.ui.designsystem.ObsidianSurface
+import com.haero.tonestore.ui.designsystem.ObsidianTextField
 import org.koin.androidx.compose.koinViewModel
 
 private enum class CreateStep(val titleResId: Int) {
@@ -122,8 +121,65 @@ fun CreateToneScreen(
     val isLastStep = currentStep == steps.lastIndex
     val isFirstStep = currentStep == 0
 
-    Scaffold(
-        bottomBar = {
+    ObsidianBackground {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 80.dp) // BottomBar space
+            ) {
+                CreateToneHeader(
+                    title = if (state.isEditMode) {
+                        stringResource(R.string.edit_tone_setting)
+                    } else {
+                        stringResource(R.string.create_tone_setting)
+                    },
+                    onCloseClick = onNavigateBack
+                )
+
+                StepProgressIndicator(
+                    currentStep = currentStep,
+                    totalSteps = steps.size,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
+                )
+
+                AnimatedContent(
+                    targetState = currentStep,
+                    transitionSpec = {
+                        if (targetState > initialState) {
+                            slideInHorizontally { it } + fadeIn() togetherWith
+                                slideOutHorizontally { -it } + fadeOut()
+                        } else {
+                            slideInHorizontally { -it } + fadeIn() togetherWith
+                                slideOutHorizontally { it } + fadeOut()
+                        }
+                    },
+                    label = "step_content"
+                ) { step ->
+                    when (steps[step]) {
+                        CreateStep.SONG_INFO -> SongInfoStepContent(
+                            songName = state.songName,
+                            songNameError = state.songNameError,
+                            selectedTags = state.selectedTags,
+                            onSongNameChange = { viewModel.handleIntent(CreateToneIntent.UpdateSongName(it)) },
+                            onTagToggle = { viewModel.handleIntent(CreateToneIntent.ToggleTag(it)) }
+                        )
+                        CreateStep.PEDAL_BOARD -> PedalBoardStepContent(
+                            state = state,
+                            viewModel = viewModel
+                        )
+                        CreateStep.AMP -> AmpStepContent(
+                            state = state,
+                            viewModel = viewModel
+                        )
+                        CreateStep.GUITAR -> GuitarStepContent(
+                            state = state,
+                            viewModel = viewModel
+                        )
+                    }
+                }
+            }
+
             StepperBottomBar(
                 currentStep = currentStep,
                 totalSteps = steps.size,
@@ -132,67 +188,16 @@ fun CreateToneScreen(
                 isSaving = state.isSaving,
                 onPrevious = { currentStep-- },
                 onNext = { currentStep++ },
-                onSave = { viewModel.handleIntent(CreateToneIntent.SaveToneSetting) }
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            CreateToneHeader(
-                title = if (state.isEditMode) {
-                    stringResource(R.string.edit_tone_setting)
-                } else {
-                    stringResource(R.string.create_tone_setting)
-                },
-                onCloseClick = onNavigateBack
+                onSave = { viewModel.handleIntent(CreateToneIntent.SaveToneSetting) },
+                modifier = Modifier.align(Alignment.BottomCenter)
             )
 
-            StepProgressIndicator(
-                currentStep = currentStep,
-                totalSteps = steps.size,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 90.dp)
             )
-
-            AnimatedContent(
-                targetState = currentStep,
-                transitionSpec = {
-                    if (targetState > initialState) {
-                        slideInHorizontally { it } + fadeIn() togetherWith
-                            slideOutHorizontally { -it } + fadeOut()
-                    } else {
-                        slideInHorizontally { -it } + fadeIn() togetherWith
-                            slideOutHorizontally { it } + fadeOut()
-                    }
-                },
-                label = "step_content"
-            ) { step ->
-                when (steps[step]) {
-                    CreateStep.SONG_INFO -> SongInfoStepContent(
-                        songName = state.songName,
-                        songNameError = state.songNameError,
-                        selectedTags = state.selectedTags,
-                        onSongNameChange = { viewModel.handleIntent(CreateToneIntent.UpdateSongName(it)) },
-                        onTagToggle = { viewModel.handleIntent(CreateToneIntent.ToggleTag(it)) }
-                    )
-                    CreateStep.PEDAL_BOARD -> PedalBoardStepContent(
-                        state = state,
-                        viewModel = viewModel
-                    )
-                    CreateStep.AMP -> AmpStepContent(
-                        state = state,
-                        viewModel = viewModel
-                    )
-                    CreateStep.GUITAR -> GuitarStepContent(
-                        state = state,
-                        viewModel = viewModel
-                    )
-                }
-            }
         }
     }
 }
@@ -210,29 +215,19 @@ private fun CreateToneHeader(
             .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Surface(
+        ObsidianIconButton(
             onClick = onCloseClick,
-            shape = CircleShape,
-            color = Color.Transparent,
-            modifier = Modifier.size(44.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = stringResource(R.string.back),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-        }
+            icon = Icons.Default.Close,
+            tint = Obsidian.colors.textPrimary
+        )
 
         Spacer(modifier = Modifier.width(12.dp))
 
         Text(
             text = title,
-            style = MaterialTheme.typography.titleLarge,
+            style = Obsidian.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
+            color = Obsidian.colors.textPrimary
         )
     }
 }
@@ -257,13 +252,13 @@ private fun StepProgressIndicator(
         ) {
             Text(
                 text = stringResource(steps[currentStep].titleResId),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                style = Obsidian.typography.headlineSmall,
+                color = Obsidian.colors.textPrimary
             )
             Text(
                 text = stringResource(R.string.step_indicator, currentStep + 1, totalSteps),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = Obsidian.typography.bodyMedium,
+                color = Obsidian.colors.textSecondary
             )
         }
 
@@ -275,8 +270,8 @@ private fun StepProgressIndicator(
                 .fillMaxWidth()
                 .height(6.dp)
                 .clip(RoundedCornerShape(3.dp)),
-            color = MaterialTheme.colorScheme.primary,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            color = Obsidian.colors.primary,
+            trackColor = Obsidian.colors.surfaceHighlight,
             strokeCap = StrokeCap.Round
         )
 
@@ -313,9 +308,9 @@ private fun StepDot(
                 .size(24.dp)
                 .background(
                     color = when {
-                        isCompleted -> MaterialTheme.colorScheme.primary
-                        isCurrent -> MaterialTheme.colorScheme.primary
-                        else -> MaterialTheme.colorScheme.surfaceVariant
+                        isCompleted -> Obsidian.colors.primary
+                        isCurrent -> Obsidian.colors.primary
+                        else -> Obsidian.colors.surfaceHighlight
                     },
                     shape = CircleShape
                 ),
@@ -325,25 +320,25 @@ private fun StepDot(
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary,
+                    tint = Obsidian.colors.bgPrimary,
                     modifier = Modifier.size(14.dp)
                 )
             } else if (isCurrent) {
                 Box(
                     modifier = Modifier
                         .size(8.dp)
-                        .background(MaterialTheme.colorScheme.onPrimary, CircleShape)
+                        .background(Obsidian.colors.bgPrimary, CircleShape)
                 )
             }
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall,
+            style = Obsidian.typography.labelSmall,
             color = if (isCurrent || isCompleted) {
-                MaterialTheme.colorScheme.onSurface
+                Obsidian.colors.textPrimary
             } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
+                Obsidian.colors.textMuted
             },
             textAlign = TextAlign.Center,
             fontSize = 10.sp
@@ -363,9 +358,10 @@ private fun StepperBottomBar(
     onSave: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
+    ObsidianSurface(
         modifier = modifier.fillMaxWidth(),
-        tonalElevation = 3.dp
+        shape = RoundedCornerShape(topStart = Obsidian.radius.lg, topEnd = Obsidian.radius.lg),
+        elevation = 16.dp
     ) {
         Row(
             modifier = Modifier
@@ -374,107 +370,49 @@ private fun StepperBottomBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AnimatedVisibility(visible = !isFirstStep) {
-                StepperButton(
-                    text = stringResource(R.string.previous),
+            AnimatedVisibility(
+                visible = !isFirstStep,
+                modifier = Modifier.weight(1f)
+            ) {
+                ObsidianOutlinedButton(
+                    onClick = onPrevious,
                     icon = Icons.AutoMirrored.Filled.ArrowBack,
-                    iconAtStart = true,
-                    isPrimary = false,
-                    onClick = onPrevious
-                )
-            }
-            if (isFirstStep) {
-                Spacer(modifier = Modifier.width(1.dp))
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.previous))
+                }
             }
 
-            if (isLastStep) {
-                StepperButton(
-                    text = stringResource(R.string.save),
-                    icon = Icons.Default.Save,
-                    iconAtStart = false,
-                    isPrimary = true,
-                    isLoading = isSaving,
-                    onClick = onSave
-                )
+            if (!isFirstStep) {
+                Spacer(modifier = Modifier.width(16.dp))
             } else {
-                StepperButton(
-                    text = stringResource(R.string.next),
-                    icon = Icons.AutoMirrored.Filled.ArrowForward,
-                    iconAtStart = false,
-                    isPrimary = true,
-                    onClick = onNext
-                )
+                Spacer(modifier = Modifier.weight(1f))
             }
-        }
-    }
-}
 
-@Composable
-private fun StepperButton(
-    text: String,
-    icon: ImageVector,
-    iconAtStart: Boolean,
-    isPrimary: Boolean,
-    isLoading: Boolean = false,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        onClick = onClick,
-        modifier = modifier
-            .shadow(
-                elevation = if (isPrimary) 8.dp else 0.dp,
-                shape = RoundedCornerShape(16.dp),
-                ambientColor = if (isPrimary) {
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+            Box(modifier = Modifier.weight(1f)) {
+                if (isLastStep) {
+                    ObsidianButton(
+                        onClick = onSave,
+                        icon = Icons.Default.Save,
+                        isLoading = isSaving,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(R.string.save))
+                    }
                 } else {
-                    MaterialTheme.colorScheme.surface
-                }
-            ),
-        shape = RoundedCornerShape(16.dp),
-        color = if (isPrimary) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.surfaceVariant
-        },
-        contentColor = if (isPrimary) {
-            MaterialTheme.colorScheme.onPrimary
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        }
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                if (iconAtStart) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
-                Text(
-                    text = text,
-                    fontWeight = FontWeight.SemiBold,
-                    style = MaterialTheme.typography.labelLarge
-                )
-                if (!iconAtStart) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
+                    ObsidianButton(
+                        onClick = onNext,
+                        icon = null, // 아이콘은 텍스트 뒤에 넣기 위해 null 처리 후 content에서 처리
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(R.string.next))
+                        Spacer(Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
         }
@@ -496,19 +434,31 @@ private fun SongInfoStepContent(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = songName,
-            onValueChange = onSongNameChange,
-            label = { Text(stringResource(R.string.song_name)) },
-            placeholder = { Text(stringResource(R.string.song_name_hint)) },
-            singleLine = true,
-            isError = songNameError != null,
-            supportingText = songNameError?.let { { Text(it) } },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            shape = RoundedCornerShape(12.dp)
-        )
+        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+            Text(
+                text = stringResource(R.string.song_name),
+                style = Obsidian.typography.labelLarge,
+                color = Obsidian.colors.textSecondary,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            ObsidianTextField(
+                value = songName,
+                onValueChange = onSongNameChange,
+                placeholder = stringResource(R.string.song_name_hint),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            if (songNameError != null) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = songNameError,
+                    style = Obsidian.typography.bodySmall,
+                    color = Obsidian.colors.error
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 

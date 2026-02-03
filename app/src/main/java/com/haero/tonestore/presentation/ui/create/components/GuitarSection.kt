@@ -12,11 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,6 +32,9 @@ import com.haero.tonestore.domain.model.GuitarSetting
 import com.haero.tonestore.domain.model.PickupPosition
 import com.haero.tonestore.presentation.ui.components.RotaryKnob
 import com.haero.tonestore.presentation.ui.components.SectionHeader
+import com.haero.tonestore.ui.designsystem.Obsidian
+import com.haero.tonestore.ui.designsystem.ObsidianCard
+import com.haero.tonestore.ui.designsystem.ObsidianTextField
 
 @Composable
 fun GuitarSection(
@@ -57,30 +57,36 @@ fun GuitarSection(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = Obsidian.spacing.screenPadding)
         ) {
             if (isEditable) {
-                OutlinedTextField(
+                Text(
+                    text = stringResource(R.string.guitar_model_hint),
+                    style = Obsidian.typography.labelMedium,
+                    color = Obsidian.colors.textSecondary,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                ObsidianTextField(
                     value = guitarSetting.guitarModel ?: "",
                     onValueChange = onGuitarModelChange,
-                    label = { Text(stringResource(R.string.guitar_model_hint)) },
+                    placeholder = stringResource(R.string.guitar_model_hint),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-            } else if (guitarSetting.guitarModel.isNullOrBlank().not()) {
+            } else if (!guitarSetting.guitarModel.isNullOrBlank()) {
                 Text(
                     text = guitarSetting.guitarModel,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = Obsidian.typography.titleSmall,
+                    color = Obsidian.colors.textPrimary
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
             Text(
                 text = stringResource(R.string.pickup_selector),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                style = Obsidian.typography.labelLarge,
+                color = Obsidian.colors.textPrimary
             )
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -92,25 +98,29 @@ fun GuitarSection(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+            ObsidianCard(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                RotaryKnob(
-                    value = guitarSetting.volumeKnob,
-                    onValueChange = { if (isEditable) onVolumeChange(it) },
-                    label = "Volume",
-                    size = 72.dp,
-                    enabled = isEditable
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    RotaryKnob(
+                        value = guitarSetting.volumeKnob,
+                        onValueChange = { if (isEditable) onVolumeChange(it) },
+                        label = "Volume",
+                        size = 72.dp,
+                        enabled = isEditable
+                    )
 
-                RotaryKnob(
-                    value = guitarSetting.toneKnob,
-                    onValueChange = { if (isEditable) onToneChange(it) },
-                    label = "Tone",
-                    size = 72.dp,
-                    enabled = isEditable
-                )
+                    RotaryKnob(
+                        value = guitarSetting.toneKnob,
+                        onValueChange = { if (isEditable) onToneChange(it) },
+                        label = "Tone",
+                        size = 72.dp,
+                        enabled = isEditable
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -135,8 +145,8 @@ private fun PickupSelector(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clip(RoundedCornerShape(Obsidian.radius.card))
+            .background(Obsidian.colors.surfaceHighlight)
             .padding(8.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
@@ -147,7 +157,7 @@ private fun PickupSelector(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
+                    .clip(RoundedCornerShape(Obsidian.radius.xs))
                     .clickable(enabled = enabled) { onPositionChange(position) }
                     .padding(8.dp)
             ) {
@@ -157,17 +167,17 @@ private fun PickupSelector(
                         .clip(CircleShape)
                         .background(
                             if (isSelected) {
-                                MaterialTheme.colorScheme.primary
+                                Obsidian.colors.primary
                             } else {
-                                MaterialTheme.colorScheme.surface
+                                Obsidian.colors.surface
                             }
                         )
                         .border(
                             width = 2.dp,
                             color = if (isSelected) {
-                                MaterialTheme.colorScheme.primary
+                                Obsidian.colors.primary
                             } else {
-                                MaterialTheme.colorScheme.outline
+                                Obsidian.colors.border
                             },
                             shape = CircleShape
                         ),
@@ -178,7 +188,7 @@ private fun PickupSelector(
                             modifier = Modifier
                                 .size(12.dp)
                                 .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.onPrimary)
+                                .background(Obsidian.colors.bgPrimary)
                         )
                     }
                 }
@@ -187,12 +197,12 @@ private fun PickupSelector(
 
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.labelSmall,
+                    style = Obsidian.typography.labelSmall,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                     color = if (isSelected) {
-                        MaterialTheme.colorScheme.primary
+                        Obsidian.colors.primary
                     } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                        Obsidian.colors.textSecondary
                     },
                     textAlign = TextAlign.Center
                 )

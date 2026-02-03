@@ -66,6 +66,7 @@
 
     <!-- Amp Section -->
     <string name="amp_setting">Amp Setting</string>
+    <string name="amp_and_guitar_setting">Amp &amp; Guitar</string>
     <string name="amp_model_hint">Amp model (e.g., Fender Twin Reverb)</string>
     <string name="amp_setting_exists">Amp configured</string>
 

@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GraphicEq
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Speaker
 import androidx.compose.material3.*
@@ -94,8 +93,7 @@ fun DetailScreen(
 
     val tabs = listOf(
         TabItem(stringResource(R.string.pedal_board), Icons.Default.GraphicEq),
-        TabItem(stringResource(R.string.amp_setting), Icons.Default.Speaker),
-        TabItem(stringResource(R.string.guitar_setting), Icons.Default.MusicNote)
+        TabItem(stringResource(R.string.amp_and_guitar_setting), Icons.Default.Speaker)
     )
 
     ObsidianBackground {
@@ -138,8 +136,10 @@ fun DetailScreen(
                                 ) { page ->
                                     when (page) {
                                         0 -> DetailPedalBoardContent(pedalBoard = toneSetting.pedalBoard)
-                                        1 -> DetailAmpContent(ampSetting = toneSetting.ampSetting)
-                                        2 -> DetailGuitarContent(guitarSetting = toneSetting.guitarSetting)
+                                        1 -> DetailAmpAndGuitarContent(
+                                            ampSetting = toneSetting.ampSetting,
+                                            guitarSetting = toneSetting.guitarSetting
+                                        )
                                     }
                                 }
                             }
@@ -401,6 +401,7 @@ private fun DetailAmpContent(
         ) {
             @OptIn(ExperimentalLayoutApi::class)
             FlowRow(
+                maxItemsInEachRow = 4,
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalArrangement = Arrangement.spacedBy(20.dp)
