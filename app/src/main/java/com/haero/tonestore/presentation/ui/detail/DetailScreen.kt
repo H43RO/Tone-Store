@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -341,6 +342,7 @@ private fun DetailPedalBoardContent(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun GridPedalView(
     pedals: List<com.haero.tonestore.domain.model.Pedal>
@@ -352,34 +354,55 @@ private fun GridPedalView(
             .padding(horizontal = Obsidian.spacing.screenPadding, vertical = Obsidian.spacing.md),
         verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
     ) {
-        pedals.chunked(2).forEach { rowPedals ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
-            ) {
-                rowPedals.forEach { pedal ->
-                    PedalCard(
-                        pedal = pedal,
-                        onKnobChange = { _, _ -> },
-                        onToggleEnabled = {},
-                        onRemove = {},
-                        isEditable = false,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                if (rowPedals.size == 1) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
+        FlowRow(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            maxItemsInEachRow = 2,
+            verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
+        ) {
+            pedals.forEach { pedal ->
+                PedalCard(
+                    pedal = pedal,
+                    onKnobChange = { _, _ -> },
+                    onToggleEnabled = {},
+                    onRemove = {},
+                    isEditable = false,
+                    modifier = Modifier.weight(1F)
+                )
+            }
+
+            if (pedals.size == 1) {
+                Spacer(modifier = Modifier.weight(1f))
             }
         }
+//        pedals.chunked(2).forEach { rowPedals ->
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
+//            ) {
+//                rowPedals.forEach { pedal ->
+//                    PedalCard(
+//                        pedal = pedal,
+//                        onKnobChange = { _, _ -> },
+//                        onToggleEnabled = {},
+//                        onRemove = {},
+//                        isEditable = false,
+//                        modifier = Modifier.weight(1f)
+//                    )
+//                }
+//                if (rowPedals.size == 1) {
+//                    Spacer(modifier = Modifier.weight(1f))
+//                }
+//            }
+//        }
 
         Spacer(modifier = Modifier.height(100.dp))
     }
 }
 
 @Composable
-private fun DetailAmpContent(
-    ampSetting: AmpSetting
+private fun DetailAmpAndGuitarContent(
+    ampSetting: AmpSetting,
+    guitarSetting: GuitarSetting
 ) {
     Column(
         modifier = Modifier
@@ -387,10 +410,18 @@ private fun DetailAmpContent(
             .verticalScroll(rememberScrollState())
             .padding(Obsidian.spacing.screenPadding)
     ) {
+        // Amp Section
+        Text(
+            text = stringResource(R.string.amp_setting),
+            style = Obsidian.typography.titleLarge,
+            color = Obsidian.colors.primary,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+
         if (!ampSetting.ampModel.isNullOrBlank()) {
             Text(
-                text = ampSetting.ampModel.orEmpty(),
-                style = Obsidian.typography.headlineLarge,
+                text = ampSetting.ampModel,
+                style = Obsidian.typography.headlineMedium,
                 color = Obsidian.colors.textPrimary
             )
             Spacer(modifier = Modifier.height(Obsidian.spacing.lg))
@@ -401,8 +432,8 @@ private fun DetailAmpContent(
         ) {
             @OptIn(ExperimentalLayoutApi::class)
             FlowRow(
-                maxItemsInEachRow = 4,
                 modifier = Modifier.fillMaxWidth(),
+                maxItemsInEachRow = 4,
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
@@ -426,24 +457,24 @@ private fun DetailAmpContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(100.dp))
-    }
-}
+        Spacer(modifier = Modifier.height(Obsidian.spacing.xxl))
 
-@Composable
-private fun DetailGuitarContent(
-    guitarSetting: GuitarSetting
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(Obsidian.spacing.screenPadding)
-    ) {
+        ObsidianDivider()
+
+        Spacer(modifier = Modifier.height(Obsidian.spacing.xxl))
+
+        // Guitar Section
+        Text(
+            text = stringResource(R.string.guitar_setting),
+            style = Obsidian.typography.titleLarge,
+            color = Obsidian.colors.primary,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
         if (!guitarSetting.guitarModel.isNullOrBlank()) {
             Text(
-                text = guitarSetting.guitarModel.orEmpty(),
-                style = Obsidian.typography.headlineLarge,
+                text = guitarSetting.guitarModel,
+                style = Obsidian.typography.headlineMedium,
                 color = Obsidian.colors.textPrimary
             )
             Spacer(modifier = Modifier.height(Obsidian.spacing.lg))
@@ -451,8 +482,8 @@ private fun DetailGuitarContent(
 
         Text(
             text = stringResource(R.string.pickup_selector),
-            style = Obsidian.typography.headlineSmall,
-            color = Obsidian.colors.textPrimary
+            style = Obsidian.typography.titleMedium,
+            color = Obsidian.colors.textSecondary
         )
         Spacer(modifier = Modifier.height(Obsidian.spacing.md))
 
