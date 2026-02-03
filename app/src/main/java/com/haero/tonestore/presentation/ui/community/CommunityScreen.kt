@@ -4,18 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -24,10 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.outlined.NewReleases
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,19 +21,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.haero.tonestore.R
 import com.haero.tonestore.presentation.ui.community.components.SharedPresetCard
 import com.haero.tonestore.presentation.viewmodel.CommunityViewModel
-import com.haero.tonestore.ui.components.GlassBackground
-import com.haero.tonestore.ui.components.GlassCard
-import com.haero.tonestore.ui.components.LocalEmberGlassTheme
+import com.haero.tonestore.ui.designsystem.*
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,7 +40,6 @@ fun CommunityScreen(
     viewModel: CommunityViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val theme = LocalEmberGlassTheme.current
 
     LaunchedEffect(state.navigateToDetail) {
         state.navigateToDetail?.let { id ->
@@ -68,11 +48,11 @@ fun CommunityScreen(
         }
     }
 
-    GlassBackground {
+    ObsidianBackground {
         Column(modifier = Modifier.fillMaxSize()) {
-            GlassCommunityHeader()
+            ObsidianCommunityHeader()
 
-            GlassCommunityTabs(
+            ObsidianCommunityTabs(
                 currentTab = state.currentTab,
                 onTabSelected = { viewModel.handleIntent(CommunityIntent.SetTab(it)) }
             )
@@ -88,18 +68,23 @@ fun CommunityScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator(color = theme.primary)
+                            ObsidianLoadingIndicator()
                         }
                     }
                     state.displayedPresets.isEmpty() -> {
-                        GlassEmptyCommunityState(
+                        ObsidianEmptyCommunityState(
                             modifier = Modifier.fillMaxSize()
                         )
                     }
                     else -> {
                         LazyColumn(
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            contentPadding = PaddingValues(
+                                start = Obsidian.spacing.screenPadding,
+                                end = Obsidian.spacing.screenPadding,
+                                top = Obsidian.spacing.md,
+                                bottom = 120.dp
+                            ),
+                            verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
                         ) {
                             items(
                                 items = state.displayedPresets,
@@ -116,10 +101,6 @@ fun CommunityScreen(
                                     modifier = Modifier.animateItem()
                                 )
                             }
-
-                            item {
-                                Spacer(modifier = Modifier.height(100.dp))
-                            }
                         }
                     }
                 }
@@ -129,17 +110,15 @@ fun CommunityScreen(
 }
 
 @Composable
-private fun GlassCommunityHeader(
+private fun ObsidianCommunityHeader(
     modifier: Modifier = Modifier
 ) {
-    val theme = LocalEmberGlassTheme.current
-
     Column(
         modifier = modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(horizontal = 20.dp)
-            .padding(top = 16.dp, bottom = 8.dp)
+            .padding(horizontal = Obsidian.spacing.screenPadding)
+            .padding(top = Obsidian.spacing.lg, bottom = Obsidian.spacing.sm)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -147,42 +126,39 @@ private fun GlassCommunityHeader(
             Icon(
                 imageVector = Icons.Default.Public,
                 contentDescription = null,
-                tint = theme.primary,
+                tint = Obsidian.colors.primary,
                 modifier = Modifier.size(28.dp)
             )
-            Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+            Spacer(modifier = Modifier.width(Obsidian.spacing.sm))
             Text(
                 text = stringResource(R.string.community),
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = theme.textPrimary
+                style = Obsidian.typography.displaySmall,
+                color = Obsidian.colors.textPrimary
             )
         }
         Text(
             text = stringResource(R.string.community_subtitle),
-            fontSize = 14.sp,
-            color = theme.textSecondary
+            style = Obsidian.typography.bodySmall,
+            color = Obsidian.colors.textSecondary
         )
     }
 }
 
 @Composable
-private fun GlassCommunityTabs(
+private fun ObsidianCommunityTabs(
     currentTab: CommunityTab,
     onTabSelected: (CommunityTab) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val theme = LocalEmberGlassTheme.current
-
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 8.dp)
+            .padding(horizontal = Obsidian.spacing.screenPadding, vertical = Obsidian.spacing.sm)
     ) {
-        GlassCard(
+        ObsidianSurface(
             modifier = Modifier.fillMaxWidth(),
-            cornerRadius = 16.dp,
-            glassAlpha = 0.1f
+            shape = RoundedCornerShape(Obsidian.radius.lg),
+            elevation = 0.dp // 탭 영역은 깊이감보다 일체감
         ) {
             Row(
                 modifier = Modifier
@@ -193,22 +169,22 @@ private fun GlassCommunityTabs(
                 CommunityTab.entries.forEach { tab ->
                     val selected = currentTab == tab
                     val color by animateColorAsState(
-                        targetValue = if (selected) theme.primary else theme.textSecondary,
+                        targetValue = if (selected) Obsidian.colors.primary else Obsidian.colors.textSecondary,
                         label = "tabColor"
                     )
 
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(Obsidian.radius.md))
                             .then(
                                 if (selected) {
                                     Modifier
-                                        .background(theme.primary.copy(alpha = 0.15f))
+                                        .background(Obsidian.colors.primaryMuted)
                                         .border(
                                             1.dp,
-                                            theme.primary.copy(alpha = 0.3f),
-                                            RoundedCornerShape(12.dp)
+                                            Obsidian.colors.primary.copy(alpha = 0.3f),
+                                            RoundedCornerShape(Obsidian.radius.md)
                                         )
                                 } else {
                                     Modifier
@@ -237,8 +213,7 @@ private fun GlassCommunityTabs(
                                     CommunityTab.POPULAR -> "인기"
                                 },
                                 color = color,
-                                fontSize = 14.sp,
-                                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
+                                style = if (selected) Obsidian.typography.labelLarge else Obsidian.typography.bodyMedium
                             )
                         }
                     }
@@ -249,13 +224,11 @@ private fun GlassCommunityTabs(
 }
 
 @Composable
-private fun GlassEmptyCommunityState(
+private fun ObsidianEmptyCommunityState(
     modifier: Modifier = Modifier
 ) {
-    val theme = LocalEmberGlassTheme.current
-
     Column(
-        modifier = modifier.padding(32.dp),
+        modifier = modifier.padding(Obsidian.spacing.xxxl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -263,29 +236,27 @@ private fun GlassEmptyCommunityState(
             modifier = Modifier
                 .size(100.dp)
                 .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.1f))
-                .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape),
+                .background(Obsidian.colors.surfaceHighlight),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.Public,
                 contentDescription = null,
-                tint = theme.textSecondary,
+                tint = Obsidian.colors.textMuted,
                 modifier = Modifier.size(48.dp)
             )
         }
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Obsidian.spacing.xl))
         Text(
             text = stringResource(R.string.empty_presets_title),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Medium,
-            color = theme.textPrimary
+            style = Obsidian.typography.headlineMedium,
+            color = Obsidian.colors.textPrimary
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Obsidian.spacing.sm))
         Text(
             text = stringResource(R.string.empty_presets_subtitle),
-            fontSize = 14.sp,
-            color = theme.textSecondary,
+            style = Obsidian.typography.bodyMedium,
+            color = Obsidian.colors.textSecondary,
             textAlign = TextAlign.Center
         )
     }

@@ -1,18 +1,9 @@
 package com.haero.tonestore.presentation.ui.community.components
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -31,15 +22,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.haero.tonestore.domain.model.GenreTag
 import com.haero.tonestore.domain.model.SharedToneSetting
-import com.haero.tonestore.ui.components.GlassCard
-import com.haero.tonestore.ui.components.LocalEmberGlassTheme
+import com.haero.tonestore.ui.designsystem.*
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -55,19 +42,13 @@ fun SharedPresetCard(
     onAuthorClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val theme = LocalEmberGlassTheme.current
-
-    GlassCard(
+    ObsidianCard(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
-        cornerRadius = 20.dp,
-        glassAlpha = 0.12f
+            .clickable(onClick = onClick)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
             // 작성자 정보
             Row(
@@ -82,32 +63,33 @@ fun SharedPresetCard(
                         .size(40.dp)
                         .clip(CircleShape)
                         .background(
-                            Brush.linearGradient(listOf(theme.primary, theme.accent))
+                            Brush.linearGradient(
+                                listOf(Obsidian.colors.primary, Obsidian.colors.primaryLight)
+                            )
                         )
-                        .padding(2.dp)
+                        .padding(1.5.dp)
                 ) {
                     if (preset.authorPhotoUrl != null) {
                         AsyncImage(
                             model = preset.authorPhotoUrl,
                             contentDescription = "Profile",
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .fillMaxSize()
                                 .clip(CircleShape),
                             contentScale = ContentScale.Crop
                         )
                     } else {
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .fillMaxSize()
                                 .clip(CircleShape)
-                                .background(theme.surfaceElevated),
+                                .background(Obsidian.colors.bgSecondary),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = preset.authorName.firstOrNull()?.uppercase() ?: "?",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = theme.primary
+                                style = Obsidian.typography.labelLarge,
+                                color = Obsidian.colors.primary
                             )
                         }
                     }
@@ -118,14 +100,13 @@ fun SharedPresetCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = preset.authorName.ifEmpty { "익명" },
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = theme.textPrimary
+                        style = Obsidian.typography.titleMedium,
+                        color = Obsidian.colors.textPrimary
                     )
                     Text(
                         text = formatRelativeTime(preset.createdAt),
-                        fontSize = 12.sp,
-                        color = theme.textSecondary
+                        style = Obsidian.typography.caption,
+                        color = Obsidian.colors.textMuted
                     )
                 }
             }
@@ -135,18 +116,17 @@ fun SharedPresetCard(
             // 프리셋 제목
             Text(
                 text = preset.title,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.SemiBold,
+                style = Obsidian.typography.headlineSmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                color = theme.textPrimary
+                color = Obsidian.colors.textPrimary
             )
 
             // 원곡 이름
             Text(
                 text = "🎸 ${preset.toneSetting.songName}",
-                fontSize = 14.sp,
-                color = theme.textSecondary,
+                style = Obsidian.typography.bodySmall,
+                color = Obsidian.colors.textSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -156,8 +136,8 @@ fun SharedPresetCard(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = preset.description,
-                    fontSize = 14.sp,
-                    color = theme.textSecondary,
+                    style = Obsidian.typography.bodyMedium,
+                    color = Obsidian.colors.textSecondary,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -170,42 +150,41 @@ fun SharedPresetCard(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     preset.tags.take(3).forEach { tag ->
-                        GlassTagChip(tag = tag)
+                        ObsidianTag(label = tag.displayNameKo)
                     }
                     if (preset.tags.size > 3) {
                         Text(
                             text = "+${preset.tags.size - 3}",
-                            fontSize = 12.sp,
-                            color = theme.textSecondary,
+                            style = Obsidian.typography.caption,
+                            color = Obsidian.colors.textMuted,
                             modifier = Modifier.align(Alignment.CenterVertically)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // 좋아요, 댓글, 다운로드 수
+            // 액션 영역 (좋아요, 북마크, 댓글, 다운로드)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // 좋아요
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .clickable { onLikeClick() }
                             .padding(4.dp)
                     ) {
-                        // Like Animation
-                        val scale = androidx.compose.animation.core.animateFloatAsState(
+                        val scale = animateFloatAsState(
                             targetValue = if (isLiked) 1.2f else 1f,
                             animationSpec = androidx.compose.animation.core.spring(
                                 dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
@@ -217,28 +196,28 @@ fun SharedPresetCard(
                         Icon(
                             imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                             contentDescription = "Like",
-                            tint = if (isLiked) theme.secondary else theme.textSecondary,
+                            tint = if (isLiked) Obsidian.colors.favorite else Obsidian.colors.textMuted,
                             modifier = Modifier
-                                .size(20.dp)
+                                .size(18.dp)
                                 .scale(scale.value)
                         )
                         Text(
                             text = "${preset.likes}",
-                            fontSize = 13.sp,
-                            color = if (isLiked) theme.secondary else theme.textSecondary
+                            style = Obsidian.typography.labelMedium,
+                            color = if (isLiked) Obsidian.colors.favorite else Obsidian.colors.textMuted
                         )
                     }
 
                     // 북마크
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .clickable { onBookmarkClick() }
                             .padding(4.dp)
                     ) {
-                        val scale = androidx.compose.animation.core.animateFloatAsState(
+                        val scale = animateFloatAsState(
                             targetValue = if (isBookmarked) 1.2f else 1f,
                             animationSpec = androidx.compose.animation.core.spring(
                                 dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
@@ -250,9 +229,9 @@ fun SharedPresetCard(
                         Icon(
                             imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
                             contentDescription = "Bookmark",
-                            tint = if (isBookmarked) theme.primary else theme.textSecondary,
+                            tint = if (isBookmarked) Obsidian.colors.primary else Obsidian.colors.textMuted,
                             modifier = Modifier
-                                .size(20.dp)
+                                .size(18.dp)
                                 .scale(scale.value)
                         )
                     }
@@ -260,63 +239,41 @@ fun SharedPresetCard(
                     // 댓글
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.ChatBubbleOutline,
                             contentDescription = "Comments",
-                            tint = theme.textSecondary,
-                            modifier = Modifier.size(18.dp)
+                            tint = Obsidian.colors.textMuted,
+                            modifier = Modifier.size(16.dp)
                         )
                         Text(
                             text = "${preset.commentCount}",
-                            fontSize = 13.sp,
-                            color = theme.textSecondary
+                            style = Obsidian.typography.labelMedium,
+                            color = Obsidian.colors.textMuted
                         )
                     }
 
                     // 다운로드
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Download,
                             contentDescription = "Downloads",
-                            tint = theme.textSecondary,
-                            modifier = Modifier.size(18.dp)
+                            tint = Obsidian.colors.textMuted,
+                            modifier = Modifier.size(16.dp)
                         )
                         Text(
                             text = "${preset.downloads}",
-                            fontSize = 13.sp,
-                            color = theme.textSecondary
+                            style = Obsidian.typography.labelMedium,
+                            color = Obsidian.colors.textMuted
                         )
                     }
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun GlassTagChip(
-    tag: GenreTag,
-    modifier: Modifier = Modifier
-) {
-    val theme = LocalEmberGlassTheme.current
-
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(theme.primary.copy(alpha = 0.15f))
-            .border(1.dp, theme.primary.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
-            .padding(horizontal = 10.dp, vertical = 5.dp)
-    ) {
-        Text(
-            text = tag.displayNameKo,
-            fontSize = 11.sp,
-            color = theme.primary
-        )
     }
 }
 

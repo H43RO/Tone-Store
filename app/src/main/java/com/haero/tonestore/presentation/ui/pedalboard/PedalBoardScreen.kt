@@ -5,52 +5,20 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.haero.tonestore.R
@@ -62,6 +30,7 @@ import com.haero.tonestore.presentation.ui.pedalboard.components.PedalBoardGrid
 import com.haero.tonestore.presentation.ui.pedalboard.components.PedalboardInfoEditor
 import com.haero.tonestore.presentation.ui.pedalboard.components.PresetPedalSelectionDialog
 import com.haero.tonestore.presentation.viewmodel.PedalBoardViewModel
+import com.haero.tonestore.ui.designsystem.*
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,7 +42,6 @@ fun PedalBoardScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
 
     var showAddPedalDialog by remember { mutableStateOf(false) }
     var addingToSlotIndex by remember { mutableStateOf<Int?>(null) }
@@ -119,133 +87,135 @@ fun PedalBoardScreen(
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            PedalBoardEditHeader(
-                title = if (state.isEditMode) {
-                    stringResource(R.string.edit_pedalboard)
-                } else {
-                    stringResource(R.string.create_pedalboard)
-                },
-                isSaving = state.isSaving,
-                isEditMode = state.isEditMode,
-                onCloseClick = onNavigateBack,
-                onSaveClick = { viewModel.handleIntent(PedalBoardIntent.SavePedalBoard) },
-                onDeleteClick = { viewModel.handleIntent(PedalBoardIntent.DeletePedalBoard) }
-            )
-
+    ObsidianBackground {
+        Scaffold(
+            containerColor = Color.Transparent,
+            snackbarHost = { SnackbarHost(snackbarHostState) }
+        ) { paddingValues ->
             Column(
                 modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp)
+                    .fillMaxSize()
+                    .padding(paddingValues)
             ) {
-                Spacer(modifier = Modifier.height(8.dp))
+                PedalBoardEditHeader(
+                    title = if (state.isEditMode) {
+                        stringResource(R.string.edit_pedalboard)
+                    } else {
+                        stringResource(R.string.create_pedalboard)
+                    },
+                    isSaving = state.isSaving,
+                    isEditMode = state.isEditMode,
+                    onCloseClick = onNavigateBack,
+                    onSaveClick = { viewModel.handleIntent(PedalBoardIntent.SavePedalBoard) },
+                    onDeleteClick = { viewModel.handleIntent(PedalBoardIntent.DeletePedalBoard) }
+                )
 
-                Box(
-                    modifier = Modifier.fillMaxWidth()
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = Obsidian.spacing.screenPadding)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
+                    Spacer(modifier = Modifier.height(Obsidian.spacing.sm))
+
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        PedalBoardGrid(
-                            slots = state.slots,
-                            columns = state.columns,
-                            rows = state.rows,
-                            editingSlotIndex = state.editingSlotIndex,
-                            onSlotClick = { slotIndex ->
-                                viewModel.handleIntent(PedalBoardIntent.OpenPedalEditor(slotIndex))
-                            },
-                            onAddClick = { slotIndex ->
-                                addingToSlotIndex = slotIndex
-                                showAddPedalDialog = true
-                            },
-                            onSwapSlots = { fromIndex, toIndex ->
-                                viewModel.handleIntent(PedalBoardIntent.SwapSlots(fromIndex, toIndex))
-                            },
-                            onSlotPositioned = { index, offset ->
-                                slotPositions[index] = offset
-                            },
-                            onDeletePedal = { slotIndex ->
-                                viewModel.handleIntent(PedalBoardIntent.RemovePedalFromSlot(slotIndex))
-                            },
-                            isEditable = true,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        ExpressionPedalZone(
-                            expressionPedal = state.expressionPedal,
-                            onSelectPedal = { showExpressionPedalDialog = true },
-                            onRemovePedal = { viewModel.handleIntent(PedalBoardIntent.RemoveExpressionPedal) }
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            PedalBoardGrid(
+                                slots = state.slots,
+                                columns = state.columns,
+                                rows = state.rows,
+                                editingSlotIndex = state.editingSlotIndex,
+                                onSlotClick = { slotIndex ->
+                                    viewModel.handleIntent(PedalBoardIntent.OpenPedalEditor(slotIndex))
+                                },
+                                onAddClick = { slotIndex ->
+                                    addingToSlotIndex = slotIndex
+                                    showAddPedalDialog = true
+                                },
+                                onSwapSlots = { fromIndex, toIndex ->
+                                    viewModel.handleIntent(PedalBoardIntent.SwapSlots(fromIndex, toIndex))
+                                },
+                                onSlotPositioned = { index, offset ->
+                                    slotPositions[index] = offset
+                                },
+                                onDeletePedal = { slotIndex ->
+                                    viewModel.handleIntent(PedalBoardIntent.RemovePedalFromSlot(slotIndex))
+                                },
+                                isEditable = true,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Spacer(Modifier.width(Obsidian.spacing.sm))
+                            ExpressionPedalZone(
+                                expressionPedal = state.expressionPedal,
+                                onSelectPedal = { showExpressionPedalDialog = true },
+                                onRemovePedal = { viewModel.handleIntent(PedalBoardIntent.RemoveExpressionPedal) }
+                            )
+                        }
                     }
+
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
-            }
+                val isEditingPedal = state.editingSlotIndex != null && state.editingPedal != null
 
-            val isEditingPedal = state.editingSlotIndex != null && state.editingPedal != null
+                AnimatedVisibility(
+                    visible = isEditingPedal,
+                    enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
+                    exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut()
+                ) {
+                    val pedal = lastEditingPedal.value ?: return@AnimatedVisibility
+                    val slotIndex = lastEditingSlotIndex.value ?: return@AnimatedVisibility
 
-            AnimatedVisibility(
-                visible = isEditingPedal,
-                enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
-                exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut()
-            ) {
-                val pedal = lastEditingPedal.value ?: return@AnimatedVisibility
-                val slotIndex = lastEditingSlotIndex.value ?: return@AnimatedVisibility
+                    InlinePedalEditor(
+                        pedal = pedal,
+                        slotIndex = slotIndex,
+                        onDismiss = { viewModel.handleIntent(PedalBoardIntent.ClosePedalEditor) },
+                        onColorChange = { color ->
+                            viewModel.handleIntent(
+                                PedalBoardIntent.UpdatePedalColor(slotIndex, color)
+                            )
+                        },
+                        onKnobsChange = { knobs ->
+                            viewModel.handleIntent(
+                                PedalBoardIntent.UpdatePedalKnobs(slotIndex, knobs)
+                            )
+                        },
+                        onPedalNameChange = { name ->
+                            viewModel.handleIntent(
+                                PedalBoardIntent.UpdatePedalName(slotIndex, name)
+                            )
+                        },
+                        onKnobNameChange = { knobIndex, name ->
+                            viewModel.handleIntent(PedalBoardIntent.UpdateKnobName(slotIndex, knobIndex, name))
+                        }
+                    )
+                }
 
-                InlinePedalEditor(
-                    pedal = pedal,
-                    slotIndex = slotIndex,
-                    onDismiss = { viewModel.handleIntent(PedalBoardIntent.ClosePedalEditor) },
-                    onColorChange = { color ->
-                        viewModel.handleIntent(
-                            PedalBoardIntent.UpdatePedalColor(slotIndex, color)
-                        )
-                    },
-                    onKnobsChange = { knobs ->
-                        viewModel.handleIntent(
-                            PedalBoardIntent.UpdatePedalKnobs(slotIndex, knobs)
-                        )
-                    },
-                    onPedalNameChange = { name ->
-                        viewModel.handleIntent(
-                            PedalBoardIntent.UpdatePedalName(slotIndex, name)
-                        )
-                    },
-                    onKnobNameChange = { knobIndex, name ->
-                        viewModel.handleIntent(PedalBoardIntent.UpdateKnobName(slotIndex, knobIndex, name))
-                    }
-                )
-            }
-
-            AnimatedVisibility(
-                visible = isEditingPedal.not(),
-                enter = expandVertically(expandFrom = Alignment.Bottom) + fadeIn(),
-                exit = shrinkVertically(shrinkTowards = Alignment.Bottom) + fadeOut()
-            ) {
-                PedalboardInfoEditor(
-                    name = state.name,
-                    columns = state.columns,
-                    rows = state.rows,
-                    pedalCount = state.pedalCount,
-                    totalSlots = state.totalSlots,
-                    nameError = state.nameError,
-                    onNameChange = { viewModel.handleIntent(PedalBoardIntent.UpdateName(it)) },
-                    onColumnsChange = { newColumns ->
-                        viewModel.handleIntent(PedalBoardIntent.UpdateLayout(newColumns, state.rows))
-                    },
-                    onRowsChange = { newRows ->
-                        viewModel.handleIntent(PedalBoardIntent.UpdateLayout(state.columns, newRows))
-                    }
-                )
+                AnimatedVisibility(
+                    visible = isEditingPedal.not(),
+                    enter = expandVertically(expandFrom = Alignment.Bottom) + fadeIn(),
+                    exit = shrinkVertically(shrinkTowards = Alignment.Bottom) + fadeOut()
+                ) {
+                    PedalboardInfoEditor(
+                        name = state.name,
+                        columns = state.columns,
+                        rows = state.rows,
+                        pedalCount = state.pedalCount,
+                        totalSlots = state.totalSlots,
+                        nameError = state.nameError,
+                        onNameChange = { viewModel.handleIntent(PedalBoardIntent.UpdateName(it)) },
+                        onColumnsChange = { newColumns ->
+                            viewModel.handleIntent(PedalBoardIntent.UpdateLayout(newColumns, state.rows))
+                        },
+                        onRowsChange = { newRows ->
+                            viewModel.handleIntent(PedalBoardIntent.UpdateLayout(state.columns, newRows))
+                        }
+                    )
+                }
             }
         }
     }
@@ -323,113 +293,37 @@ private fun PedalBoardEditHeader(
             .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Surface(
+        ObsidianIconButton(
             onClick = onCloseClick,
-            shape = CircleShape,
-            color = Color.Transparent,
-            modifier = Modifier.size(44.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = stringResource(R.string.back),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-        }
+            icon = Icons.Default.Close,
+            tint = Obsidian.colors.textPrimary
+        )
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(8.dp))
 
         Text(
             text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
+            style = Obsidian.typography.headlineMedium,
+            color = Obsidian.colors.textPrimary,
             modifier = Modifier.weight(1f)
         )
 
         if (isEditMode) {
-            Surface(
+            ObsidianIconButton(
                 onClick = onDeleteClick,
-                shape = CircleShape,
-                modifier = Modifier.size(44.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = stringResource(R.string.delete),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.width(8.dp))
+                icon = Icons.Default.Delete,
+                tint = Obsidian.colors.textSecondary
+            )
+            Spacer(modifier = Modifier.width(4.dp))
         }
 
-        Surface(
+        ObsidianIconButton(
             onClick = onSaveClick,
-            shape = CircleShape,
-            modifier = Modifier.size(44.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                if (isSaving) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Save,
-                        contentDescription = stringResource(R.string.save),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-        }
+            icon = Icons.Default.Save,
+            tint = Obsidian.colors.primary,
+            enabled = !isSaving
+        )
     }
-}
-
-@Composable
-private fun AddPedalDialog(
-    presetPedals: List<Pedal>,
-    onSelectPreset: (Pedal) -> Unit,
-    onCreateCustom: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.select_preset_pedal)) },
-        text = {
-            Column {
-                presetPedals.forEach { pedal ->
-                    AssistChip(
-                        onClick = { onSelectPreset(pedal) },
-                        label = { Text(pedal.name) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                AssistChip(
-                    onClick = onCreateCustom,
-                    label = { Text(stringResource(R.string.add_custom_pedal)) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
-        }
-    )
 }
 
 @Composable
@@ -437,47 +331,11 @@ private fun CustomPedalDialog(onConfirm: (name: String, knobs: List<String>) -> 
     var pedalName by remember { mutableStateOf("") }
     val knobNames = remember { mutableStateListOf("Knob 1") }
 
-    AlertDialog(
+    ObsidianDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.create_custom_pedal)) },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = pedalName,
-                    onValueChange = { pedalName = it },
-                    label = { Text(stringResource(R.string.pedal_name)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = stringResource(R.string.knobs),
-                    style = MaterialTheme.typography.labelLarge
-                )
-
-                knobNames.forEachIndexed { index, name ->
-                    OutlinedTextField(
-                        value = name,
-                        onValueChange = { knobNames[index] = it },
-                        label = { Text("Knob ${index + 1}") },
-                        singleLine = true,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                    )
-                }
-
-                if (knobNames.size < 6) {
-                    TextButton(onClick = { knobNames.add("Knob ${knobNames.size + 1}") }) {
-                        Text(stringResource(R.string.add_knob))
-                    }
-                }
-            }
-        },
+        title = stringResource(R.string.create_custom_pedal),
         confirmButton = {
-            TextButton(
+            ObsidianButton(
                 onClick = {
                     if (pedalName.isNotBlank()) {
                         onConfirm(pedalName, knobNames.filter { it.isNotBlank() })
@@ -489,24 +347,45 @@ private fun CustomPedalDialog(onConfirm: (name: String, knobs: List<String>) -> 
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            ObsidianOutlinedButton(onClick = onDismiss) {
                 Text(stringResource(R.string.cancel))
             }
         }
-    )
-}
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.md)
+        ) {
+            ObsidianTextField(
+                value = pedalName,
+                onValueChange = { pedalName = it },
+                placeholder = stringResource(R.string.pedal_name),
+                modifier = Modifier.fillMaxWidth()
+            )
 
-@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
-@Composable
-private fun PedalBoardEditHeaderPreview() {
-    com.haero.tonestore.ui.theme.ToneStoreTheme {
-        PedalBoardEditHeader(
-            title = "Create Pedal Board",
-            isSaving = false,
-            isEditMode = false,
-            onCloseClick = {},
-            onSaveClick = {},
-            onDeleteClick = {}
-        )
+            Text(
+                text = stringResource(R.string.knobs),
+                style = Obsidian.typography.labelLarge,
+                color = Obsidian.colors.textSecondary
+            )
+
+            knobNames.forEachIndexed { index, name ->
+                ObsidianTextField(
+                    value = name,
+                    onValueChange = { knobNames[index] = it },
+                    placeholder = "노브 ${index + 1} 이름",
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            if (knobNames.size < 6) {
+                ObsidianTextButton(
+                    onClick = { knobNames.add("Knob ${knobNames.size + 1}") },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text(stringResource(R.string.add_knob))
+                }
+            }
+        }
     }
 }

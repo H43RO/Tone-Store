@@ -1,27 +1,13 @@
 package com.haero.tonestore.presentation.ui.preset_detail.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,11 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.Comment
+import com.haero.tonestore.ui.designsystem.*
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -54,7 +40,7 @@ fun CommentItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // 프로필 이미지
@@ -72,13 +58,13 @@ fun CommentItem(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.secondaryContainer),
+                    .background(Obsidian.colors.surfaceHighlight),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = comment.authorName.firstOrNull()?.uppercase() ?: "?",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                    style = Obsidian.typography.labelLarge,
+                    color = Obsidian.colors.primary
                 )
             }
         }
@@ -90,20 +76,20 @@ fun CommentItem(
             ) {
                 Text(
                     text = comment.authorName.ifEmpty { "익명" },
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium
+                    style = Obsidian.typography.titleMedium,
+                    color = Obsidian.colors.textPrimary
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = formatCommentTime(comment.createdAt),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = Obsidian.typography.caption,
+                    color = Obsidian.colors.textMuted
                 )
                 if (comment.updatedAt > comment.createdAt) {
                     Text(
                         text = stringResource(R.string.edited_suffix),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = Obsidian.typography.caption,
+                        color = Obsidian.colors.textMuted
                     )
                 }
 
@@ -120,29 +106,30 @@ fun CommentItem(
                                 imageVector = Icons.Default.MoreVert,
                                 contentDescription = "More options",
                                 modifier = Modifier.size(18.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = Obsidian.colors.textSecondary
                             )
                         }
 
                         DropdownMenu(
                             expanded = showMenu,
-                            onDismissRequest = { showMenu = false }
+                            onDismissRequest = { showMenu = false },
+                            containerColor = Obsidian.colors.surfaceElevated
                         ) {
                             DropdownMenuItem(
-                                text = { Text("수정") },
+                                text = { Text("수정", color = Obsidian.colors.textPrimary) },
                                 onClick = {
                                     showMenu = false
                                     onEditClick()
                                 },
                                 leadingIcon = {
-                                    Icon(Icons.Default.Edit, contentDescription = null)
+                                    Icon(Icons.Default.Edit, contentDescription = null, tint = Obsidian.colors.textSecondary)
                                 }
                             )
                             DropdownMenuItem(
                                 text = {
                                     Text(
                                         "삭제",
-                                        color = MaterialTheme.colorScheme.error
+                                        color = Obsidian.colors.error
                                     )
                                 },
                                 onClick = {
@@ -153,7 +140,7 @@ fun CommentItem(
                                     Icon(
                                         Icons.Default.Delete,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.error
+                                        tint = Obsidian.colors.error
                                     )
                                 }
                             )
@@ -166,8 +153,8 @@ fun CommentItem(
 
             Text(
                 text = comment.content,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                style = Obsidian.typography.bodyMedium,
+                color = Obsidian.colors.textSecondary
             )
         }
     }
