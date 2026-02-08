@@ -285,26 +285,16 @@ fun PedalBoardScreen(
         ObsidianAlertDialog(
             onDismissRequest = { showUnsavedChangesDialog = false },
             title = "저장되지 않은 변경사항",
-            text = "페달보드가 저장되지 않았어요.\n나가기 전 저장할까요?",
-            confirmButton = {
-                ObsidianButton(
-                    onClick = {
-                        viewModel.handleIntent(PedalBoardIntent.SavePedalBoard)
-                        showUnsavedChangesDialog = false
-                    }
-                ) {
-                    Text("저장")
-                }
+            message = "페달보드가 저장되지 않았어요.\n나가기 전 저장할까요?",
+            confirmText = "저장",
+            onConfirm = {
+                viewModel.handleIntent(PedalBoardIntent.SavePedalBoard)
+                showUnsavedChangesDialog = false
             },
-            dismissButton = {
-                ObsidianOutlinedButton(
-                    onClick = {
-                        showUnsavedChangesDialog = false
-                        onNavigateBack()
-                    }
-                ) {
-                    Text("나가기")
-                }
+            dismissText = "나가기",
+            onDismiss = {
+                showUnsavedChangesDialog = false
+                onNavigateBack()
             }
         )
     }
