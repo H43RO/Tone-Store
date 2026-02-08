@@ -27,7 +27,8 @@ data class PedalBoardState(
     val nameError: String? = null,
     val navigateBack: Boolean = false,
     val showSaveSuccess: Boolean = false,
-    val showDeleteConfirm: Boolean = false
+    val showDeleteConfirm: Boolean = false,
+    val hasUnsavedChanges: Boolean = false
 ) {
     val totalSlots: Int get() = columns * rows
     val pedalCount: Int get() = slots.count { it != null }

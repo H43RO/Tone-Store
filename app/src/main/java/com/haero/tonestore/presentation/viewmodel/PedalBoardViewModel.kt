@@ -37,8 +37,18 @@ class PedalBoardViewModel(
     val state: StateFlow<PedalBoardState> = _state.asStateFlow()
 
     private var allPedalBoards: List<SavedPedalBoard> = emptyList()
+    private var initialPedalBoard: SavedPedalBoard? = null
 
     init {
+        // 새 페달보드 생성을 위한 초기 상태 설정
+        val now = System.currentTimeMillis()
+        initialPedalBoard = SavedPedalBoard(
+            id = UUID.randomUUID().toString(),
+            name = "",
+            createdAt = now,
+            updatedAt = now
+        )
+
         loadPresetPedals()
         loadAllPedalBoards()
         loadAllCustomPedals()
@@ -91,6 +101,7 @@ class PedalBoardViewModel(
                 getSavedPedalBoardByIdUseCase(id)
             }.onSuccess { pedalBoard ->
                 if (pedalBoard != null) {
+                    initialPedalBoard = pedalBoard
                     _state.update {
                         it.copy(
                             isLoading = false,
@@ -100,7 +111,8 @@ class PedalBoardViewModel(
                             columns = pedalBoard.columns,
                             rows = pedalBoard.rows,
                             slots = pedalBoard.slots,
-                            expressionPedal = pedalBoard.expressionPedal
+                            expressionPedal = pedalBoard.expressionPedal,
+                            hasUnsavedChanges = false
                         )
                     }
                 } else {
@@ -112,8 +124,31 @@ class PedalBoardViewModel(
         }
     }
 
+    private fun updateState(transform: (PedalBoardState) -> PedalBoardState) {
+        _state.update { currentState ->
+            val newState = transform(currentState)
+            val hasChanges = checkForChanges(newState)
+            newState.copy(hasUnsavedChanges = hasChanges)
+        }
+    }
+
+    private fun checkForChanges(state: PedalBoardState): Boolean {
+        val initial = initialPedalBoard ?: return state.pedalCount > 0 || state.name.isNotEmpty()
+
+        if (state.name != initial.name) return true
+        if (state.columns != initial.columns) return true
+        if (state.rows != initial.rows) return true
+        if (state.expressionPedal != initial.expressionPedal) return true
+
+        // 슬롯 리스트 비교 (크기 및 내용)
+        if (state.slots.size != initial.slots.size) return true
+        if (state.slots != initial.slots) return true
+
+        return false
+    }
+
     private fun updateName(name: String) {
-        _state.update { it.copy(name = name, nameError = null) }
+        updateState { it.copy(name = name, nameError = null) }
     }
 
     private fun updateLayout(columns: Int, rows: Int) {
@@ -140,7 +175,7 @@ class PedalBoardViewModel(
             currentSlots.take(newTotalSlots)
         }
 
-        _state.update {
+        updateState {
             it.copy(
                 columns = newColumns,
                 rows = newRows,
@@ -159,7 +194,7 @@ class PedalBoardViewModel(
         )
         val updatedSlots = _state.value.slots.toMutableList()
         updatedSlots[slotIndex] = newPedal
-        _state.update { it.copy(slots = updatedSlots) }
+        updateState { it.copy(slots = updatedSlots) }
     }
 
     private fun addCustomPedalToSlot(slotIndex: Int, name: String, knobNames: List<String>) {
@@ -175,7 +210,7 @@ class PedalBoardViewModel(
         )
         val updatedSlots = _state.value.slots.toMutableList()
         updatedSlots[slotIndex] = newPedal
-        _state.update { it.copy(slots = updatedSlots) }
+        updateState { it.copy(slots = updatedSlots) }
     }
 
     private fun removePedalFromSlot(slotIndex: Int) {
@@ -183,7 +218,7 @@ class PedalBoardViewModel(
 
         val updatedSlots = _state.value.slots.toMutableList()
         updatedSlots[slotIndex] = null
-        _state.update { it.copy(slots = updatedSlots, editingSlotIndex = null) }
+        updateState { it.copy(slots = updatedSlots, editingSlotIndex = null) }
     }
 
     private fun swapSlots(fromIndex: Int, toIndex: Int) {
@@ -199,7 +234,7 @@ class PedalBoardViewModel(
         updatedSlots[fromIndex] = updatedSlots[fromIndex]?.copy(order = fromIndex)
         updatedSlots[toIndex] = updatedSlots[toIndex]?.copy(order = toIndex)
 
-        _state.update { it.copy(slots = updatedSlots) }
+        updateState { it.copy(slots = updatedSlots) }
     }
 
     private fun movePedalToSlot(fromIndex: Int, toIndex: Int) {
@@ -213,7 +248,7 @@ class PedalBoardViewModel(
         if (updatedSlots[toIndex] == null) {
             updatedSlots[fromIndex] = null
             updatedSlots[toIndex] = pedal.copy(order = toIndex)
-            _state.update { it.copy(slots = updatedSlots) }
+            updateState { it.copy(slots = updatedSlots) }
         } else {
             swapSlots(fromIndex, toIndex)
         }
@@ -229,7 +264,7 @@ class PedalBoardViewModel(
         val updatedPedal = pedal.copy(knobs = updatedKnobs)
         val updatedSlots = _state.value.slots.toMutableList()
         updatedSlots[slotIndex] = updatedPedal
-        _state.update { it.copy(slots = updatedSlots) }
+        updateState { it.copy(slots = updatedSlots) }
     }
 
     private fun togglePedalEnabled(slotIndex: Int) {
@@ -239,7 +274,7 @@ class PedalBoardViewModel(
         val updatedPedal = pedal.copy(isEnabled = pedal.isEnabled.not())
         val updatedSlots = _state.value.slots.toMutableList()
         updatedSlots[slotIndex] = updatedPedal
-        _state.update { it.copy(slots = updatedSlots) }
+        updateState { it.copy(slots = updatedSlots) }
     }
 
     private fun openPedalEditor(slotIndex: Int) {
@@ -258,7 +293,7 @@ class PedalBoardViewModel(
         val updatedPedal = pedal.copy(color = color)
         val updatedSlots = _state.value.slots.toMutableList()
         updatedSlots[slotIndex] = updatedPedal
-        _state.update { it.copy(slots = updatedSlots) }
+        updateState { it.copy(slots = updatedSlots) }
     }
 
     private fun updatePedalKnobs(slotIndex: Int, knobs: List<Knob>) {
@@ -268,7 +303,7 @@ class PedalBoardViewModel(
         val updatedPedal = pedal.copy(knobs = knobs)
         val updatedSlots = _state.value.slots.toMutableList()
         updatedSlots[slotIndex] = updatedPedal
-        _state.update { it.copy(slots = updatedSlots) }
+        updateState { it.copy(slots = updatedSlots) }
     }
 
     private fun updatePedalName(slotIndex: Int, name: String) {
@@ -278,7 +313,7 @@ class PedalBoardViewModel(
         val updatedPedal = pedal.copy(name = name)
         val updatedSlots = _state.value.slots.toMutableList()
         updatedSlots[slotIndex] = updatedPedal
-        _state.update { it.copy(slots = updatedSlots) }
+        updateState { it.copy(slots = updatedSlots) }
     }
 
     private fun updateKnobName(slotIndex: Int, knobIndex: Int, name: String) {
@@ -293,15 +328,15 @@ class PedalBoardViewModel(
         val updatedPedal = pedal.copy(knobs = updatedKnobs)
         val updatedSlots = _state.value.slots.toMutableList()
         updatedSlots[slotIndex] = updatedPedal
-        _state.update { it.copy(slots = updatedSlots) }
+        updateState { it.copy(slots = updatedSlots) }
     }
 
     private fun selectExpressionPedal(pedal: Pedal) {
-        _state.update { it.copy(expressionPedal = pedal) }
+        updateState { it.copy(expressionPedal = pedal) }
     }
 
     private fun removeExpressionPedal() {
-        _state.update { it.copy(expressionPedal = null) }
+        updateState { it.copy(expressionPedal = null) }
     }
 
     private fun savePedalBoard() {

@@ -106,7 +106,13 @@ fun PedalBoardScreen(
                     },
                     isSaving = state.isSaving,
                     isEditMode = state.isEditMode,
-                    onCloseClick = { showUnsavedChangesDialog = true },
+                    onCloseClick = {
+                        if (state.hasUnsavedChanges) {
+                            showUnsavedChangesDialog = true
+                        } else {
+                            onNavigateBack()
+                        }
+                    },
                     onSaveClick = { viewModel.handleIntent(PedalBoardIntent.SavePedalBoard) },
                     onDeleteClick = { viewModel.handleIntent(PedalBoardIntent.DeletePedalBoard) }
                 )
@@ -278,7 +284,11 @@ fun PedalBoardScreen(
 
     // 뒤로가기 핸들링
     androidx.activity.compose.BackHandler {
-        showUnsavedChangesDialog = true
+        if (state.hasUnsavedChanges) {
+            showUnsavedChangesDialog = true
+        } else {
+            onNavigateBack()
+        }
     }
 
     if (showUnsavedChangesDialog) {
