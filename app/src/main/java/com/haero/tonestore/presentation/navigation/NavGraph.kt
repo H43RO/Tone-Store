@@ -62,6 +62,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -762,4 +763,19 @@ private fun ObsidianNavItem(
             maxLines = 1
         )
     }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF121212)
+@Composable
+private fun ObsidianBottomNavBarPreview() {
+    ObsidianBottomNavBar(
+        tabs = bottomNavTabs,
+        selectedIndex = 0,
+        onTabSelected = {},
+        showCreateMenu = false,
+        onCreateClick = {},
+        onDismissCreateMenu = {},
+        onCreateTone = {},
+        onCreatePedalBoard = {}
+    )
 }
