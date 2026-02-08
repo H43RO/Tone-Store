@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -31,13 +33,18 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,8 +62,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.ToneSetting
-import com.haero.tonestore.presentation.ui.home.components.GridToneSettingCard
-import com.haero.tonestore.presentation.ui.home.components.SortFilterBar
 import com.haero.tonestore.presentation.ui.home.components.ToneSettingCard
 import com.haero.tonestore.presentation.viewmodel.HomeViewModel
 import com.haero.tonestore.ui.designsystem.Obsidian
@@ -127,23 +132,97 @@ fun HomeScreen(
                     totalCount = state.toneSettings.size
                 )
 
-                if (state.toneSettings.isNotEmpty()) {
-                    SortFilterBar(
-                        sortOption = state.sortOption,
-                        onSortOptionChange = { viewModel.handleIntent(HomeIntent.SetSortOption(it)) }
-                    )
-                }
+                var sortExpanded by remember { mutableStateOf(false) }
 
-                ObsidianSearchField(
-                    value = state.searchQuery,
-                    onValueChange = { viewModel.handleIntent(HomeIntent.UpdateSearchQuery(it)) },
-                    placeholder = stringResource(R.string.search_hint),
-                    onClear = { viewModel.handleIntent(HomeIntent.UpdateSearchQuery("")) },
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = Obsidian.spacing.screenPadding)
-                        .padding(bottom = Obsidian.spacing.md)
-                )
+                        .padding(bottom = Obsidian.spacing.md),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ObsidianSearchField(
+                        value = state.searchQuery,
+                        onValueChange = { viewModel.handleIntent(HomeIntent.UpdateSearchQuery(it)) },
+                        placeholder = stringResource(R.string.search_hint),
+                        onClear = { viewModel.handleIntent(HomeIntent.UpdateSearchQuery("")) },
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    if (state.toneSettings.isNotEmpty()) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Box {
+                            IconButton(
+                                onClick = { sortExpanded = true },
+                                modifier = Modifier
+                                    .background(
+                                        color = Obsidian.colors.surfaceElevated,
+                                        shape = RoundedCornerShape(Obsidian.radius.md)
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        color = Obsidian.colors.borderSubtle,
+                                        shape = RoundedCornerShape(Obsidian.radius.md)
+                                    )
+                                    .size(48.dp)
+                            ) {
+                                Icon(
+                                    imageVector = if (state.sortOption == SortOption.FAVORITES_FIRST) {
+                                        Icons.Filled.Favorite
+                                    } else {
+                                        Icons.Filled.Schedule
+                                    },
+                                    contentDescription = null,
+                                    tint = Obsidian.colors.primary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+
+                            DropdownMenu(
+                                expanded = sortExpanded,
+                                onDismissRequest = { sortExpanded = false },
+                                modifier = Modifier
+                                    .background(Obsidian.colors.surfaceElevated)
+                                    .border(1.dp, Obsidian.colors.border, RoundedCornerShape(4.dp))
+                            ) {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            stringResource(R.string.sort_favorites_first),
+                                            style = Obsidian.typography.bodyMedium,
+                                            color = if (state.sortOption == SortOption.FAVORITES_FIRST) {
+                                                Obsidian.colors.primary
+                                            } else {
+                                                Obsidian.colors.textPrimary
+                                            }
+                                        )
+                                    },
+                                    onClick = {
+                                        viewModel.handleIntent(HomeIntent.SetSortOption(SortOption.FAVORITES_FIRST))
+                                        sortExpanded = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            stringResource(R.string.sort_date_first),
+                                            style = Obsidian.typography.bodyMedium,
+                                            color = if (state.sortOption == SortOption.DATE_FIRST) {
+                                                Obsidian.colors.primary
+                                            } else {
+                                                Obsidian.colors.textPrimary
+                                            }
+                                        )
+                                    },
+                                    onClick = {
+                                        viewModel.handleIntent(HomeIntent.SetSortOption(SortOption.DATE_FIRST))
+                                        sortExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
 
                 Box(
                     modifier = Modifier
