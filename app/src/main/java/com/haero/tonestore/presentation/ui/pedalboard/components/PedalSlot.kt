@@ -176,8 +176,8 @@ internal fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
 
     val gradient = Brush.verticalGradient(
         colors = listOf(
-            backgroundColor.copy(alpha = 0.9f),
-            backgroundColor.copy(alpha = 0.7f)
+            PedalColorUtils.darken(backgroundColor, 0.9f),
+            PedalColorUtils.darken(backgroundColor, 0.7f)
         )
     )
 

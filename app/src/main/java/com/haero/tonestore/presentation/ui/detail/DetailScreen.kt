@@ -356,7 +356,9 @@ private fun GridPedalView(
         val chunkedPedals = pedals.chunked(2)
         chunkedPedals.forEach { rowPedals ->
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(androidx.compose.foundation.layout.IntrinsicSize.Max),
                 horizontalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
             ) {
                 rowPedals.forEach { pedal ->
@@ -366,7 +368,9 @@ private fun GridPedalView(
                         onToggleEnabled = {},
                         onRemove = {},
                         isEditable = false,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
                     )
                 }
 

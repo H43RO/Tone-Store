@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -116,6 +117,7 @@ fun PedalCard(
     ) {
         Box(
             modifier = Modifier
+                .fillMaxSize()
                 .background(adjustedGradient)
                 .border(2.dp, borderColor, RoundedCornerShape(12.dp))
                 .padding(12.dp)
