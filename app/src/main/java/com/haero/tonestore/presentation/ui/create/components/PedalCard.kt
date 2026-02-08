@@ -181,6 +181,8 @@ fun PedalCard(
                     }
                 }
 
+                Spacer(Modifier.weight(1f))
+
                 if (isEditable) {
                     val powerButtonColor = if (pedal.isEnabled) {
                         PedalColorUtils.calculateBorderColor(backgroundColor)
@@ -213,8 +215,6 @@ fun PedalCard(
                         )
                     }
                 }
-
-                Spacer(Modifier.weight(1f))
             }
         }
     }
