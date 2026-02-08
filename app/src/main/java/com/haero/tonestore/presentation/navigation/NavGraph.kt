@@ -724,14 +724,14 @@ private fun ObsidianNavItem(
     Column(
         modifier = modifier
             .scale(scale)
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(50))
             .background(backgroundColor)
             .then(
                 if (selected) {
                     Modifier.border(
                         1.dp,
                         ObsidianColors.primary.copy(alpha = 0.3f),
-                        RoundedCornerShape(12.dp)
+                        RoundedCornerShape(50)
                     )
                 } else {
                     Modifier
@@ -742,22 +742,22 @@ private fun ObsidianNavItem(
                 indication = null,
                 onClick = onClick
             )
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 8.dp, vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             imageVector = if (selected) tab.selectedIcon else tab.icon,
             contentDescription = stringResource(tab.titleResId),
             tint = contentColor,
-            modifier = Modifier.size(22.dp)
+            modifier = Modifier.size(20.dp)
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(2.dp))
 
         Text(
             text = stringResource(tab.titleResId),
             color = contentColor,
-            fontSize = 10.sp,
+            fontSize = 9.sp,
             fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
             maxLines = 1
         )
