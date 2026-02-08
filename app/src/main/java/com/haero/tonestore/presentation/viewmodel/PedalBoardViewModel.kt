@@ -317,13 +317,35 @@ class PedalBoardViewModel(
                 currentState.name
             }
 
+            // 빈 행 최적화 (뒤에서부터 비어있는 행 제거)
+            var optimizedRows = currentState.rows
+            val columns = currentState.columns
+            val slots = currentState.slots
+
+            for (r in currentState.rows - 1 downTo SavedPedalBoard.MIN_ROWS) {
+                val startIndex = r * columns
+                val endIndex = startIndex + columns
+                // 슬롯 범위를 안전하게 가져옴
+                if (startIndex < slots.size) {
+                    val rowSlots = slots.subList(startIndex, minOf(endIndex, slots.size))
+                    if (rowSlots.all { it == null }) {
+                        optimizedRows = r
+                    } else {
+                        break
+                    }
+                }
+            }
+
+            // 최적화된 슬롯 리스트 (크기 조정)
+            val optimizedSlots = slots.take(columns * optimizedRows)
+
             val now = System.currentTimeMillis()
             val pedalBoard = SavedPedalBoard(
                 id = currentState.editingId ?: UUID.randomUUID().toString(),
                 name = finalName,
                 columns = currentState.columns,
-                rows = currentState.rows,
-                slots = currentState.slots,
+                rows = optimizedRows,
+                slots = optimizedSlots,
                 expressionPedal = currentState.expressionPedal,
                 createdAt = now,
                 updatedAt = now
@@ -333,7 +355,7 @@ class PedalBoardViewModel(
                 savePedalBoardUseCase(pedalBoard)
 
                 // 2. 커스텀 페달 자동 저장
-                saveCustomPedalsFromBoard(currentState.slots)
+                saveCustomPedalsFromBoard(optimizedSlots)
             }.onSuccess {
                 _state.update { it.copy(isSaving = false, navigateBack = true, showSaveSuccess = true) }
             }.onFailure { e ->
