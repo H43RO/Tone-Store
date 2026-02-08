@@ -213,6 +213,8 @@ fun PedalCard(
                         )
                     }
                 }
+
+                Spacer(Modifier.weight(1f))
             }
         }
     }
