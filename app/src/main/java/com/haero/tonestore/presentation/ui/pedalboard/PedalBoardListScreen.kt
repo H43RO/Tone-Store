@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -29,7 +28,6 @@ import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -128,27 +126,6 @@ fun PedalBoardListScreen(
                         }
                     }
                 }
-            }
-
-            // Expandable FAB - Material3 ExtendedFloatingActionButton
-            if (state.isLoggedIn && state.pedalBoards.isNotEmpty()) {
-                ExtendedFloatingActionButton(
-                    onClick = onNavigateToCreate,
-                    expanded = isExpanded,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Rounded.Add,
-                            contentDescription = null
-                        )
-                    },
-                    text = { Text(stringResource(R.string.create_pedalboard)) },
-                    containerColor = Obsidian.colors.primary,
-                    contentColor = Color.White,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(end = 20.dp, bottom = 100.dp)
-                        .navigationBarsPadding()
-                )
             }
         }
     }
