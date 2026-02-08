@@ -5,7 +5,6 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -15,7 +14,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -716,23 +717,17 @@ private fun ObsidianNavItem(
         label = "scale"
     )
 
-    val horizontalPadding by animateDpAsState(
-        targetValue = if (selected) 16.dp else 14.dp,
-        animationSpec = spring(stiffness = Spring.StiffnessMedium),
-        label = "horizontalPadding"
-    )
-
-    Box(
+    Column(
         modifier = modifier
             .scale(scale)
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)
             .then(
                 if (selected) {
                     Modifier.border(
                         1.dp,
                         ObsidianColors.primary.copy(alpha = 0.3f),
-                        RoundedCornerShape(16.dp)
+                        RoundedCornerShape(12.dp)
                     )
                 } else {
                     Modifier
@@ -743,28 +738,24 @@ private fun ObsidianNavItem(
                 indication = null,
                 onClick = onClick
             )
-            .padding(horizontal = horizontalPadding, vertical = 10.dp),
-        contentAlignment = Alignment.Center
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = if (selected) tab.selectedIcon else tab.icon,
-                contentDescription = stringResource(tab.titleResId),
-                tint = contentColor,
-                modifier = Modifier.size(22.dp)
-            )
+        Icon(
+            imageVector = if (selected) tab.selectedIcon else tab.icon,
+            contentDescription = stringResource(tab.titleResId),
+            tint = contentColor,
+            modifier = Modifier.size(22.dp)
+        )
 
-            if (selected) {
-                Text(
-                    text = stringResource(tab.titleResId),
-                    color = contentColor,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-        }
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = stringResource(tab.titleResId),
+            color = contentColor,
+            fontSize = 10.sp,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            maxLines = 1
+        )
     }
 }
