@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -570,120 +571,123 @@ private fun ObsidianBottomNavBar(
     onCreatePedalBoard: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 12.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
             .navigationBarsPadding(),
-        contentAlignment = Alignment.Center
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        // Main Nav Bar (Pill Shape)
         Box(
             modifier = Modifier
+                .weight(1f)
                 .shadow(
-                    elevation = 16.dp,
-                    shape = RoundedCornerShape(24.dp),
-                    spotColor = Color.Black
+                    elevation = 20.dp,
+                    shape = RoundedCornerShape(50),
+                    spotColor = Color.Black.copy(alpha = 0.3f)
                 )
-                .clip(RoundedCornerShape(24.dp))
-                .background(ObsidianColors.surface.copy(alpha = 0.85f))
-                .border(1.dp, ObsidianColors.border.copy(alpha = 0.6f), RoundedCornerShape(24.dp))
+                .clip(RoundedCornerShape(50))
+                .background(ObsidianColors.surface.copy(alpha = 0.9f))
+                .border(1.dp, ObsidianColors.border.copy(alpha = 0.4f), RoundedCornerShape(50))
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Tab items
                 tabs.forEach { tab ->
                     ObsidianNavItem(
                         tab = tab,
                         selected = selectedIndex == tab.index,
-                        onClick = { onTabSelected(tab.index) }
+                        onClick = { onTabSelected(tab.index) },
+                        modifier = Modifier.weight(1f)
                     )
                 }
+            }
+        }
 
-                // Divider
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp)
-                        .size(width = 1.dp, height = 24.dp)
-                        .background(ObsidianColors.border.copy(alpha = 0.5f))
+        // + Create Button (Separate Circle)
+        Box {
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .shadow(
+                        elevation = 20.dp,
+                        shape = CircleShape,
+                        spotColor = Color.Black.copy(alpha = 0.3f)
+                    )
+                    .clip(CircleShape)
+                    .background(ObsidianColors.surface.copy(alpha = 0.9f))
+                    .border(1.dp, ObsidianColors.border.copy(alpha = 0.4f), CircleShape)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onCreateClick
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Add,
+                    contentDescription = "Create",
+                    tint = ObsidianColors.primary,
+                    modifier = Modifier.size(26.dp)
                 )
+            }
 
-                // + Create Button
-                Box {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(ObsidianColors.primary)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = onCreateClick
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Add,
-                            contentDescription = "Create",
-                            tint = ObsidianColors.bgPrimary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-
-                    // Dropdown Menu
-                    DropdownMenu(
-                        expanded = showCreateMenu,
-                        onDismissRequest = onDismissCreateMenu,
-                        modifier = Modifier
-                            .background(ObsidianColors.surfaceElevated)
-                            .border(1.dp, ObsidianColors.border, RoundedCornerShape(12.dp))
-                    ) {
-                        DropdownMenuItem(
-                            text = {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.MusicNote,
-                                        contentDescription = null,
-                                        tint = ObsidianColors.primary,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.add_tone_setting),
-                                        color = ObsidianColors.textPrimary,
-                                        fontSize = 14.sp
-                                    )
-                                }
-                            },
-                            onClick = onCreateTone
-                        )
-                        DropdownMenuItem(
-                            text = {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Dashboard,
-                                        contentDescription = null,
-                                        tint = ObsidianColors.primary,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.create_pedalboard),
-                                        color = ObsidianColors.textPrimary,
-                                        fontSize = 14.sp
-                                    )
-                                }
-                            },
-                            onClick = onCreatePedalBoard
-                        )
-                    }
-                }
+            // Dropdown Menu
+            DropdownMenu(
+                expanded = showCreateMenu,
+                onDismissRequest = onDismissCreateMenu,
+                modifier = Modifier
+                    .background(ObsidianColors.surfaceElevated)
+                    .border(1.dp, ObsidianColors.border, RoundedCornerShape(12.dp))
+            ) {
+                DropdownMenuItem(
+                    text = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.MusicNote,
+                                contentDescription = null,
+                                tint = ObsidianColors.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.add_tone_setting),
+                                color = ObsidianColors.textPrimary,
+                                fontSize = 14.sp
+                            )
+                        }
+                    },
+                    onClick = onCreateTone
+                )
+                DropdownMenuItem(
+                    text = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Dashboard,
+                                contentDescription = null,
+                                tint = ObsidianColors.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.create_pedalboard),
+                                color = ObsidianColors.textPrimary,
+                                fontSize = 14.sp
+                            )
+                        }
+                    },
+                    onClick = onCreatePedalBoard
+                )
             }
         }
     }
