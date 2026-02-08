@@ -342,7 +342,6 @@ private fun DetailPedalBoardContent(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun GridPedalView(
     pedals: List<com.haero.tonestore.domain.model.Pedal>
@@ -354,46 +353,28 @@ private fun GridPedalView(
             .padding(horizontal = Obsidian.spacing.screenPadding, vertical = Obsidian.spacing.md),
         verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
     ) {
-        FlowRow(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            maxItemsInEachRow = 2,
-            verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
-        ) {
-            pedals.forEach { pedal ->
-                PedalCard(
-                    pedal = pedal,
-                    onKnobChange = { _, _ -> },
-                    onToggleEnabled = {},
-                    onRemove = {},
-                    isEditable = false,
-                    modifier = Modifier.weight(1F)
-                )
-            }
+        val chunkedPedals = pedals.chunked(2)
+        chunkedPedals.forEach { rowPedals ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
+            ) {
+                rowPedals.forEach { pedal ->
+                    PedalCard(
+                        pedal = pedal,
+                        onKnobChange = { _, _ -> },
+                        onToggleEnabled = {},
+                        onRemove = {},
+                        isEditable = false,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
 
-            if (pedals.size == 1) {
-                Spacer(modifier = Modifier.weight(1f))
+                if (rowPedals.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
             }
         }
-//        pedals.chunked(2).forEach { rowPedals ->
-//            Row(
-//                modifier = Modifier.fillMaxWidth(),
-//                horizontalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
-//            ) {
-//                rowPedals.forEach { pedal ->
-//                    PedalCard(
-//                        pedal = pedal,
-//                        onKnobChange = { _, _ -> },
-//                        onToggleEnabled = {},
-//                        onRemove = {},
-//                        isEditable = false,
-//                        modifier = Modifier.weight(1f)
-//                    )
-//                }
-//                if (rowPedals.size == 1) {
-//                    Spacer(modifier = Modifier.weight(1f))
-//                }
-//            }
-//        }
 
         Spacer(modifier = Modifier.height(100.dp))
     }

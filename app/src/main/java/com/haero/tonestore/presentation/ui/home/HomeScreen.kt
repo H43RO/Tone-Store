@@ -515,7 +515,7 @@ private fun ToneSettingList(
             start = Obsidian.spacing.screenPadding,
             end = Obsidian.spacing.screenPadding,
             top = Obsidian.spacing.md,
-            bottom = 120.dp // NavBar 영역까지 스크롤 가능
+            bottom = 180.dp // NavBar 영역 및 FAB까지 충분히 스크롤 가능하도록 여백 추가
         ),
         verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
     ) {
@@ -567,7 +567,7 @@ private fun ToneSettingGrid(
             start = Obsidian.spacing.screenPadding,
             end = Obsidian.spacing.screenPadding,
             top = Obsidian.spacing.md,
-            bottom = 120.dp // NavBar 영역까지 스크롤 가능
+            bottom = 180.dp // NavBar 영역 및 FAB까지 충분히 스크롤 가능하도록 여백 추가
         ),
         horizontalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap),
         verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)

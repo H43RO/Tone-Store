@@ -1,6 +1,9 @@
 package com.haero.tonestore.presentation.ui.pedalboard.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
@@ -10,9 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.haero.tonestore.R
+import com.haero.tonestore.ui.designsystem.Obsidian
 
 /**
  * Layout stepper component for adjusting pedalboard grid dimensions.
@@ -50,9 +52,10 @@ fun LayoutStepper(
     ) {
         Text(
             text = stringResource(R.string.layout_size),
-            style = MaterialTheme.typography.bodyMedium,
+            style = Obsidian.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
-            modifier = Modifier.width(60.dp)
+            modifier = Modifier.width(60.dp),
+            color = Obsidian.colors.textSecondary
         )
 
         StepperControl(
@@ -66,8 +69,8 @@ fun LayoutStepper(
 
         Text(
             "×",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = Obsidian.typography.titleLarge,
+            color = Obsidian.colors.textMuted
         )
 
         StepperControl(
@@ -95,74 +98,55 @@ private fun StepperControl(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Surface(
-            onClick = { if (value > minValue) onValueChange(value - 1) },
-            shape = CircleShape,
-            enabled = value > minValue,
-            modifier = Modifier.size(36.dp),
-            color = if (value > minValue) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            }
-        ) {
-            IconButton(
-                onClick = { if (value > minValue) onValueChange(value - 1) },
-                enabled = value > minValue,
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Remove,
-                    contentDescription = "$label 감소",
-                    tint = if (value > minValue) {
-                        MaterialTheme.colorScheme.onPrimaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                    },
-                    modifier = Modifier.size(18.dp)
+        val canDecrease = value > minValue
+        val canIncrease = value < maxValue
+
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .background(
+                    color = if (canDecrease) Obsidian.colors.primaryMuted else Obsidian.colors.surfaceHighlight,
+                    shape = CircleShape
                 )
-            }
+                .clickable(enabled = canDecrease) { if (canDecrease) onValueChange(value - 1) },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Remove,
+                contentDescription = "$label 감소",
+                tint = if (canDecrease) Obsidian.colors.primary else Obsidian.colors.textMuted,
+                modifier = Modifier.size(18.dp)
+            )
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(16.dp))
 
         Text(
             text = "$value",
-            style = MaterialTheme.typography.titleMedium,
+            style = Obsidian.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.width(24.dp)
+            color = Obsidian.colors.textPrimary,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(16.dp))
 
-        Surface(
-            onClick = { if (value < maxValue) onValueChange(value + 1) },
-            shape = CircleShape,
-            enabled = value < maxValue,
-            modifier = Modifier.size(36.dp),
-            color = if (value < maxValue) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            }
-        ) {
-            IconButton(
-                onClick = { if (value < maxValue) onValueChange(value + 1) },
-                enabled = value < maxValue,
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "$label 증가",
-                    tint = if (value < maxValue) {
-                        MaterialTheme.colorScheme.onPrimaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                    },
-                    modifier = Modifier.size(18.dp)
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .background(
+                    color = if (canIncrease) Obsidian.colors.primaryMuted else Obsidian.colors.surfaceHighlight,
+                    shape = CircleShape
                 )
-            }
+                .clickable(enabled = canIncrease) { if (canIncrease) onValueChange(value + 1) },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "$label 증가",
+                tint = if (canIncrease) Obsidian.colors.primary else Obsidian.colors.textMuted,
+                modifier = Modifier.size(18.dp)
+            )
         }
     }
 }
