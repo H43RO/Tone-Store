@@ -501,9 +501,7 @@ private fun MainTabScreen(
                     0 -> HomeScreen(
                         onNavigateToCreate = onNavigateToCreate,
                         onNavigateToDetail = onNavigateToDetail,
-                        onNavigateToLogin = onNavigateToLogin,
-                        sharedTransitionScope = null,
-                        animatedVisibilityScope = null
+                        onNavigateToLogin = onNavigateToLogin
                     )
                     1 -> PedalBoardListScreen(
                         onNavigateToCreate = onNavigateToPedalBoardCreate,

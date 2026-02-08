@@ -1,9 +1,7 @@
 package com.haero.tonestore.presentation.ui.home
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
@@ -24,10 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -79,8 +74,6 @@ fun HomeScreen(
     onNavigateToCreate: () -> Unit,
     onNavigateToDetail: (String) -> Unit,
     onNavigateToLogin: () -> Unit = {},
-    sharedTransitionScope: SharedTransitionScope?,
-    animatedVisibilityScope: AnimatedVisibilityScope?,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -134,11 +127,12 @@ fun HomeScreen(
 
                 var sortExpanded by remember { mutableStateOf(false) }
 
+                Spacer(Modifier.height(16.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = Obsidian.spacing.screenPadding)
-                        .padding(bottom = Obsidian.spacing.md),
+                        .padding(vertical = Obsidian.spacing.md),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     ObsidianSearchField(
@@ -535,7 +529,7 @@ private fun ToneSettingList(
             top = Obsidian.spacing.md,
             bottom = 180.dp // NavBar 영역 및 FAB까지 충분히 스크롤 가능하도록 여백 추가
         ),
-        verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(
             items = toneSettings,
@@ -566,39 +560,5 @@ private fun ToneSettingList(
             onDismiss = { showDeleteDialog = null },
             isDangerous = true
         )
-    }
-}
-
-@Composable
-private fun ToneSettingGrid(
-    toneSettings: List<ToneSetting>,
-    onItemClick: (String) -> Unit,
-    onFavoriteClick: (String) -> Unit
-) {
-    val gridState = rememberLazyGridState()
-
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(160.dp),
-        state = gridState,
-        contentPadding = PaddingValues(
-            start = Obsidian.spacing.screenPadding,
-            end = Obsidian.spacing.screenPadding,
-            top = Obsidian.spacing.md,
-            bottom = 180.dp // NavBar 영역 및 FAB까지 충분히 스크롤 가능하도록 여백 추가
-        ),
-        horizontalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap),
-        verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
-    ) {
-        items(
-            items = toneSettings,
-            key = { it.id }
-        ) { toneSetting ->
-            GridToneSettingCard(
-                toneSetting = toneSetting,
-                onClick = { onItemClick(toneSetting.id) },
-                onFavoriteClick = { onFavoriteClick(toneSetting.id) },
-                sharedElementKey = toneSetting.id
-            )
-        }
     }
 }
