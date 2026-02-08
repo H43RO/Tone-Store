@@ -1,6 +1,6 @@
 [versions]
 agp = "8.13.2"
-kotlin = "2.0.21"
+kotlin = "2.1.0"
 googleServices = "4.4.2"
 firebaseBom = "33.7.0"
 playServicesAuth = "21.0.0"
@@ -18,10 +18,12 @@ room = "2.6.1"
 navigationCompose = "2.7.6"
 gson = "2.10.1"
 coroutines = "1.7.3"
-ksp = "2.0.21-1.0.25"
+ksp = "2.1.0-1.0.29"
 mockk = "1.13.8"
 coroutinesTest = "1.7.3"
 ktlint = "12.1.2"
+backdrop = "1.0.0-rc02"
+capsule = "2.1.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -69,6 +71,9 @@ firebase-storage = { group = "com.google.firebase", name = "firebase-storage-ktx
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 # Google Play Services Auth
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
+# Backdrop (Liquid Glass)
+backdrop = { group = "io.github.kyant0", name = "backdrop", version.ref = "backdrop" }
+capsule = { group = "io.github.kyant0", name = "capsule", version.ref = "capsule" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

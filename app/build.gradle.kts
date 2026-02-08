@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.haero.tonestore"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.haero.tonestore"
         minSdk = 31
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -99,6 +99,15 @@ dependencies {
 
     // Google Play Services Auth
     implementation(libs.play.services.auth)
+
+    // Backdrop (Liquid Glass)
+    implementation(libs.backdrop) {
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk7")
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk8")
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-common")
+    }
+    implementation(libs.capsule)
 
     // Testing
     testImplementation(libs.junit)

@@ -5,7 +5,6 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -15,7 +14,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -55,7 +53,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -85,6 +82,10 @@ import com.haero.tonestore.presentation.ui.profile.UserProfileScreen
 import com.haero.tonestore.presentation.ui.settings.SettingsScreen
 import com.haero.tonestore.presentation.ui.share.ShareToneScreen
 import com.haero.tonestore.ui.designsystem.ObsidianColors
+import com.haero.tonestore.ui.designsystem.liquid.LiquidBottomTab
+import com.haero.tonestore.ui.designsystem.liquid.LiquidBottomTabs
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import kotlinx.coroutines.launch
 
 sealed class Screen(val route: String) {
@@ -487,6 +488,7 @@ private fun MainTabScreen(
     val pagerState = rememberPagerState(pageCount = { bottomNavTabs.size })
     val scope = rememberCoroutineScope()
     var showCreateMenu by remember { mutableStateOf(false) }
+    val backdrop = rememberLayerBackdrop()
 
     Scaffold(
         containerColor = ObsidianColors.bgPrimary,
@@ -509,14 +511,21 @@ private fun MainTabScreen(
                 onCreatePedalBoard = {
                     showCreateMenu = false
                     onNavigateToPedalBoardCreate()
-                }
+                },
+                backdrop = backdrop
             )
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .layerBackdrop(backdrop)
             ) { page ->
                 when (page) {
                     0 -> HomeScreen(
@@ -570,43 +579,32 @@ private fun ObsidianBottomNavBar(
     onDismissCreateMenu: () -> Unit,
     onCreateTone: () -> Unit,
     onCreatePedalBoard: () -> Unit,
+    backdrop: com.kyant.backdrop.Backdrop,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Main Nav Bar (Pill Shape)
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .shadow(
-                    elevation = 20.dp,
-                    shape = RoundedCornerShape(50),
-                    spotColor = Color.Black.copy(alpha = 0.3f)
-                )
-                .clip(RoundedCornerShape(50))
-                .background(ObsidianColors.surface.copy(alpha = 0.9f))
-                .border(1.dp, ObsidianColors.border.copy(alpha = 0.4f), RoundedCornerShape(50))
+        // Liquid Nav Bar
+        LiquidBottomTabs(
+            selectedTabIndex = { selectedIndex },
+            onTabSelected = onTabSelected,
+            backdrop = backdrop,
+            tabsCount = tabs.size,
+            modifier = Modifier.weight(1f)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min)
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                tabs.forEach { tab ->
-                    ObsidianNavItem(
+            tabs.forEach { tab ->
+                LiquidBottomTab(
+                    onClick = { onTabSelected(tab.index) }
+                ) {
+                    ObsidianNavItemContent(
                         tab = tab,
-                        selected = selectedIndex == tab.index,
-                        onClick = { onTabSelected(tab.index) },
-                        modifier = Modifier.weight(1f)
+                        selected = selectedIndex == tab.index
                     )
                 }
             }
@@ -696,70 +694,36 @@ private fun ObsidianBottomNavBar(
 }
 
 @Composable
-private fun ObsidianNavItem(
+private fun ObsidianNavItemContent(
     tab: BottomNavTab,
     selected: Boolean,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val backgroundColor by animateColorAsState(
-        targetValue = if (selected) ObsidianColors.primaryMuted else Color.Transparent,
-        animationSpec = spring(stiffness = Spring.StiffnessMedium),
-        label = "backgroundColor"
-    )
-
     val contentColor by animateColorAsState(
         targetValue = if (selected) ObsidianColors.primary else ObsidianColors.textMuted,
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
         label = "contentColor"
     )
 
-    val scale by animateFloatAsState(
-        targetValue = if (selected) 1f else 0.95f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "scale"
-    )
-
     Column(
-        modifier = modifier
-            .scale(scale)
-            .clip(RoundedCornerShape(50))
-            .background(backgroundColor)
-            .then(
-                if (selected) {
-                    Modifier.border(
-                        1.dp,
-                        ObsidianColors.primary.copy(alpha = 0.3f),
-                        RoundedCornerShape(50)
-                    )
-                } else {
-                    Modifier
-                }
-            )
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClick
-            )
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier.padding(top = 4.dp, bottom = 2.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically)
     ) {
         Icon(
             imageVector = if (selected) tab.selectedIcon else tab.icon,
             contentDescription = stringResource(tab.titleResId),
             tint = contentColor,
-            modifier = Modifier.size(20.dp)
+            modifier = Modifier.size(22.dp)
         )
 
         Text(
             text = stringResource(tab.titleResId),
             color = contentColor,
-            fontSize = 9.sp,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-            maxLines = 1
+            fontSize = 10.sp,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+            maxLines = 1,
+            lineHeight = 12.sp
         )
     }
 }
@@ -775,6 +739,7 @@ private fun ObsidianBottomNavBarPreview() {
         onCreateClick = {},
         onDismissCreateMenu = {},
         onCreateTone = {},
-        onCreatePedalBoard = {}
+        onCreatePedalBoard = {},
+        backdrop = rememberLayerBackdrop()
     )
 }
