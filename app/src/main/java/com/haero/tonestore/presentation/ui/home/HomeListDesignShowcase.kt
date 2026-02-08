@@ -114,7 +114,7 @@ fun MinimalistToneItem(
             Icon(
                 imageVector = if (item.isFavorite) Icons.Default.Favorite else Icons.Filled.MoreVert,
                 contentDescription = null,
-                tint = if (item.isFavorite) Obsidian.colors.accent else Obsidian.colors.textTertiary
+                tint = if (item.isFavorite) Obsidian.colors.favorite else Obsidian.colors.textMuted
             )
         }
     }
@@ -212,7 +212,7 @@ fun ModernCardToneItem(
                         Text(
                             text = "+${item.tags.size - 2}",
                             style = Obsidian.typography.labelSmall,
-                            color = Obsidian.colors.textTertiary,
+                            color = Obsidian.colors.textMuted,
                             modifier = Modifier.align(Alignment.CenterVertically)
                         )
                     }
@@ -223,7 +223,7 @@ fun ModernCardToneItem(
                 Icon(
                     imageVector = if (item.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = null,
-                    tint = if (item.isFavorite) Obsidian.colors.error else Obsidian.colors.textTertiary
+                    tint = if (item.isFavorite) Obsidian.colors.error else Obsidian.colors.textMuted
                 )
             }
         }
@@ -257,7 +257,7 @@ fun CompactTechToneItem(
             modifier = Modifier
                 .width(4.dp)
                 .fillMaxHeight()
-                .background(if (item.isFavorite) Obsidian.colors.accent else Obsidian.colors.border)
+                .background(if (item.isFavorite) Obsidian.colors.primary else Obsidian.colors.border)
         )
 
         Spacer(modifier = Modifier.width(12.dp))
@@ -283,7 +283,7 @@ fun CompactTechToneItem(
             Text(
                 text = "${item.date} | ${item.tags.joinToString(", ")}",
                 style = Obsidian.typography.labelSmall,
-                color = Obsidian.colors.textTertiary
+                color = Obsidian.colors.textMuted
             )
         }
 
@@ -294,7 +294,7 @@ fun CompactTechToneItem(
                 modifier = Modifier.size(32.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.PlayArrow,
+                    imageVector = Icons.Default.PlayArrow,
                     contentDescription = null,
                     tint = Obsidian.colors.primary,
                     modifier = Modifier.size(20.dp)
