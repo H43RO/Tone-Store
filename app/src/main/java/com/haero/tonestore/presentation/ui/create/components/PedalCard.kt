@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -123,7 +122,7 @@ fun PedalCard(
                 .padding(12.dp)
         ) {
             Column(
-                modifier = Modifier,
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
@@ -157,7 +156,7 @@ fun PedalCard(
                     }
                 }
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.weight(1f))
 
                 FlowRow(
                     modifier = Modifier
