@@ -72,6 +72,7 @@ fun PedalBoardSection(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .height(androidx.compose.foundation.layout.IntrinsicSize.Max)
                         .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -84,7 +85,9 @@ fun PedalBoardSection(
                             onToggleEnabled = { onTogglePedalEnabled(pedal.id) },
                             onRemove = { onRemovePedal(pedal.id) },
                             isEditable = isEditable,
-                            modifier = Modifier.width(180.dp)
+                            modifier = Modifier
+                                .width(180.dp)
+                                .androidx.compose.foundation.layout.fillMaxHeight()
                         )
                     }
                 }
