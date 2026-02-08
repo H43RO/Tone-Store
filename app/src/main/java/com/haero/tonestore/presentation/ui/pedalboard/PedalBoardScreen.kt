@@ -284,7 +284,9 @@ fun PedalBoardScreen(
 
     // 뒤로가기 핸들링
     androidx.activity.compose.BackHandler {
-        if (state.hasUnsavedChanges) {
+        if (state.editingSlotIndex != null) {
+            viewModel.handleIntent(PedalBoardIntent.ClosePedalEditor)
+        } else if (state.hasUnsavedChanges) {
             showUnsavedChangesDialog = true
         } else {
             onNavigateBack()
