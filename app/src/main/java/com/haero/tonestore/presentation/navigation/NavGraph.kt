@@ -519,7 +519,7 @@ private fun MainTabScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(top = innerPadding.calculateTopPadding())
         ) {
             HorizontalPager(
                 state = pagerState,
@@ -554,13 +554,13 @@ private fun MainTabScreen(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .height(innerPadding.calculateBottomPadding() + 24.dp)
+                    .height(innerPadding.calculateBottomPadding() + 8.dp)
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                ObsidianColors.bgPrimary.copy(alpha = 0.9f),
-                                ObsidianColors.bgPrimary
+                                ObsidianColors.bgPrimary.copy(alpha = 0.2f),
+                                ObsidianColors.bgPrimary.copy(alpha = 0.5f)
                             )
                         )
                     )

@@ -59,11 +59,13 @@ import com.kyant.capsule.ContinuousCapsule
 import kotlin.math.abs
 import kotlin.math.sign
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
 internal val LocalLiquidBottomTabScale =
     staticCompositionLocalOf { { 1f } }
+
+internal val LocalLiquidInteractionEnabled =
+    staticCompositionLocalOf { true }
 
 @Composable
 fun RowScope.LiquidBottomTab(
@@ -72,14 +74,21 @@ fun RowScope.LiquidBottomTab(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val scale = LocalLiquidBottomTabScale.current
+    val interactionEnabled = LocalLiquidInteractionEnabled.current
     Column(
         modifier
             .clip(ContinuousCapsule)
-            .clickable(
-                interactionSource = null,
-                indication = null,
-                role = Role.Tab,
-                onClick = onClick
+            .then(
+                if (interactionEnabled) {
+                    Modifier.clickable(
+                        interactionSource = null,
+                        indication = null,
+                        role = Role.Tab,
+                        onClick = onClick
+                    )
+                } else {
+                    Modifier
+                }
             )
             .fillMaxHeight()
             .weight(1f)
@@ -145,6 +154,7 @@ fun LiquidBottomTabs(
                     val targetIndex = targetValue.fastRoundToInt().fastCoerceIn(0, tabsCount - 1)
                     currentIndex = targetIndex
                     animateToValue(targetIndex.toFloat())
+                    onTabSelected(targetIndex)
                     animationScope.launch {
                         offsetAnimation.animateTo(
                             0f,
@@ -171,10 +181,8 @@ fun LiquidBottomTabs(
         }
         LaunchedEffect(dampedDragAnimation) {
             snapshotFlow { currentIndex }
-                .drop(1)
                 .collectLatest { index ->
                     dampedDragAnimation.animateToValue(index.toFloat())
-                    onTabSelected(index)
                 }
         }
 
@@ -226,7 +234,8 @@ fun LiquidBottomTabs(
         CompositionLocalProvider(
             LocalLiquidBottomTabScale provides {
                 lerp(1f, 1.2f, dampedDragAnimation.pressProgress)
-            }
+            },
+            LocalLiquidInteractionEnabled provides false
         ) {
             Row(
                 Modifier
