@@ -47,6 +47,7 @@ fun PedalBoardScreen(
     var addingToSlotIndex by remember { mutableStateOf<Int?>(null) }
     var showCustomPedalDialog by remember { mutableStateOf(false) }
     var showExpressionPedalDialog by remember { mutableStateOf(false) }
+    var showUnsavedChangesDialog by remember { mutableStateOf(false) }
 
     val slotPositions = remember { mutableStateMapOf<Int, Offset>() }
 
@@ -105,7 +106,7 @@ fun PedalBoardScreen(
                     },
                     isSaving = state.isSaving,
                     isEditMode = state.isEditMode,
-                    onCloseClick = onNavigateBack,
+                    onCloseClick = { showUnsavedChangesDialog = true },
                     onSaveClick = { viewModel.handleIntent(PedalBoardIntent.SavePedalBoard) },
                     onDeleteClick = { viewModel.handleIntent(PedalBoardIntent.DeletePedalBoard) }
                 )
@@ -271,6 +272,39 @@ fun PedalBoardScreen(
             },
             onDismiss = {
                 showExpressionPedalDialog = false
+            }
+        )
+    }
+
+    // 뒤로가기 핸들링
+    androidx.activity.compose.BackHandler {
+        showUnsavedChangesDialog = true
+    }
+
+    if (showUnsavedChangesDialog) {
+        ObsidianAlertDialog(
+            onDismissRequest = { showUnsavedChangesDialog = false },
+            title = "저장되지 않은 변경사항",
+            text = "페달보드가 저장되지 않았어요.\n나가기 전 저장할까요?",
+            confirmButton = {
+                ObsidianButton(
+                    onClick = {
+                        viewModel.handleIntent(PedalBoardIntent.SavePedalBoard)
+                        showUnsavedChangesDialog = false
+                    }
+                ) {
+                    Text("저장")
+                }
+            },
+            dismissButton = {
+                ObsidianOutlinedButton(
+                    onClick = {
+                        showUnsavedChangesDialog = false
+                        onNavigateBack()
+                    }
+                ) {
+                    Text("나가기")
+                }
             }
         )
     }
