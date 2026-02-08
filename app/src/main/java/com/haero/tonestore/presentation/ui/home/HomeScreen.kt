@@ -528,8 +528,7 @@ private fun ToneSettingList(
                 toneSetting = toneSetting,
                 onClick = { onItemClick(toneSetting.id) },
                 onFavoriteClick = { onFavoriteClick(toneSetting.id) },
-                onDeleteClick = { showDeleteDialog = toneSetting.id },
-                sharedElementKey = toneSetting.id
+                onDeleteClick = { showDeleteDialog = toneSetting.id }
             )
         }
     }
