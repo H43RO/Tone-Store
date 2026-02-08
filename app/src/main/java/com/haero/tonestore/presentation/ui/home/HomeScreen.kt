@@ -2,14 +2,10 @@ package com.haero.tonestore.presentation.ui.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,7 +13,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -35,13 +29,13 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -55,9 +49,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -72,7 +63,6 @@ import com.haero.tonestore.ui.designsystem.Obsidian
 import com.haero.tonestore.ui.designsystem.ObsidianAlertDialog
 import com.haero.tonestore.ui.designsystem.ObsidianBackground
 import com.haero.tonestore.ui.designsystem.ObsidianButton
-import com.haero.tonestore.ui.designsystem.ObsidianIconButton
 import com.haero.tonestore.ui.designsystem.ObsidianLoadingIndicator
 import com.haero.tonestore.ui.designsystem.ObsidianOutlinedButton
 import com.haero.tonestore.ui.designsystem.ObsidianSearchField
@@ -134,21 +124,26 @@ fun HomeScreen(
             // 메인 콘텐츠 Column
             Column(modifier = Modifier.fillMaxSize()) {
                 ObsidianHomeHeader(
-                    isSearchActive = state.isSearchActive,
-                    searchQuery = state.searchQuery,
-                    totalCount = state.toneSettings.size,
-                    onSearchQueryChange = { viewModel.handleIntent(HomeIntent.UpdateSearchQuery(it)) },
-                    onSearchActiveChange = { viewModel.handleIntent(HomeIntent.SetSearchActive(it)) }
+                    totalCount = state.toneSettings.size
                 )
 
                 if (state.toneSettings.isNotEmpty()) {
                     SortFilterBar(
-                        viewMode = state.viewMode,
                         sortOption = state.sortOption,
-                        onViewModeChange = { viewModel.handleIntent(HomeIntent.SetViewMode(it)) },
                         onSortOptionChange = { viewModel.handleIntent(HomeIntent.SetSortOption(it)) }
                     )
                 }
+
+                ObsidianSearchField(
+                    value = state.searchQuery,
+                    onValueChange = { viewModel.handleIntent(HomeIntent.UpdateSearchQuery(it)) },
+                    placeholder = stringResource(R.string.search_hint),
+                    onClear = { viewModel.handleIntent(HomeIntent.UpdateSearchQuery("")) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Obsidian.spacing.screenPadding)
+                        .padding(bottom = Obsidian.spacing.md)
+                )
 
                 Box(
                     modifier = Modifier
@@ -182,40 +177,19 @@ fun HomeScreen(
                             )
                         }
                         else -> {
-                            Crossfade(
-                                targetState = state.viewMode,
-                                label = "viewModeTransition",
-                                animationSpec = tween(durationMillis = 300)
-                            ) { viewMode ->
-                                when (viewMode) {
-                                    ViewMode.LIST -> {
-                                        ToneSettingList(
-                                            toneSettings = state.filteredToneSettings,
-                                            listState = listState,
-                                            onItemClick = { id ->
-                                                viewModel.handleIntent(HomeIntent.SelectToneSetting(id))
-                                            },
-                                            onDelete = { id ->
-                                                viewModel.handleIntent(HomeIntent.DeleteToneSetting(id))
-                                            },
-                                            onFavoriteClick = { id ->
-                                                viewModel.handleIntent(HomeIntent.ToggleFavorite(id))
-                                            }
-                                        )
-                                    }
-                                    ViewMode.GRID -> {
-                                        ToneSettingGrid(
-                                            toneSettings = state.filteredToneSettings,
-                                            onItemClick = { id ->
-                                                viewModel.handleIntent(HomeIntent.SelectToneSetting(id))
-                                            },
-                                            onFavoriteClick = { id ->
-                                                viewModel.handleIntent(HomeIntent.ToggleFavorite(id))
-                                            }
-                                        )
-                                    }
+                            ToneSettingList(
+                                toneSettings = state.filteredToneSettings,
+                                listState = listState,
+                                onItemClick = { id ->
+                                    viewModel.handleIntent(HomeIntent.SelectToneSetting(id))
+                                },
+                                onDelete = { id ->
+                                    viewModel.handleIntent(HomeIntent.DeleteToneSetting(id))
+                                },
+                                onFavoriteClick = { id ->
+                                    viewModel.handleIntent(HomeIntent.ToggleFavorite(id))
                                 }
-                            }
+                            )
                         }
                     }
                 }
@@ -232,9 +206,15 @@ fun HomeScreen(
                             contentDescription = null
                         )
                     },
-                    text = { Text(stringResource(R.string.add_tone_setting)) },
+                    text = {
+                        Text(
+                            text = stringResource(R.string.add_tone_setting),
+                            style = Obsidian.typography.labelLarge
+                        )
+                    },
                     containerColor = Obsidian.colors.primary,
-                    contentColor = Color.White,
+                    contentColor = Obsidian.colors.bgPrimary,
+                    shape = RoundedCornerShape(Obsidian.radius.full),
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(end = 20.dp, bottom = 100.dp)
@@ -247,11 +227,7 @@ fun HomeScreen(
 
 @Composable
 private fun ObsidianHomeHeader(
-    isSearchActive: Boolean,
-    searchQuery: String,
     totalCount: Int,
-    onSearchQueryChange: (String) -> Unit,
-    onSearchActiveChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -259,57 +235,20 @@ private fun ObsidianHomeHeader(
             .fillMaxWidth()
             .statusBarsPadding()
             .padding(horizontal = Obsidian.spacing.screenPadding)
-            .padding(top = Obsidian.spacing.lg, bottom = Obsidian.spacing.sm)
+            .padding(top = Obsidian.spacing.lg)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = stringResource(R.string.app_name),
-                    style = Obsidian.typography.displaySmall,
-                    color = Obsidian.colors.textPrimary
-                )
-                if (totalCount > 0 && !isSearchActive) {
-                    Text(
-                        text = stringResource(R.string.tones_saved_count, totalCount),
-                        style = Obsidian.typography.bodySmall,
-                        color = Obsidian.colors.textSecondary
-                    )
-                }
-            }
-
-            ObsidianIconButton(
-                onClick = { onSearchActiveChange(!isSearchActive) },
-                icon = if (isSearchActive) Icons.Rounded.Close else Icons.Rounded.Search,
-                tint = if (isSearchActive) Obsidian.colors.primary else Obsidian.colors.textSecondary
+        // Title & Count
+        Column {
+            Text(
+                text = stringResource(R.string.app_name),
+                style = Obsidian.typography.displaySmall,
+                color = Obsidian.colors.textPrimary
             )
-        }
-
-        AnimatedVisibility(
-            visible = isSearchActive,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
-            val focusRequester = remember { FocusRequester() }
-
-            LaunchedEffect(isSearchActive) {
-                if (isSearchActive) {
-                    focusRequester.requestFocus()
-                }
-            }
-
-            Box(modifier = Modifier.padding(top = Obsidian.spacing.lg)) {
-                ObsidianSearchField(
-                    value = searchQuery,
-                    onValueChange = onSearchQueryChange,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequester),
-                    placeholder = stringResource(R.string.search_hint),
-                    onClear = { onSearchQueryChange("") }
+            if (totalCount > 0) {
+                Text(
+                    text = stringResource(R.string.tones_saved_count, totalCount),
+                    style = Obsidian.typography.bodySmall,
+                    color = Obsidian.colors.textSecondary
                 )
             }
         }

@@ -1,8 +1,5 @@
 package com.haero.tonestore.presentation.ui.home.components
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,9 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -29,99 +24,76 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.haero.tonestore.R
 import com.haero.tonestore.presentation.ui.home.SortOption
-import com.haero.tonestore.presentation.ui.home.ViewMode
-import com.haero.tonestore.ui.components.LocalEmberGlassTheme
+import com.haero.tonestore.ui.designsystem.Obsidian
 
 /**
- * SortFilterBar - Glassmorphism 스타일 정렬 및 뷰 모드 토글 바
+ * SortFilterBar - Obsidian 스타일 정렬 옵션 바
+ * (그리드/리스트 뷰 토글 제거됨)
  */
 @Composable
 fun SortFilterBar(
-    viewMode: ViewMode,
     sortOption: SortOption,
-    onViewModeChange: (ViewMode) -> Unit,
     onSortOptionChange: (SortOption) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val theme = LocalEmberGlassTheme.current
     var sortExpanded by remember { mutableStateOf(false) }
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .padding(horizontal = Obsidian.spacing.screenPadding, vertical = 8.dp),
+        horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Glass View toggle
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color.White.copy(alpha = 0.1f))
-                .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
-                .padding(4.dp)
-        ) {
-            GlassViewToggleButton(
-                isSelected = viewMode == ViewMode.LIST,
-                icon = Icons.Default.ViewList,
-                contentDescription = stringResource(R.string.view_list),
-                onClick = { onViewModeChange(ViewMode.LIST) }
-            )
-            GlassViewToggleButton(
-                isSelected = viewMode == ViewMode.GRID,
-                icon = Icons.Default.GridView,
-                contentDescription = stringResource(R.string.view_grid),
-                onClick = { onViewModeChange(ViewMode.GRID) }
-            )
-        }
-
-        // Glass Sort dropdown
+        // Obsidian Sort dropdown
         Box {
-            Box(
+            Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(theme.primary.copy(alpha = 0.15f))
-                    .border(1.dp, theme.primary.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(Obsidian.radius.button))
+                    .background(Obsidian.colors.surfaceElevated)
+                    .border(
+                        1.dp,
+                        Obsidian.colors.borderSubtle,
+                        RoundedCornerShape(Obsidian.radius.button)
+                    )
                     .clickable { sortExpanded = !sortExpanded }
-                    .padding(horizontal = 14.dp, vertical = 10.dp)
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Text(
-                        text = when (sortOption) {
-                            SortOption.FAVORITES_FIRST -> stringResource(R.string.sort_favorites_first)
-                            SortOption.DATE_FIRST -> stringResource(R.string.sort_date_first)
-                        },
-                        color = theme.primary,
-                        fontSize = 13.sp
-                    )
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = null,
-                        tint = theme.primary,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+                Text(
+                    text = when (sortOption) {
+                        SortOption.FAVORITES_FIRST -> stringResource(R.string.sort_favorites_first)
+                        SortOption.DATE_FIRST -> stringResource(R.string.sort_date_first)
+                    },
+                    style = Obsidian.typography.labelMedium,
+                    color = Obsidian.colors.textPrimary
+                )
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = Obsidian.colors.textSecondary,
+                    modifier = Modifier.size(16.dp)
+                )
             }
+
             DropdownMenu(
                 expanded = sortExpanded,
                 onDismissRequest = { sortExpanded = false },
-                modifier = Modifier.background(theme.surfaceElevated)
+                modifier = Modifier
+                    .background(Obsidian.colors.surfaceElevated)
+                    .border(1.dp, Obsidian.colors.border, RoundedCornerShape(4.dp))
             ) {
                 DropdownMenuItem(
                     text = {
                         Text(
                             stringResource(R.string.sort_favorites_first),
-                            color = theme.textPrimary
+                            style = Obsidian.typography.bodyMedium,
+                            color = if (sortOption == SortOption.FAVORITES_FIRST) Obsidian.colors.primary else Obsidian.colors.textPrimary
                         )
                     },
                     onClick = {
@@ -133,7 +105,8 @@ fun SortFilterBar(
                     text = {
                         Text(
                             stringResource(R.string.sort_date_first),
-                            color = theme.textPrimary
+                            style = Obsidian.typography.bodyMedium,
+                            color = if (sortOption == SortOption.DATE_FIRST) Obsidian.colors.primary else Obsidian.colors.textPrimary
                         )
                     },
                     onClick = {
@@ -143,68 +116,5 @@ fun SortFilterBar(
                 )
             }
         }
-    }
-}
-
-/**
- * GlassViewToggleButton - Glassmorphism 뷰 모드 토글 버튼
- */
-@Composable
-private fun GlassViewToggleButton(
-    isSelected: Boolean,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    contentDescription: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val theme = LocalEmberGlassTheme.current
-
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isSelected) {
-            theme.primary.copy(alpha = 0.2f)
-        } else {
-            Color.Transparent
-        },
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
-        label = "viewToggleBackground"
-    )
-
-    val iconTint by animateColorAsState(
-        targetValue = if (isSelected) {
-            theme.primary
-        } else {
-            theme.textSecondary
-        },
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
-        label = "viewToggleIcon"
-    )
-
-    Box(
-        modifier = modifier
-            .size(40.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(backgroundColor)
-            .then(
-                if (isSelected) {
-                    Modifier.border(1.dp, theme.primary.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
-                } else {
-                    Modifier
-                }
-            )
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = iconTint,
-            modifier = Modifier.size(20.dp)
-        )
     }
 }
