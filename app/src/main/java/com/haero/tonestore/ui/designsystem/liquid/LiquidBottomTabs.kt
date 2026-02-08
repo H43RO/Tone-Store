@@ -105,7 +105,7 @@ fun RowScope.LiquidBottomTab(
 
 @Composable
 fun LiquidBottomTabs(
-    selectedTabIndex: () -> Int,
+    selectedTabIndex: () -> Float,
     onTabSelected: (index: Int) -> Unit,
     backdrop: Backdrop,
     tabsCount: Int,
@@ -138,8 +138,8 @@ fun LiquidBottomTabs(
 
         val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
         val animationScope = rememberCoroutineScope()
-        var currentIndex by remember(selectedTabIndex) {
-            mutableIntStateOf(selectedTabIndex())
+        var currentIndex by remember {
+            mutableIntStateOf(selectedTabIndex().fastRoundToInt().fastCoerceIn(0, tabsCount - 1))
         }
         val dampedDragAnimation = remember(animationScope) {
             DampedDragAnimation(
@@ -173,16 +173,11 @@ fun LiquidBottomTabs(
                 }
             )
         }
-        LaunchedEffect(selectedTabIndex) {
+        LaunchedEffect(Unit) {
             snapshotFlow { selectedTabIndex() }
-                .collectLatest { index ->
-                    currentIndex = index
-                }
-        }
-        LaunchedEffect(dampedDragAnimation) {
-            snapshotFlow { currentIndex }
-                .collectLatest { index ->
-                    dampedDragAnimation.animateToValue(index.toFloat())
+                .collectLatest { position ->
+                    currentIndex = position.fastRoundToInt().fastCoerceIn(0, tabsCount - 1)
+                    dampedDragAnimation.updateValue(position)
                 }
         }
 
@@ -227,9 +222,15 @@ fun LiquidBottomTabs(
                 .height(64f.dp)
                 .fillMaxWidth()
                 .padding(4f.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            content = content
-        )
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CompositionLocalProvider(
+                LocalLiquidBottomTabScale provides { 1f },
+                LocalLiquidInteractionEnabled provides false
+            ) {
+                content()
+            }
+        }
 
         CompositionLocalProvider(
             LocalLiquidBottomTabScale provides {
@@ -284,8 +285,6 @@ fun LiquidBottomTabs(
                             size.width - (dampedDragAnimation.value + 1f) * tabWidth + panelOffset
                         }
                 }
-                .then(interactiveHighlight.gestureModifier)
-                .then(dampedDragAnimation.modifier)
                 .drawBackdrop(
                     backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
                     shape = { ContinuousCapsule },
@@ -331,5 +330,24 @@ fun LiquidBottomTabs(
                 .height(56f.dp)
                 .fillMaxWidth(1f / tabsCount)
         )
+
+        Row(
+            Modifier
+                .then(interactiveHighlight.gestureModifier)
+                .then(dampedDragAnimation.modifier)
+                .height(64f.dp)
+                .fillMaxWidth()
+                .padding(4f.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CompositionLocalProvider(
+                LocalLiquidBottomTabScale provides {
+                    lerp(1f, 1.2f, dampedDragAnimation.pressProgress)
+                },
+                LocalLiquidInteractionEnabled provides true
+            ) {
+                content()
+            }
+        }
     }
 }

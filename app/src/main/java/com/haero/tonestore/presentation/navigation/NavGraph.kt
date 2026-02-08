@@ -496,6 +496,7 @@ private fun MainTabScreen(
             ObsidianBottomNavBar(
                 tabs = bottomNavTabs,
                 selectedIndex = pagerState.currentPage,
+                selectedPosition = { pagerState.currentPage + pagerState.currentPageOffsetFraction },
                 onTabSelected = { index ->
                     scope.launch {
                         pagerState.animateScrollToPage(index)
@@ -580,6 +581,7 @@ private fun ObsidianBottomNavBar(
     onCreateTone: () -> Unit,
     onCreatePedalBoard: () -> Unit,
     backdrop: com.kyant.backdrop.Backdrop,
+    selectedPosition: () -> Float,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -592,7 +594,7 @@ private fun ObsidianBottomNavBar(
     ) {
         // Liquid Nav Bar
         LiquidBottomTabs(
-            selectedTabIndex = { selectedIndex },
+            selectedTabIndex = selectedPosition,
             onTabSelected = onTabSelected,
             backdrop = backdrop,
             tabsCount = tabs.size,
@@ -740,6 +742,7 @@ private fun ObsidianBottomNavBarPreview() {
         onDismissCreateMenu = {},
         onCreateTone = {},
         onCreatePedalBoard = {},
-        backdrop = rememberLayerBackdrop()
+        backdrop = rememberLayerBackdrop(),
+        selectedPosition = { 0f }
     )
 }
