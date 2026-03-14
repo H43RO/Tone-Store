@@ -64,15 +64,15 @@ fun PedalSlot(
     onDeleteClick: () -> Unit = {}
 ) {
     val borderColor = when {
-        isDropTarget -> MaterialTheme.colorScheme.primary
-        isDragging -> MaterialTheme.colorScheme.tertiary
+        isDropTarget -> com.haero.tonestore.ui.designsystem.Obsidian.colors.primary
+        isDragging -> com.haero.tonestore.ui.designsystem.Obsidian.colors.secondary
         else -> Color.Transparent
     }
     val borderWidth = if (isDropTarget || isDragging) 3.dp else 0.dp
     val backgroundColor = when {
-        isDropTarget -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        isDropTarget -> com.haero.tonestore.ui.designsystem.Obsidian.colors.primaryMuted.copy(alpha = 0.3f)
         pedal != null -> Color.Transparent
-        else -> MaterialTheme.colorScheme.background
+        else -> com.haero.tonestore.ui.designsystem.Obsidian.colors.bgSecondary
     }
 
     Box(
@@ -95,14 +95,14 @@ fun PedalSlot(
                     Modifier
                         .border(
                             width = 2.dp,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                            color = com.haero.tonestore.ui.designsystem.Obsidian.colors.primary.copy(alpha = 0.5f),
                             shape = RoundedCornerShape(8.dp)
                         )
                         .clickable { onAddClick() }
                 } else {
                     Modifier.border(
                         width = 1.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                        color = com.haero.tonestore.ui.designsystem.Obsidian.colors.border.copy(alpha = 0.5f),
                         shape = RoundedCornerShape(8.dp)
                     )
                 }
@@ -123,14 +123,14 @@ fun PedalSlot(
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "페달 추가",
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = com.haero.tonestore.ui.designsystem.Obsidian.colors.primary,
                         modifier = Modifier.size(28.dp)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = stringResource(R.string.add_pedal),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
+                        style = com.haero.tonestore.ui.designsystem.Obsidian.typography.labelSmall,
+                        color = com.haero.tonestore.ui.designsystem.Obsidian.colors.primary
                     )
                 }
             }
@@ -169,8 +169,8 @@ internal fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
         Color(pedal.color)
     } else {
         when (pedal.type) {
-            PedalType.PRESET -> MaterialTheme.colorScheme.primaryContainer
-            else -> MaterialTheme.colorScheme.secondaryContainer
+            PedalType.PRESET -> com.haero.tonestore.ui.designsystem.Obsidian.colors.primaryMuted
+            else -> com.haero.tonestore.ui.designsystem.Obsidian.colors.surfaceHighlight
         }
     }
 
@@ -210,7 +210,7 @@ internal fun MiniPedalCard(pedal: Pedal, modifier: Modifier = Modifier) {
         ) {
             Text(
                 text = pedal.name,
-                style = MaterialTheme.typography.labelMedium,
+                style = com.haero.tonestore.ui.designsystem.Obsidian.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 color = contentColor,
                 textAlign = TextAlign.Center,

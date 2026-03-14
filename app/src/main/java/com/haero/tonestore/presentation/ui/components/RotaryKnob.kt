@@ -9,6 +9,7 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,16 +21,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.haero.tonestore.ui.designsystem.Obsidian
 import kotlin.math.PI
 import kotlin.math.atan2
@@ -39,16 +40,6 @@ import kotlin.math.sin
 
 /**
  * 실제 앰프/이펙터 노브를 모방한 회전 노브 컴포넌트
- *
- * @param value 현재 값 (0-10)
- * @param onValueChange 값 변경 콜백
- * @param label 노브 아래에 표시될 레이블
- * @param modifier Modifier
- * @param size 노브 크기
- * @param enabled 활성화 여부
- * @param steps 노브의 스텝 수 (햅틱 피드백용, 기본 20 = 0.5 단위)
- * @param labelColor 레이블 색상 (null이면 기본 테마 색상 사용)
- * @param isPedalKnob 페달용 노브 여부 (true: 검정 노브/흰색 포인터, false: 테마 색상)
  */
 @Composable
 fun RotaryKnob(
@@ -59,13 +50,12 @@ fun RotaryKnob(
     size: Dp = 64.dp,
     enabled: Boolean = true,
     steps: Int = 20,
-    labelColor: androidx.compose.ui.graphics.Color? = null,
+    labelColor: Color? = null,
     isPedalKnob: Boolean = false
 ) {
     val view = LocalView.current
     val context = LocalContext.current
 
-    // Vibrator 가져오기
     val vibrator = remember {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val vibratorManager = context.getSystemService(VibratorManager::class.java)
@@ -76,46 +66,23 @@ fun RotaryKnob(
         }
     }
 
-    // 노브 회전 각도 범위: 값 0일때 12시 방향
-    // Canvas에서 0°는 3시 방향, -90°가 12시 방향
-    // 값 0 -> 12시(-90°), 값 10 -> 거의 한바퀴 돌아서 (시계방향 300°)
-    val startAngle = -90f // 12시 방향 (위쪽)
-    val sweepAngle = 300f // 시계방향으로 300° 회전
+    val startAngle = -90f
+    val sweepAngle = 300f
 
-    // 현재 값에 따른 각도 계산
     val normalizedValue = (value / 10f).coerceIn(0f, 1f)
     val currentAngle = startAngle + (normalizedValue * sweepAngle)
 
-    // 드래그 중 이전 각도 저장
     var previousAngle by remember { mutableFloatStateOf(0f) }
-    // 드래그 중 누적 값 추적 (핵심!)
     var accumulatedValue by remember { mutableFloatStateOf(value) }
-    // 햅틱 피드백을 위한 이전 스텝 저장
     var previousStep by remember { mutableIntStateOf((value * steps / 10f).roundToInt()) }
 
-    // 노브 색상: 페달용은 검정/흰색 고정, 그 외는 테마 색상
-    // enabled=false 일 때도 primary 색상 유지 (상세화면에서 시인성 확보)
-    val actualKnobColor = if (isPedalKnob) {
-        androidx.compose.ui.graphics.Color.Black
-    } else {
-        Obsidian.colors.primary
-    }
-
-    val trackColor = if (isPedalKnob) {
-        androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.3f)
-    } else {
-        Obsidian.colors.surfaceHighlight
-    }
-
-    val indicatorColor = if (isPedalKnob) {
-        androidx.compose.ui.graphics.Color.White
-    } else {
-        Obsidian.colors.bgPrimary
-    }
-
+    // Colors mapping to Slate Studio Theme
+    val knobRingColor = if (isPedalKnob) Color.Black else Obsidian.colors.surfaceHighlight
+    val fillRingColor = if (isPedalKnob) Color.White.copy(alpha = 0.5f) else Obsidian.colors.primary
+    val fillRingGlow = if (isPedalKnob) Color.White.copy(alpha = 0.2f) else Obsidian.colors.primary.copy(alpha = 0.3f)
+    val pointerColor = if (isPedalKnob) Color.White else Obsidian.colors.primaryLight
     val actualLabelColor = labelColor ?: Obsidian.colors.textSecondary
 
-    // 드르륵 햅틱 피드백 함수
     fun performTickHaptic() {
         vibrator?.let { vib ->
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -130,8 +97,11 @@ fun RotaryKnob(
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        val darkMetal = Color(0xFF1E1E24)
+        val metalHighlight = Color(0xFF2C2C35)
+
         Canvas(
             modifier = Modifier
                 .size(size)
@@ -148,7 +118,6 @@ fun RotaryKnob(
                             down.position.y - centerY,
                             down.position.x - centerX
                         ) * (180f / PI.toFloat())
-                        // 드래그 시작 시 현재 value로 초기화
                         accumulatedValue = value
                         previousStep = (value * steps / 10f).roundToInt()
 
@@ -164,16 +133,12 @@ fun RotaryKnob(
                                     ) * (180f / PI.toFloat())
 
                                     var delta = currentDragAngle - previousAngle
-
-                                    // 각도 점프 처리 (180° 경계)
                                     if (delta > 180) delta -= 360
                                     if (delta < -180) delta += 360
 
-                                    // 민감도 조절 - 누적값 사용!
                                     val sensitivity = 0.5f
                                     accumulatedValue = (accumulatedValue + delta * sensitivity / 27f).coerceIn(0f, 10f)
 
-                                    // 스텝 기반 햅틱 피드백 (드르륵 느낌)
                                     val currentStep = (accumulatedValue * steps / 10f).roundToInt()
                                     if (currentStep != previousStep) {
                                         performTickHaptic()
@@ -192,38 +157,61 @@ fun RotaryKnob(
             val radius = (size.toPx() - strokeWidth) / 2f
             val center = Offset(size.toPx() / 2f, size.toPx() / 2f)
 
-            // 배경 트랙 (전체 범위)
+            // Outer Base Track
             drawArc(
-                color = trackColor,
+                color = knobRingColor,
                 startAngle = startAngle,
                 sweepAngle = sweepAngle,
                 useCenter = false,
-                style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+                style = Stroke(width = strokeWidth * 1.5f, cap = StrokeCap.Round),
                 topLeft = Offset(strokeWidth / 2f, strokeWidth / 2f),
                 size = androidx.compose.ui.geometry.Size(radius * 2f, radius * 2f)
             )
 
-            // 활성 트랙 (현재 값까지)
+            // Glow Base Track
             drawArc(
-                color = actualKnobColor,
+                color = fillRingGlow,
                 startAngle = startAngle,
                 sweepAngle = normalizedValue * sweepAngle,
                 useCenter = false,
-                style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+                style = Stroke(width = strokeWidth * 1.5f, cap = StrokeCap.Round),
                 topLeft = Offset(strokeWidth / 2f, strokeWidth / 2f),
                 size = androidx.compose.ui.geometry.Size(radius * 2f, radius * 2f)
             )
 
-            // 중앙 원 (노브 몸체)
+            // Active Track
+            drawArc(
+                color = fillRingColor,
+                startAngle = startAngle,
+                sweepAngle = normalizedValue * sweepAngle,
+                useCenter = false,
+                style = Stroke(width = strokeWidth * 0.7f, cap = StrokeCap.Round),
+                topLeft = Offset(strokeWidth / 2f, strokeWidth / 2f),
+                size = androidx.compose.ui.geometry.Size(radius * 2f, radius * 2f)
+            )
+
+            // Central Area Base
             drawCircle(
-                color = actualKnobColor,
-                radius = radius * 0.6f,
+                brush = Brush.radialGradient(
+                    colors = listOf(metalHighlight, darkMetal),
+                    center = center,
+                    radius = radius * 0.8f
+                ),
+                radius = radius * 0.8f,
                 center = center
             )
 
-            // 포인터 (현재 위치 표시)
+            // Central Inner Bevel
+            drawCircle(
+                color = Color.Black.copy(alpha = 0.3f),
+                radius = radius * 0.75f,
+                center = center,
+                style = Stroke(width = 2f)
+            )
+
+            // Pointer
             val pointerAngle = currentAngle * (PI.toFloat() / 180f)
-            val pointerLength = radius * 0.4f
+            val pointerLength = radius * 0.6f
             val pointerStart = Offset(
                 center.x + cos(pointerAngle) * (radius * 0.2f),
                 center.y + sin(pointerAngle) * (radius * 0.2f)
@@ -232,30 +220,41 @@ fun RotaryKnob(
                 center.x + cos(pointerAngle) * pointerLength,
                 center.y + sin(pointerAngle) * pointerLength
             )
+
+            // Pointer glow/shadow
             drawLine(
-                color = indicatorColor,
+                color = pointerColor.copy(alpha = 0.4f),
                 start = pointerStart,
                 end = pointerEnd,
-                strokeWidth = strokeWidth * 0.4f,
+                strokeWidth = strokeWidth * 0.6f,
+                cap = StrokeCap.Round
+            )
+
+            // Pointer Core
+            drawLine(
+                color = pointerColor,
+                start = pointerStart,
+                end = pointerEnd,
+                strokeWidth = strokeWidth * 0.3f,
                 cap = StrokeCap.Round
             )
         }
 
-        // 현재 값 표시
-        Text(
-            text = String.format("%.1f", value),
-            style = Obsidian.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            color = labelColor ?: Obsidian.colors.textPrimary
-        )
-
-        // 레이블
-        Text(
-            text = label,
-            style = Obsidian.typography.labelSmall.copy(fontSize = 10.sp),
-            color = actualLabelColor,
-            textAlign = TextAlign.Center,
-            maxLines = 1
-        )
+        // Value & Label container
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = String.format("%.1f", value),
+                style = Obsidian.typography.titleMedium,
+                color = labelColor ?: Obsidian.colors.textPrimary
+            )
+            Text(
+                text = label,
+                style = Obsidian.typography.labelMedium,
+                color = actualLabelColor,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        }
     }
 }

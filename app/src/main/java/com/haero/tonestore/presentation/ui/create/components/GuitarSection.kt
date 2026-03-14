@@ -1,18 +1,17 @@
 package com.haero.tonestore.presentation.ui.create.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.GuitarSetting
@@ -33,7 +31,7 @@ import com.haero.tonestore.domain.model.PickupPosition
 import com.haero.tonestore.presentation.ui.components.RotaryKnob
 import com.haero.tonestore.presentation.ui.components.SectionHeader
 import com.haero.tonestore.ui.designsystem.Obsidian
-import com.haero.tonestore.ui.designsystem.ObsidianCard
+import com.haero.tonestore.ui.designsystem.ObsidianSurface
 import com.haero.tonestore.ui.designsystem.ObsidianTextField
 
 @Composable
@@ -73,36 +71,43 @@ fun GuitarSection(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
             } else if (!guitarSetting.guitarModel.isNullOrBlank()) {
                 Text(
                     text = guitarSetting.guitarModel,
-                    style = Obsidian.typography.titleSmall,
+                    style = Obsidian.typography.headlineMedium,
                     color = Obsidian.colors.textPrimary
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
             Text(
                 text = stringResource(R.string.pickup_selector),
-                style = Obsidian.typography.labelLarge,
-                color = Obsidian.colors.textPrimary
+                style = Obsidian.typography.titleMedium,
+                color = Obsidian.colors.textSecondary
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            PickupSelector(
-                selectedPosition = guitarSetting.pickupSelector,
-                onPositionChange = onPickupPositionChange,
-                enabled = isEditable
-            )
+            ObsidianSurface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(Obsidian.radius.lg)
+            ) {
+                PickupSelector(
+                    selectedPosition = guitarSetting.pickupSelector,
+                    onPositionChange = onPickupPositionChange,
+                    enabled = isEditable,
+                    modifier = Modifier.padding(vertical = 20.dp, horizontal = 12.dp)
+                )
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            ObsidianCard(
-                modifier = Modifier.fillMaxWidth()
+            ObsidianSurface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(Obsidian.radius.lg)
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(Obsidian.spacing.lg),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     RotaryKnob(
@@ -123,7 +128,7 @@ fun GuitarSection(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
@@ -132,7 +137,8 @@ fun GuitarSection(
 private fun PickupSelector(
     selectedPosition: PickupPosition,
     onPositionChange: (PickupPosition) -> Unit,
-    enabled: Boolean
+    enabled: Boolean,
+    modifier: Modifier = Modifier
 ) {
     val positions = listOf(
         PickupPosition.NECK to "N",
@@ -143,11 +149,7 @@ private fun PickupSelector(
     )
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(Obsidian.radius.card))
-            .background(Obsidian.colors.surfaceHighlight)
-            .padding(8.dp),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -157,54 +159,37 @@ private fun PickupSelector(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(Obsidian.radius.xs))
+                    .clip(RoundedCornerShape(Obsidian.radius.button))
                     .clickable(enabled = enabled) { onPositionChange(position) }
-                    .padding(8.dp)
+                    .padding(4.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(
-                            if (isSelected) {
-                                Obsidian.colors.primary
-                            } else {
-                                Obsidian.colors.surface
-                            }
-                        )
-                        .border(
-                            width = 2.dp,
-                            color = if (isSelected) {
-                                Obsidian.colors.primary
-                            } else {
-                                Obsidian.colors.border
-                            },
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
+                ObsidianSurface(
+                    modifier = Modifier.size(44.dp),
+                    shape = RoundedCornerShape(Obsidian.radius.button),
+                    elevation = if (isSelected) Obsidian.elevation.sm else 0.dp,
+                    border = if (isSelected) Obsidian.colors.primaryLight else Obsidian.colors.borderSubtle
                 ) {
-                    if (isSelected) {
-                        Box(
-                            modifier = Modifier
-                                .size(12.dp)
-                                .clip(CircleShape)
-                                .background(Obsidian.colors.bgPrimary)
-                        )
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isSelected) {
+                            Box(
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .background(Obsidian.colors.primary, RoundedCornerShape(4.dp))
+                            )
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
                     text = label,
-                    style = Obsidian.typography.labelSmall,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isSelected) {
-                        Obsidian.colors.primary
-                    } else {
-                        Obsidian.colors.textSecondary
-                    },
-                    textAlign = TextAlign.Center
+                    style = Obsidian.typography.labelLarge,
+                    color = if (isSelected) Obsidian.colors.primaryLight else Obsidian.colors.textMuted,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                 )
             }
         }

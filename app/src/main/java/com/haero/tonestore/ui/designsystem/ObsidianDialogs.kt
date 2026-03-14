@@ -19,7 +19,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 
 /**
- * Obsidian Design System - Dialog & Modal Components
+ * Obsidian Design System - Dialog & Modal Components (Slate Studio)
  */
 
 // ============================================================
@@ -39,16 +39,18 @@ fun ObsidianDialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(
             dismissOnBackPress = true,
-            dismissOnClickOutside = true
+            dismissOnClickOutside = true,
+            usePlatformDefaultWidth = false
         )
     ) {
         Column(
             modifier = modifier
                 .fillMaxWidth()
-                .shadow(Obsidian.elevation.dialog, RoundedCornerShape(Obsidian.radius.dialog))
+                .padding(horizontal = 24.dp)
+                .shadow(32.dp, RoundedCornerShape(Obsidian.radius.dialog), spotColor = Obsidian.colors.primary.copy(alpha = 0.15f))
                 .clip(RoundedCornerShape(Obsidian.radius.dialog))
-                .background(Obsidian.colors.surface)
-                .border(1.dp, Obsidian.colors.border, RoundedCornerShape(Obsidian.radius.dialog))
+                .background(Obsidian.colors.surfaceElevated)
+                .border(1.dp, Obsidian.colors.borderSubtle, RoundedCornerShape(Obsidian.radius.dialog))
         ) {
             // Header
             if (title != null) {
@@ -56,9 +58,9 @@ fun ObsidianDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
-                            start = Obsidian.spacing.xl,
+                            start = Obsidian.spacing.xxl,
                             end = Obsidian.spacing.md,
-                            top = Obsidian.spacing.lg,
+                            top = Obsidian.spacing.xl,
                             bottom = Obsidian.spacing.sm
                         ),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -77,30 +79,36 @@ fun ObsidianDialog(
                         iconSize = 20.dp
                     )
                 }
+            } else {
+                Spacer(Modifier.height(Obsidian.spacing.xl))
             }
 
             // Content
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = Obsidian.spacing.xl),
+                    .padding(horizontal = Obsidian.spacing.xxl),
                 content = content
             )
 
             // Buttons
             if (confirmButton != null || dismissButton != null) {
-                Spacer(Modifier.height(Obsidian.spacing.lg))
+                Spacer(Modifier.height(Obsidian.spacing.xl))
 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                        .padding(bottom = 20.dp),
+                        .padding(horizontal = Obsidian.spacing.xl)
+                        .padding(bottom = Obsidian.spacing.xl),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    dismissButton?.invoke()
-                    Spacer(Modifier.width(12.dp))
-                    confirmButton?.invoke()
+                    if (dismissButton != null) {
+                        dismissButton()
+                        Spacer(Modifier.width(12.dp))
+                    }
+                    if (confirmButton != null) {
+                        confirmButton()
+                    }
                 }
             } else {
                 Spacer(Modifier.height(Obsidian.spacing.xl))
@@ -134,7 +142,7 @@ fun ObsidianAlertDialog(
             ) {
                 Text(
                     text = confirmText,
-                    color = if (isDangerous) Obsidian.colors.bgPrimary else Obsidian.colors.bgPrimary
+                    color = Obsidian.colors.textPrimary
                 )
             }
         },
@@ -156,7 +164,7 @@ fun ObsidianAlertDialog(
     ) {
         Text(
             text = message,
-            style = Obsidian.typography.bodyMedium,
+            style = Obsidian.typography.bodyLarge,
             color = Obsidian.colors.textSecondary
         )
     }
@@ -178,12 +186,12 @@ fun ObsidianBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         modifier = modifier,
-        sheetState = rememberModalBottomSheetState(),
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         shape = RoundedCornerShape(
             topStart = Obsidian.radius.xxl,
             topEnd = Obsidian.radius.xxl
         ),
-        containerColor = Obsidian.colors.surface,
+        containerColor = Obsidian.colors.surfaceElevated,
         contentColor = Obsidian.colors.textPrimary,
         dragHandle = if (showDragHandle) {
             {
@@ -191,13 +199,13 @@ fun ObsidianBottomSheet(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(16.dp))
                     Box(
                         modifier = Modifier
-                            .width(40.dp)
-                            .height(4.dp)
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(Obsidian.colors.border)
+                            .width(48.dp)
+                            .height(5.dp)
+                            .clip(RoundedCornerShape(2.5.dp))
+                            .background(Obsidian.colors.borderFocus.copy(alpha = 0.3f))
                     )
                     Spacer(Modifier.height(12.dp))
                 }
@@ -209,7 +217,7 @@ fun ObsidianBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = Obsidian.spacing.xl)
+                .padding(horizontal = Obsidian.spacing.xxl)
         ) {
             if (title != null) {
                 Text(
@@ -223,6 +231,7 @@ fun ObsidianBottomSheet(
             content()
 
             Spacer(Modifier.height(Obsidian.spacing.xxxl))
+            Spacer(Modifier.height(WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
         }
     }
 }
@@ -243,15 +252,19 @@ fun ObsidianSnackbar(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = Obsidian.spacing.screenPadding)
-            .shadow(Obsidian.elevation.lg, RoundedCornerShape(Obsidian.radius.md))
-            .clip(RoundedCornerShape(Obsidian.radius.md))
-            .background(if (isError) Obsidian.colors.error else Obsidian.colors.surfaceElevated)
+            .shadow(
+                elevation = Obsidian.elevation.lg,
+                shape = RoundedCornerShape(999.dp),
+                spotColor = if (isError) Obsidian.colors.error else Obsidian.colors.primary
+            )
+            .clip(RoundedCornerShape(999.dp))
+            .background(if (isError) Obsidian.colors.error else Obsidian.colors.surfaceHighlight)
             .border(
                 1.dp,
-                if (isError) Obsidian.colors.error.copy(alpha = 0.5f) else Obsidian.colors.border,
-                RoundedCornerShape(Obsidian.radius.md)
+                if (isError) Obsidian.colors.error.copy(alpha = 0.5f) else Obsidian.colors.borderSubtle,
+                RoundedCornerShape(999.dp)
             )
-            .padding(Obsidian.spacing.cardPadding),
+            .padding(horizontal = 20.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -266,9 +279,9 @@ fun ObsidianSnackbar(
             Text(
                 text = actionLabel,
                 style = Obsidian.typography.labelLarge,
-                color = if (isError) Color.White else Obsidian.colors.primary,
+                color = if (isError) Color.White else Obsidian.colors.primaryLight,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(Obsidian.radius.sm))
+                    .clip(RoundedCornerShape(999.dp))
                     .clickable(onClick = onAction)
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             )
@@ -289,8 +302,8 @@ fun ObsidianTooltip(
         modifier = modifier
             .shadow(Obsidian.elevation.sm, RoundedCornerShape(Obsidian.radius.sm))
             .clip(RoundedCornerShape(Obsidian.radius.sm))
-            .background(Obsidian.colors.surfaceElevated)
-            .border(1.dp, Obsidian.colors.border, RoundedCornerShape(Obsidian.radius.sm))
+            .background(Obsidian.colors.surfaceHighlight)
+            .border(1.dp, Obsidian.colors.borderSubtle, RoundedCornerShape(Obsidian.radius.sm))
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Text(
@@ -331,14 +344,14 @@ fun <T> ObsidianSelectionDialog(
                         .clip(RoundedCornerShape(Obsidian.radius.md))
                         .background(
                             if (isSelected) {
-                                Obsidian.colors.primaryMuted
+                                Obsidian.colors.primary.copy(alpha = 0.15f)
                             } else {
                                 Color.Transparent
                             }
                         )
                         .border(
                             width = if (isSelected) 1.dp else 0.dp,
-                            color = if (isSelected) Obsidian.colors.primary.copy(alpha = 0.5f) else Color.Transparent,
+                            color = if (isSelected) Obsidian.colors.primary.copy(alpha = 0.3f) else Color.Transparent,
                             shape = RoundedCornerShape(Obsidian.radius.md)
                         )
                         .clickable { onItemSelected(item) }

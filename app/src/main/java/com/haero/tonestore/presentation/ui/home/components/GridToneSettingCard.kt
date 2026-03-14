@@ -41,8 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.ToneSetting
-import com.haero.tonestore.ui.components.GlassCard
-import com.haero.tonestore.ui.components.LocalEmberGlassTheme
+import com.haero.tonestore.ui.designsystem.Obsidian
+import com.haero.tonestore.ui.designsystem.ObsidianSurface
 
 @Composable
 fun GridToneSettingCard(
@@ -52,14 +52,13 @@ fun GridToneSettingCard(
     sharedElementKey: String,
     modifier: Modifier = Modifier
 ) {
-    val theme = LocalEmberGlassTheme.current
     var isPressed by remember { mutableStateOf(false) }
 
     val favoriteColor by animateColorAsState(
         targetValue = if (toneSetting.isFavorite) {
-            theme.secondary
+            Obsidian.colors.secondary
         } else {
-            theme.textMuted
+            Obsidian.colors.textMuted
         },
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
         label = "gridFavoriteColor"
@@ -74,7 +73,7 @@ fun GridToneSettingCard(
         label = "gridCardScale"
     )
 
-    GlassCard(
+    ObsidianSurface(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(0.85f)
@@ -89,8 +88,8 @@ fun GridToneSettingCard(
                     onTap = { onClick() }
                 )
             },
-        cornerRadius = 24.dp,
-        glassAlpha = 0.12f
+        onClick = onClick,
+        shape = RoundedCornerShape(Obsidian.radius.card)
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             Column(
@@ -106,7 +105,7 @@ fun GridToneSettingCard(
                         .clip(RoundedCornerShape(16.dp))
                         .background(
                             Brush.linearGradient(
-                                colors = listOf(theme.primary, theme.accent)
+                                colors = listOf(Obsidian.colors.primary, Obsidian.colors.primaryLight)
                             )
                         ),
                     contentAlignment = Alignment.Center
@@ -114,7 +113,7 @@ fun GridToneSettingCard(
                     Icon(
                         imageVector = Icons.Default.MusicNote,
                         contentDescription = null,
-                        tint = theme.background,
+                        tint = Obsidian.colors.bgPrimary,
                         modifier = Modifier.size(30.dp)
                     )
                 }
@@ -127,7 +126,7 @@ fun GridToneSettingCard(
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    color = theme.textPrimary,
+                    color = Obsidian.colors.textPrimary,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

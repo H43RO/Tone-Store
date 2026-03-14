@@ -18,7 +18,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,6 +35,7 @@ import com.haero.tonestore.domain.model.SavedCustomPedal
 import com.haero.tonestore.domain.model.SavedPedalBoard
 import com.haero.tonestore.presentation.ui.components.SectionHeader
 import com.haero.tonestore.presentation.ui.pedalboard.components.PresetPedalSelectionDialog
+import com.haero.tonestore.ui.designsystem.Obsidian
 import java.util.UUID
 
 @Composable
@@ -95,8 +95,8 @@ fun PedalBoardSection(
             } else {
                 Text(
                     text = stringResource(R.string.no_pedals),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = Obsidian.typography.bodyMedium,
+                    color = Obsidian.colors.textSecondary,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
             }
@@ -105,7 +105,7 @@ fun PedalBoardSection(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 if (savedPedalBoards.isNotEmpty()) {
-                    OutlinedButton(
+                    com.haero.tonestore.ui.designsystem.ObsidianOutlinedButton(
                         onClick = { showSavedPedalBoardDialog = true },
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -117,7 +117,7 @@ fun PedalBoardSection(
                 }
 
                 // 페달 추가 버튼 하나로 통합
-                OutlinedButton(
+                com.haero.tonestore.ui.designsystem.ObsidianOutlinedButton(
                     onClick = { showPedalSelectionSheet = true },
                     modifier = Modifier.fillMaxWidth()
                 ) {

@@ -3,38 +3,23 @@ package com.haero.tonestore.presentation.ui.detail
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Speaker
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.haero.tonestore.R
@@ -62,7 +47,7 @@ fun DetailScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var showDeleteDialog by remember { mutableStateOf(false) }
-    val pagerState = rememberPagerState(pageCount = { 3 })
+    val pagerState = rememberPagerState(pageCount = { 2 })
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -93,79 +78,100 @@ fun DetailScreen(
     }
 
     val tabs = listOf(
-        TabItem(stringResource(R.string.pedal_board), Icons.Default.GraphicEq),
-        TabItem(stringResource(R.string.amp_and_guitar_setting), Icons.Default.Speaker)
+        stringResource(R.string.pedal_board),
+        stringResource(R.string.amp_and_guitar_setting)
     )
 
-    ObsidianBackground {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                DetailHeader(
-                    title = state.toneSetting?.songName ?: stringResource(R.string.detail),
-                    onBackClick = onNavigateBack,
-                    onEditClick = { viewModel.handleIntent(DetailIntent.NavigateToEdit) },
-                    onDuplicateClick = { viewModel.handleIntent(DetailIntent.DuplicateToneSetting) },
-                    onShareClick = { onNavigateToShare(toneSettingId) },
-                    onDeleteClick = { showDeleteDialog = true }
-                )
+    Box(modifier = Modifier.fillMaxSize().background(Obsidian.colors.bgPrimary)) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            ObsidianDetailTopBar(
+                title = state.toneSetting?.songName ?: stringResource(R.string.detail),
+                onBack = onNavigateBack,
+                modifier = Modifier.statusBarsPadding(),
+                actions = {
+                    ObsidianIconButton(
+                        onClick = { onNavigateToShare(toneSettingId) },
+                        icon = Icons.Default.Share,
+                        tint = Obsidian.colors.primaryLight
+                    )
+                    ObsidianIconButton(
+                        onClick = { viewModel.handleIntent(DetailIntent.DuplicateToneSetting) },
+                        icon = Icons.Default.ContentCopy,
+                        tint = Obsidian.colors.textSecondary
+                    )
+                    ObsidianIconButton(
+                        onClick = { viewModel.handleIntent(DetailIntent.NavigateToEdit) },
+                        icon = Icons.Default.Edit,
+                        tint = Obsidian.colors.textSecondary
+                    )
+                    ObsidianIconButton(
+                        onClick = { showDeleteDialog = true },
+                        icon = Icons.Default.Delete,
+                        tint = Obsidian.colors.error
+                    )
+                }
+            )
 
-                Box(modifier = Modifier.weight(1f)) {
-                    when {
-                        state.isLoading -> {
-                            Box(modifier = Modifier.align(Alignment.Center)) {
-                                ObsidianLoadingIndicator()
-                            }
+            Box(modifier = Modifier.weight(1f)) {
+                when {
+                    state.isLoading -> {
+                        Box(modifier = Modifier.align(Alignment.Center)) {
+                            ObsidianLoadingIndicator()
                         }
-                        state.toneSetting != null -> {
-                            val toneSetting = state.toneSetting ?: return@Box
+                    }
+                    state.toneSetting != null -> {
+                        val toneSetting = state.toneSetting ?: return@Box
 
-                            Column(modifier = Modifier.fillMaxSize()) {
-                                DetailTabBar(
-                                    tabs = tabs,
-                                    selectedIndex = pagerState.currentPage,
-                                    onTabSelected = { index ->
-                                        scope.launch {
-                                            pagerState.animateScrollToPage(index)
-                                        }
-                                    },
-                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
-                                )
-
-                                HorizontalPager(
-                                    state = pagerState,
-                                    modifier = Modifier.fillMaxSize()
-                                ) { page ->
-                                    when (page) {
-                                        0 -> DetailPedalBoardContent(pedalBoard = toneSetting.pedalBoard)
-                                        1 -> DetailAmpAndGuitarContent(
-                                            ampSetting = toneSetting.ampSetting,
-                                            guitarSetting = toneSetting.guitarSetting
-                                        )
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            Spacer(Modifier.height(8.dp))
+                            ObsidianTabBar(
+                                tabs = tabs,
+                                selectedIndex = pagerState.currentPage,
+                                onTabSelected = { index ->
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(index)
                                     }
+                                }
+                            )
+                            Spacer(Modifier.height(16.dp))
+
+                            HorizontalPager(
+                                state = pagerState,
+                                modifier = Modifier.fillMaxSize()
+                            ) { page ->
+                                when (page) {
+                                    0 -> DetailPedalBoardContent(pedalBoard = toneSetting.pedalBoard)
+                                    1 -> DetailAmpAndGuitarContent(
+                                        ampSetting = toneSetting.ampSetting,
+                                        guitarSetting = toneSetting.guitarSetting
+                                    )
                                 }
                             }
                         }
-                        state.error != null -> {
-                            Text(
-                                text = state.error ?: stringResource(R.string.error_occurred),
-                                style = Obsidian.typography.bodyLarge,
-                                color = Obsidian.colors.error,
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                        }
+                    }
+                    state.error != null -> {
+                        Text(
+                            text = state.error ?: stringResource(R.string.error_occurred),
+                            style = Obsidian.typography.bodyLarge,
+                            color = Obsidian.colors.error,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
                     }
                 }
             }
-
-            SnackbarHost(
-                hostState = snackbarHostState,
-                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)
-            )
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp),
+            snackbar = { data ->
+                ObsidianSnackbar(message = data.visuals.message)
+            }
+        )
     }
 
     if (showDeleteDialog) {
-        ObsidianAlertDialog(
+        ObsidianConfirmationDialog(
             onDismissRequest = { showDeleteDialog = false },
             title = stringResource(R.string.delete_confirm_title),
             message = stringResource(
@@ -173,152 +179,10 @@ fun DetailScreen(
                 state.toneSetting?.songName ?: ""
             ),
             confirmText = stringResource(R.string.delete),
-            dismissText = stringResource(R.string.cancel),
             onConfirm = {
                 viewModel.handleIntent(DetailIntent.DeleteToneSetting)
-            },
-            isDangerous = true
-        )
-    }
-}
-
-@Composable
-private fun DetailHeader(
-    title: String,
-    onBackClick: () -> Unit,
-    onEditClick: () -> Unit,
-    onDuplicateClick: () -> Unit,
-    onShareClick: () -> Unit,
-    onDeleteClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .statusBarsPadding()
-            .padding(horizontal = 8.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        ObsidianIconButton(
-            onClick = onBackClick,
-            icon = Icons.AutoMirrored.Filled.ArrowBack,
-            tint = Obsidian.colors.textPrimary
-        )
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Text(
-            text = title,
-            style = Obsidian.typography.headlineMedium,
-            color = Obsidian.colors.textPrimary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f)
-        )
-
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            ObsidianIconButton(
-                onClick = onShareClick,
-                icon = Icons.Default.Share,
-                tint = Obsidian.colors.primary
-            )
-
-            ObsidianIconButton(
-                onClick = onDuplicateClick,
-                icon = Icons.Default.ContentCopy,
-                tint = Obsidian.colors.textSecondary
-            )
-
-            ObsidianIconButton(
-                onClick = onEditClick,
-                icon = Icons.Default.Edit,
-                tint = Obsidian.colors.textSecondary
-            )
-
-            ObsidianIconButton(
-                onClick = onDeleteClick,
-                icon = Icons.Default.Delete,
-                tint = Obsidian.colors.error
-            )
-        }
-    }
-}
-
-private data class TabItem(
-    val title: String,
-    val icon: ImageVector
-)
-
-@Composable
-private fun DetailTabBar(
-    tabs: List<TabItem>,
-    selectedIndex: Int,
-    onTabSelected: (Int) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    ObsidianSurface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(Obsidian.radius.lg),
-        elevation = 0.dp
-    ) {
-        Row(
-            modifier = Modifier.padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            tabs.forEachIndexed { index, tab ->
-                val isSelected = index == selectedIndex
-                val backgroundColor by animateColorAsState(
-                    targetValue = if (isSelected) Obsidian.colors.primaryMuted else Color.Transparent,
-                    animationSpec = spring(stiffness = Spring.StiffnessMedium),
-                    label = "tabBackground"
-                )
-                val contentColor by animateColorAsState(
-                    targetValue = if (isSelected) Obsidian.colors.primary else Obsidian.colors.textSecondary,
-                    animationSpec = spring(stiffness = Spring.StiffnessMedium),
-                    label = "tabContent"
-                )
-
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(Obsidian.radius.md))
-                        .background(backgroundColor)
-                        .then(
-                            if (isSelected) {
-                                Modifier.border(
-                                    1.dp,
-                                    Obsidian.colors.primary.copy(alpha = 0.3f),
-                                    RoundedCornerShape(Obsidian.radius.md)
-                                )
-                            } else {
-                                Modifier
-                            }
-                        )
-                        .clickable { onTabSelected(index) }
-                        .padding(vertical = 12.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = tab.icon,
-                            contentDescription = null,
-                            tint = contentColor,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = tab.title,
-                            style = if (isSelected) Obsidian.typography.labelLarge else Obsidian.typography.bodyMedium,
-                            color = contentColor,
-                            maxLines = 1
-                        )
-                    }
-                }
             }
-        }
+        )
     }
 }
 
@@ -351,15 +215,15 @@ private fun GridPedalView(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = Obsidian.spacing.screenPadding, vertical = Obsidian.spacing.md),
-        verticalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         val chunkedPedals = pedals.chunked(2)
         chunkedPedals.forEach { rowPedals ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(androidx.compose.foundation.layout.IntrinsicSize.Max),
-                horizontalArrangement = Arrangement.spacedBy(Obsidian.spacing.itemGap)
+                    .height(IntrinsicSize.Max),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 rowPedals.forEach { pedal ->
                     PedalCard(
@@ -393,14 +257,15 @@ private fun DetailAmpAndGuitarContent(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(Obsidian.spacing.screenPadding)
+            .padding(horizontal = Obsidian.spacing.screenPadding)
+            .padding(bottom = 100.dp)
     ) {
         // Amp Section
         Text(
             text = stringResource(R.string.amp_setting),
             style = Obsidian.typography.titleLarge,
-            color = Obsidian.colors.primary,
-            modifier = Modifier.padding(vertical = 8.dp)
+            color = Obsidian.colors.primaryLight,
+            modifier = Modifier.padding(vertical = 12.dp)
         )
 
         if (!ampSetting.ampModel.isNullOrBlank()) {
@@ -412,15 +277,16 @@ private fun DetailAmpAndGuitarContent(
             Spacer(modifier = Modifier.height(Obsidian.spacing.lg))
         }
 
-        ObsidianCard(
-            modifier = Modifier.fillMaxWidth()
+        ObsidianSurface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(Obsidian.radius.lg)
         ) {
             @OptIn(ExperimentalLayoutApi::class)
             FlowRow(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(Obsidian.spacing.lg),
                 maxItemsInEachRow = 4,
                 horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 listOf(
                     "Gain" to ampSetting.gain,
@@ -435,25 +301,25 @@ private fun DetailAmpAndGuitarContent(
                         value = value,
                         onValueChange = {},
                         label = label,
-                        size = 64.dp,
+                        size = 60.dp,
                         enabled = false
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(Obsidian.spacing.xxl))
+        Spacer(modifier = Modifier.height(Obsidian.spacing.xxxl))
 
         ObsidianDivider()
 
-        Spacer(modifier = Modifier.height(Obsidian.spacing.xxl))
+        Spacer(modifier = Modifier.height(Obsidian.spacing.xxxl))
 
         // Guitar Section
         Text(
             text = stringResource(R.string.guitar_setting),
             style = Obsidian.typography.titleLarge,
-            color = Obsidian.colors.primary,
-            modifier = Modifier.padding(bottom = 8.dp)
+            color = Obsidian.colors.primaryLight,
+            modifier = Modifier.padding(bottom = 12.dp)
         )
 
         if (!guitarSetting.guitarModel.isNullOrBlank()) {
@@ -470,25 +336,26 @@ private fun DetailAmpAndGuitarContent(
             style = Obsidian.typography.titleMedium,
             color = Obsidian.colors.textSecondary
         )
-        Spacer(modifier = Modifier.height(Obsidian.spacing.md))
+        Spacer(modifier = Modifier.height(12.dp))
 
         ObsidianSurface(
             modifier = Modifier.fillMaxWidth(),
-            elevation = 0.dp
+            shape = RoundedCornerShape(Obsidian.radius.lg)
         ) {
             DetailPickupSelector(
                 selectedPosition = guitarSetting.pickupSelector,
-                modifier = Modifier.padding(vertical = 16.dp)
+                modifier = Modifier.padding(vertical = 20.dp, horizontal = 12.dp)
             )
         }
 
         Spacer(modifier = Modifier.height(Obsidian.spacing.xl))
 
-        ObsidianCard(
-            modifier = Modifier.fillMaxWidth()
+        ObsidianSurface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(Obsidian.radius.lg)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(Obsidian.spacing.lg),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 RotaryKnob(
@@ -507,8 +374,6 @@ private fun DetailAmpAndGuitarContent(
                 )
             }
         }
-
-        Spacer(modifier = Modifier.height(100.dp))
     }
 }
 
@@ -534,40 +399,34 @@ private fun DetailPickupSelector(
             val isSelected = selectedPosition == position
 
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(horizontal = 4.dp)
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(
-                            if (isSelected) Obsidian.colors.primary else Obsidian.colors.bgSecondary
-                        )
-                        .border(
-                            width = 2.dp,
-                            color = if (isSelected) Obsidian.colors.primary else Obsidian.colors.border,
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
+                ObsidianSurface(
+                    modifier = Modifier.size(44.dp),
+                    shape = RoundedCornerShape(Obsidian.radius.button),
+                    elevation = if (isSelected) Obsidian.elevation.sm else 0.dp,
+                    border = if (isSelected) Obsidian.colors.primaryLight else Obsidian.colors.borderSubtle
                 ) {
-                    if (isSelected) {
-                        Box(
-                            modifier = Modifier
-                                .size(14.dp)
-                                .clip(CircleShape)
-                                .background(Obsidian.colors.bgPrimary)
-                        )
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isSelected) {
+                            Box(
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .background(Obsidian.colors.primary, RoundedCornerShape(4.dp))
+                            )
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
                     text = label,
-                    style = if (isSelected) Obsidian.typography.labelLarge else Obsidian.typography.labelSmall,
-                    color = if (isSelected) Obsidian.colors.primary else Obsidian.colors.textMuted,
-                    textAlign = TextAlign.Center
+                    style = Obsidian.typography.labelLarge,
+                    color = if (isSelected) Obsidian.colors.primaryLight else Obsidian.colors.textMuted
                 )
             }
         }

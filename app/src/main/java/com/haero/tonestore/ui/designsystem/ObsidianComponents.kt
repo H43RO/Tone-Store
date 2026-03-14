@@ -1,6 +1,9 @@
 package com.haero.tonestore.ui.designsystem
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,6 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -36,7 +42,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Obsidian Design System - Core Components
+ * Obsidian Design System - Core Components (Slate Studio)
  */
 
 // ============================================================
@@ -49,6 +55,7 @@ fun ObsidianSurface(
     shape: RoundedCornerShape = RoundedCornerShape(Obsidian.radius.card),
     elevation: Dp = Obsidian.elevation.card,
     hasBorder: Boolean = true,
+    border: Color? = null,
     onClick: (() -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
@@ -56,19 +63,33 @@ fun ObsidianSurface(
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
         targetValue = if (isPressed && onClick != null) 0.98f else 1f,
-        animationSpec = tween(100),
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
         label = "scale"
     )
+
+    val actualBorderColor = border ?: Obsidian.colors.primary.copy(alpha = 0.1f)
 
     Box(
         modifier = modifier
             .scale(scale)
-            .shadow(elevation, shape, spotColor = Color.Black)
+            .shadow(
+                elevation = elevation,
+                shape = shape,
+                spotColor = Obsidian.colors.primary.copy(alpha = 0.3f),
+                ambientColor = Obsidian.colors.primary.copy(alpha = 0.05f)
+            )
             .clip(shape)
-            .background(Obsidian.colors.surface)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Obsidian.colors.surfaceHighlight.copy(alpha = 0.3f),
+                        Obsidian.colors.surface
+                    )
+                )
+            )
             .then(
                 if (hasBorder) {
-                    Modifier.border(1.dp, Obsidian.colors.border, shape)
+                    Modifier.border(1.dp, actualBorderColor, shape)
                 } else {
                     Modifier
                 }
@@ -85,6 +106,57 @@ fun ObsidianSurface(
                 }
             ),
         content = content
+    )
+}
+
+@Composable
+fun ObsidianConfirmationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    title: String,
+    message: String,
+    confirmText: String = "Confirm",
+    dismissText: String = "Cancel",
+    isDestructive: Boolean = false
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = Obsidian.colors.bgSecondary,
+        shape = RoundedCornerShape(Obsidian.radius.lg),
+        title = {
+            Text(
+                text = title,
+                style = Obsidian.typography.titleLarge,
+                color = Obsidian.colors.textPrimary
+            )
+        },
+        text = {
+            Text(
+                text = message,
+                style = Obsidian.typography.bodyMedium,
+                color = Obsidian.colors.textSecondary
+            )
+        },
+        confirmButton = {
+            ObsidianTextButton(
+                onClick = onConfirm
+            ) {
+                Text(
+                    text = confirmText,
+                    color = if (isDestructive) Obsidian.colors.error else Obsidian.colors.primaryLight
+                )
+            }
+        },
+        dismissButton = {
+            ObsidianTextButton(
+                onClick = onDismiss
+            ) {
+                Text(
+                    text = dismissText,
+                    color = Obsidian.colors.textSecondary
+                )
+            }
+        }
     )
 }
 
@@ -134,11 +206,21 @@ fun ObsidianBackground(
     Box(
         modifier = modifier
             .fillMaxSize()
+            .background(Obsidian.colors.bgPrimary)
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(
+                        Obsidian.colors.primary.copy(alpha = 0.08f),
+                        Color.Transparent
+                    ),
+                    radius = 1200f
+                )
+            )
             .background(
                 Brush.verticalGradient(
-                    listOf(
-                        Obsidian.colors.bgPrimary,
-                        Obsidian.colors.bgSecondary,
+                    colors = listOf(
+                        Color.Transparent,
+                        Obsidian.colors.bgSecondary.copy(alpha = 0.8f),
                         Obsidian.colors.bgTertiary
                     )
                 )
@@ -164,22 +246,31 @@ fun ObsidianButton(
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.96f else 1f,
-        animationSpec = tween(100),
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
         label = "scale"
     )
 
-    val bgColor = when {
-        !enabled -> Obsidian.colors.textMuted
-        else -> Obsidian.colors.primary
+    val backgroundModifier = if (enabled) {
+        Modifier.background(
+            Brush.horizontalGradient(
+                colors = listOf(Obsidian.colors.primaryDark, Obsidian.colors.primaryLight)
+            )
+        )
+    } else {
+        Modifier.background(Obsidian.colors.surfaceElevated)
     }
 
     Box(
         modifier = modifier
             .scale(scale)
-            .height(48.dp)
-            .shadow(if (enabled) 4.dp else 0.dp, RoundedCornerShape(Obsidian.radius.button), spotColor = Obsidian.colors.primary.copy(alpha = 0.3f))
+            .height(52.dp)
+            .shadow(
+                elevation = if (enabled) 8.dp else 0.dp,
+                shape = RoundedCornerShape(Obsidian.radius.button),
+                spotColor = Obsidian.colors.primary.copy(alpha = 0.5f)
+            )
             .clip(RoundedCornerShape(Obsidian.radius.button))
-            .background(bgColor)
+            .then(backgroundModifier)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -190,13 +281,13 @@ fun ObsidianButton(
     ) {
         if (isLoading) {
             CircularProgressIndicator(
-                modifier = Modifier.size(20.dp),
-                color = Obsidian.colors.bgPrimary,
-                strokeWidth = 2.dp
+                modifier = Modifier.size(24.dp),
+                color = Obsidian.colors.textPrimary,
+                strokeWidth = 2.5.dp
             )
         } else {
             Row(
-                modifier = Modifier.padding(horizontal = 20.dp),
+                modifier = Modifier.padding(horizontal = 24.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -204,13 +295,15 @@ fun ObsidianButton(
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = Obsidian.colors.bgPrimary,
-                        modifier = Modifier.size(18.dp)
+                        tint = if (enabled) Obsidian.colors.textPrimary else Obsidian.colors.textMuted,
+                        modifier = Modifier.size(20.dp)
                     )
                     Spacer(Modifier.width(8.dp))
                 }
                 ProvideTextStyle(
-                    value = Obsidian.typography.labelLarge.copy(color = Obsidian.colors.bgPrimary)
+                    value = Obsidian.typography.labelLarge.copy(
+                        color = if (enabled) Obsidian.colors.textPrimary else Obsidian.colors.textMuted
+                    )
                 ) {
                     content()
                 }
@@ -231,25 +324,26 @@ fun ObsidianOutlinedButton(
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.96f else 1f,
-        animationSpec = tween(100),
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
         label = "scale"
     )
 
     val borderColor = when {
-        !enabled -> Obsidian.colors.textMuted
-        else -> Obsidian.colors.primary
+        !enabled -> Obsidian.colors.border
+        isPressed -> Obsidian.colors.primaryLight
+        else -> Obsidian.colors.primary.copy(alpha = 0.5f)
     }
     val textColor = when {
         !enabled -> Obsidian.colors.textMuted
-        else -> Obsidian.colors.primary
+        else -> Obsidian.colors.primaryLight
     }
 
     Box(
         modifier = modifier
             .scale(scale)
-            .height(48.dp)
+            .height(52.dp)
             .clip(RoundedCornerShape(Obsidian.radius.button))
-            .background(Color.Transparent)
+            .background(if (isPressed) Obsidian.colors.primary.copy(alpha = 0.1f) else Color.Transparent)
             .border(1.5.dp, borderColor, RoundedCornerShape(Obsidian.radius.button))
             .clickable(
                 interactionSource = interactionSource,
@@ -260,7 +354,7 @@ fun ObsidianOutlinedButton(
         contentAlignment = Alignment.Center
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = 24.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -269,7 +363,7 @@ fun ObsidianOutlinedButton(
                     imageVector = icon,
                     contentDescription = null,
                     tint = textColor,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(20.dp)
                 )
                 Spacer(Modifier.width(8.dp))
             }
@@ -290,15 +384,28 @@ fun ObsidianTextButton(
     icon: ImageVector? = null,
     content: @Composable RowScope.() -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.96f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        label = "scale"
+    )
     val textColor = when {
         !enabled -> Obsidian.colors.textMuted
-        else -> Obsidian.colors.primary
+        else -> Obsidian.colors.primaryLight
     }
 
     Row(
         modifier = modifier
+            .scale(scale)
             .clip(RoundedCornerShape(Obsidian.radius.sm))
-            .clickable(enabled = enabled, onClick = onClick)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = enabled,
+                onClick = onClick
+            )
             .padding(horizontal = 12.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
@@ -327,14 +434,14 @@ fun ObsidianIconButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     tint: Color = Obsidian.colors.textSecondary,
-    size: Dp = 40.dp,
-    iconSize: Dp = 22.dp
+    size: Dp = 48.dp,
+    iconSize: Dp = 24.dp
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.9f else 1f,
-        animationSpec = tween(100),
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
         label = "scale"
     )
 
@@ -343,7 +450,8 @@ fun ObsidianIconButton(
             .scale(scale)
             .size(size)
             .clip(CircleShape)
-            .background(Obsidian.colors.surfaceHighlight.copy(alpha = 0.5f))
+            .background(if (isPressed) Obsidian.colors.surfaceHighlight else Obsidian.colors.surface)
+            .border(1.dp, Obsidian.colors.borderSubtle, CircleShape)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -380,19 +488,35 @@ fun ObsidianTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None
 ) {
     var isFocused by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+
+    val borderColor by animateColorAsState(
+        targetValue = if (isFocused) Obsidian.colors.primary else Obsidian.colors.border,
+        animationSpec = tween(200),
+        label = "borderColor"
+    )
+
+    val elevation by animateFloatAsState(
+        targetValue = if (isFocused) 8f else 0f,
+        animationSpec = tween(200),
+        label = "elevation"
+    )
 
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier
-            .height(52.dp)
+            .height(56.dp)
+            .shadow(elevation.dp, RoundedCornerShape(Obsidian.radius.input), spotColor = Obsidian.colors.primary.copy(alpha = 0.2f))
             .clip(RoundedCornerShape(Obsidian.radius.input))
             .background(Obsidian.colors.surface)
             .border(
                 width = if (isFocused) 1.5.dp else 1.dp,
-                color = if (isFocused) Obsidian.colors.borderFocus else Obsidian.colors.border,
+                color = borderColor,
                 shape = RoundedCornerShape(Obsidian.radius.input)
-            ),
+            )
+            .focusRequester(focusRequester)
+            .onFocusChanged { isFocused = it.isFocused },
         enabled = enabled,
         singleLine = singleLine,
         textStyle = Obsidian.typography.bodyLarge.copy(color = Obsidian.colors.textPrimary),
@@ -432,11 +556,6 @@ fun ObsidianTextField(
             }
         }
     )
-
-    // Track focus
-    LaunchedEffect(Unit) {
-        // Note: In real implementation, use FocusRequester
-    }
 }
 
 @Composable
@@ -444,31 +563,74 @@ fun ObsidianSearchField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    placeholder: String = "검색...",
+    placeholder: String = "Search tones...",
     onClear: (() -> Unit)? = null
 ) {
-    ObsidianTextField(
+    var isFocused by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+
+    val borderColor by animateColorAsState(
+        targetValue = if (isFocused) Obsidian.colors.primary.copy(alpha = 0.5f) else Obsidian.colors.border,
+        label = "borderColor"
+    )
+
+    BasicTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier,
-        placeholder = placeholder,
-        leadingIcon = Icons.Rounded.Search,
-        trailingIcon = if (value.isNotEmpty() && onClear != null) {
-            {
-                IconButton(
-                    onClick = onClear,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Close,
-                        contentDescription = "Clear",
-                        tint = Obsidian.colors.textMuted,
-                        modifier = Modifier.size(18.dp)
-                    )
+        modifier = modifier
+            .height(48.dp)
+            .clip(RoundedCornerShape(Obsidian.radius.full))
+            .background(Obsidian.colors.surfaceElevated)
+            .border(
+                width = 1.dp,
+                color = borderColor,
+                shape = RoundedCornerShape(Obsidian.radius.full)
+            )
+            .focusRequester(focusRequester)
+            .onFocusChanged { isFocused = it.isFocused },
+        singleLine = true,
+        textStyle = Obsidian.typography.bodyLarge.copy(color = Obsidian.colors.textPrimary),
+        cursorBrush = SolidColor(Obsidian.colors.primary),
+        decorationBox = { innerTextField ->
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Search,
+                    contentDescription = null,
+                    tint = if (isFocused) Obsidian.colors.primary else Obsidian.colors.textMuted,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(12.dp))
+
+                Box(modifier = Modifier.weight(1f)) {
+                    if (value.isEmpty()) {
+                        Text(
+                            text = placeholder,
+                            style = Obsidian.typography.bodyLarge,
+                            color = Obsidian.colors.textMuted
+                        )
+                    }
+                    innerTextField()
+                }
+
+                if (value.isNotEmpty() && onClear != null) {
+                    IconButton(
+                        onClick = onClear,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Close,
+                            contentDescription = "Clear",
+                            tint = Obsidian.colors.textMuted,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
-        } else {
-            null
         }
     )
 }
@@ -478,7 +640,7 @@ fun ObsidianPasswordField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    placeholder: String = "비밀번호"
+    placeholder: String = "Password"
 ) {
     var isPasswordVisible by remember { mutableStateOf(false) }
 
@@ -516,21 +678,24 @@ fun ObsidianChip(
     onClick: (() -> Unit)? = null,
     leadingIcon: ImageVector? = null
 ) {
-    val bgColor = if (selected) Obsidian.colors.primaryMuted else Obsidian.colors.surfaceHighlight
-    val textColor = if (selected) Obsidian.colors.primary else Obsidian.colors.textSecondary
-    val borderColor = if (selected) Obsidian.colors.primary.copy(alpha = 0.5f) else Color.Transparent
+    val bgColor by animateColorAsState(
+        targetValue = if (selected) Obsidian.colors.primary.copy(alpha = 0.15f) else Obsidian.colors.surfaceHighlight,
+        label = "bgColor"
+    )
+    val textColor by animateColorAsState(
+        targetValue = if (selected) Obsidian.colors.primaryLight else Obsidian.colors.textSecondary,
+        label = "textColor"
+    )
+    val borderColor by animateColorAsState(
+        targetValue = if (selected) Obsidian.colors.primary.copy(alpha = 0.4f) else Color.Transparent,
+        label = "borderColor"
+    )
 
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(Obsidian.radius.chip))
             .background(bgColor)
-            .then(
-                if (selected) {
-                    Modifier.border(1.dp, borderColor, RoundedCornerShape(Obsidian.radius.chip))
-                } else {
-                    Modifier
-                }
-            )
+            .border(1.dp, borderColor, RoundedCornerShape(Obsidian.radius.chip))
             .then(
                 if (onClick != null) {
                     Modifier.clickable(onClick = onClick)
@@ -538,7 +703,7 @@ fun ObsidianChip(
                     Modifier
                 }
             )
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (leadingIcon != null) {
@@ -546,9 +711,9 @@ fun ObsidianChip(
                 imageVector = leadingIcon,
                 contentDescription = null,
                 tint = textColor,
-                modifier = Modifier.size(14.dp)
+                modifier = Modifier.size(16.dp)
             )
-            Spacer(Modifier.width(4.dp))
+            Spacer(Modifier.width(6.dp))
         }
         Text(
             text = label,
@@ -566,9 +731,10 @@ fun ObsidianTag(
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(Obsidian.radius.xs))
+            .clip(RoundedCornerShape(Obsidian.radius.chip))
             .background(color.copy(alpha = 0.15f))
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .border(1.dp, color.copy(alpha = 0.3f), RoundedCornerShape(Obsidian.radius.chip))
+            .padding(horizontal = 10.dp, vertical = 4.dp)
     ) {
         Text(
             text = label,
@@ -620,7 +786,7 @@ fun ObsidianCheckbox(
 
     Box(
         modifier = modifier
-            .size(22.dp)
+            .size(24.dp)
             .clip(RoundedCornerShape(6.dp))
             .background(bgColor)
             .border(1.5.dp, borderColor, RoundedCornerShape(6.dp))
@@ -676,14 +842,15 @@ fun ObsidianSectionHeader(
         Column {
             Text(
                 text = title,
-                style = Obsidian.typography.headlineSmall,
+                style = Obsidian.typography.titleLarge,
                 color = Obsidian.colors.textPrimary
             )
             if (subtitle != null) {
+                Spacer(Modifier.height(4.dp))
                 Text(
                     text = subtitle,
-                    style = Obsidian.typography.caption,
-                    color = Obsidian.colors.textMuted
+                    style = Obsidian.typography.bodySmall,
+                    color = Obsidian.colors.textSecondary
                 )
             }
         }

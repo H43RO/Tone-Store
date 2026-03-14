@@ -22,25 +22,23 @@ import androidx.compose.ui.unit.sp
 import com.haero.tonestore.R
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.presentation.ui.components.PedalColorUtils
-import com.haero.tonestore.ui.components.LocalEmberGlassTheme
+import com.haero.tonestore.ui.designsystem.Obsidian
 
 /**
- * 톤 세팅 카드에서 페달 미리보기를 표시하는 Glass 스타일 컴포넌트
+ * 톤 세팅 카드에서 페달 미리보기를 표시하는 스타일 컴포넌트
  * 최대 4개의 페달 아이콘을 가로로 표시하고, 초과 페달은 "+N" 표시
- * 페달 고유 색상은 유지하면서 Glassmorphism 효과 적용
+ * 페달 고유 색상은 유지하면서 Obsidian 스타일 효과 적용
  */
 @Composable
 fun PedalIconsRow(
     pedals: List<Pedal>,
     modifier: Modifier = Modifier
 ) {
-    val theme = LocalEmberGlassTheme.current
-
     if (pedals.isEmpty()) {
         Text(
             text = stringResource(R.string.no_pedals_short),
             fontSize = 12.sp,
-            color = theme.textSecondary,
+            color = Obsidian.colors.textSecondary,
             modifier = modifier
         )
         return
@@ -62,27 +60,24 @@ fun PedalIconsRow(
                 text = "+${pedals.size - 4}",
                 fontWeight = FontWeight.Bold,
                 fontSize = 11.sp,
-                color = theme.textSecondary
+                color = Obsidian.colors.textSecondary
             )
         }
     }
 }
 
 /**
- * 개별 페달 아이콘 - Glassmorphism + 페달 고유 색상 유지
+ * 개별 페달 아이콘
  */
 @Composable
 private fun GlassPedalIcon(pedal: Pedal, modifier: Modifier = Modifier) {
-    val theme = LocalEmberGlassTheme.current
-
     val pedalColor = if (pedal.color != null) {
         Color(pedal.color)
     } else {
-        theme.primary
+        Obsidian.colors.primary
     }
 
     val isLightBackground = PedalColorUtils.isLightColor(pedal.color)
-    // 항상 흰색 사용 (다크 테마에서 시인성 확보)
     val contentColor = Color.White
 
     // 페달 이름의 첫 3글자

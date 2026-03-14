@@ -260,7 +260,9 @@ fun LiquidBottomTabs(
                         },
                         highlight = {
                             val progress = dampedDragAnimation.pressProgress
-                            Highlight.Default.copy(alpha = progress)
+                            Highlight.Default.copy(
+                                alpha = progress * 0.5f // Vivid Orange Glow behavior needs to be handled via Backdrop config if possible, else just alpha
+                            )
                         },
                         onDrawSurface = { drawRect(containerColor) }
                     )
@@ -298,7 +300,9 @@ fun LiquidBottomTabs(
                     },
                     highlight = {
                         val progress = dampedDragAnimation.pressProgress
-                        Highlight.Default.copy(alpha = progress)
+                        Highlight.Default.copy(
+                            alpha = Math.max(0.15f, progress) // Stronger base visibility, brightens on press
+                        )
                     },
                     shadow = {
                         val progress = dampedDragAnimation.pressProgress

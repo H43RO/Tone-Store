@@ -253,30 +253,30 @@ private fun StepProgressIndicator(
         ) {
             Text(
                 text = stringResource(steps[currentStep].titleResId),
-                style = Obsidian.typography.headlineSmall,
+                style = Obsidian.typography.titleLarge, // Bolder step title
                 color = Obsidian.colors.textPrimary
             )
             Text(
                 text = stringResource(R.string.step_indicator, currentStep + 1, totalSteps),
-                style = Obsidian.typography.bodyMedium,
+                style = Obsidian.typography.labelMedium,
                 color = Obsidian.colors.textSecondary
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         LinearProgressIndicator(
             progress = { progress },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(6.dp)
-                .clip(RoundedCornerShape(3.dp)),
+                .height(8.dp) // Thicker indicator
+                .clip(RoundedCornerShape(4.dp)),
             color = Obsidian.colors.primary,
-            trackColor = Obsidian.colors.surfaceHighlight,
+            trackColor = Obsidian.colors.surfaceElevated,
             strokeCap = StrokeCap.Round
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -301,17 +301,17 @@ private fun StepDot(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(horizontal = 4.dp), // add slight padding
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
-                .size(24.dp)
+                .size(28.dp) // larger hit area and visual balance
                 .background(
                     color = when {
-                        isCompleted -> Obsidian.colors.primary
+                        isCompleted -> Obsidian.colors.secondary
                         isCurrent -> Obsidian.colors.primary
-                        else -> Obsidian.colors.surfaceHighlight
+                        else -> Obsidian.colors.surfaceElevated
                     },
                     shape = CircleShape
                 ),
@@ -322,17 +322,17 @@ private fun StepDot(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
                     tint = Obsidian.colors.bgPrimary,
-                    modifier = Modifier.size(14.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             } else if (isCurrent) {
                 Box(
                     modifier = Modifier
-                        .size(8.dp)
+                        .size(10.dp)
                         .background(Obsidian.colors.bgPrimary, CircleShape)
                 )
             }
         }
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = label,
             style = Obsidian.typography.labelSmall,
@@ -342,7 +342,8 @@ private fun StepDot(
                 Obsidian.colors.textMuted
             },
             textAlign = TextAlign.Center,
-            fontSize = 10.sp
+            fontSize = 11.sp, // improved legibility for Pretendard
+            fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium
         )
     }
 }
@@ -361,8 +362,8 @@ private fun StepperBottomBar(
 ) {
     ObsidianSurface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(topStart = Obsidian.radius.lg, topEnd = Obsidian.radius.lg),
-        elevation = 16.dp
+        shape = RoundedCornerShape(topStart = Obsidian.radius.xl, topEnd = Obsidian.radius.xl), // slightly rounder top
+        elevation = 0.dp // Flatter design
     ) {
         Row(
             modifier = Modifier

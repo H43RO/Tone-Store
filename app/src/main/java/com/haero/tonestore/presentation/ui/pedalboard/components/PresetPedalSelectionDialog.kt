@@ -113,7 +113,7 @@ fun PresetPedalSelectionDialog(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = com.haero.tonestore.ui.designsystem.Obsidian.colors.bgSecondary,
         dragHandle = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -147,13 +147,13 @@ fun PresetPedalSelectionDialog(
                     imageVector = Icons.Rounded.Tune,
                     contentDescription = null,
                     modifier = Modifier.size(28.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = com.haero.tonestore.ui.designsystem.Obsidian.colors.primary
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = stringResource(R.string.add_effect),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
+                    style = com.haero.tonestore.ui.designsystem.Obsidian.typography.headlineSmall,
+                    color = com.haero.tonestore.ui.designsystem.Obsidian.colors.textPrimary
                 )
             }
 
@@ -201,7 +201,7 @@ fun PresetPedalSelectionDialog(
                     ) {
                         Text(
                             text = title,
-                            style = MaterialTheme.typography.labelLarge,
+                            style = com.haero.tonestore.ui.designsystem.Obsidian.typography.labelLarge,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             color = contentColor,
                             textAlign = TextAlign.Center
@@ -242,10 +242,10 @@ fun PresetPedalSelectionDialog(
                         onValueChange = { searchQuery = it },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurface
+                        textStyle = com.haero.tonestore.ui.designsystem.Obsidian.typography.bodyMedium.copy(
+                            color = com.haero.tonestore.ui.designsystem.Obsidian.colors.textPrimary
                         ),
-                        cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
+                        cursorBrush = androidx.compose.ui.graphics.SolidColor(com.haero.tonestore.ui.designsystem.Obsidian.colors.primary),
                         decorationBox = { innerTextField ->
                             if (searchQuery.isEmpty()) {
                                 Text(
@@ -338,14 +338,14 @@ fun PresetPedalSelectionDialog(
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = "아직 커스텀 페달이 없어요",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = com.haero.tonestore.ui.designsystem.Obsidian.typography.bodyMedium,
+                                color = com.haero.tonestore.ui.designsystem.Obsidian.colors.textSecondary
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = "프리셋 탭에서 커스텀 페달을 만들어보세요!",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                style = com.haero.tonestore.ui.designsystem.Obsidian.typography.bodySmall,
+                                color = com.haero.tonestore.ui.designsystem.Obsidian.colors.textMuted
                             )
                         }
                     }
@@ -384,7 +384,7 @@ private fun CustomPedalCard(
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale = if (isPressed) 0.98f else 1f
 
-    val primaryColor = MaterialTheme.colorScheme.primary
+    val primaryColor = com.haero.tonestore.ui.designsystem.Obsidian.colors.primary
 
     Box(
         modifier = modifier
@@ -392,13 +392,13 @@ private fun CustomPedalCard(
             .height(80.dp)
             .scale(scale)
             .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.6f))
+            .background(com.haero.tonestore.ui.designsystem.Obsidian.colors.surfaceElevated.copy(alpha = 0.6f))
             .border(
                 width = 1.dp,
                 brush = Brush.linearGradient(
                     colors = listOf(
                         primaryColor.copy(alpha = 0.3f),
-                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.1f)
+                        com.haero.tonestore.ui.designsystem.Obsidian.colors.borderFocus.copy(alpha = 0.1f)
                     )
                 ),
                 shape = RoundedCornerShape(20.dp)
@@ -436,15 +436,15 @@ private fun CustomPedalCard(
             ) {
                 Text(
                     text = stringResource(R.string.create_custom_effect),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = com.haero.tonestore.ui.designsystem.Obsidian.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = com.haero.tonestore.ui.designsystem.Obsidian.colors.textPrimary
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = stringResource(R.string.custom_knob_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = com.haero.tonestore.ui.designsystem.Obsidian.typography.bodySmall,
+                    color = com.haero.tonestore.ui.designsystem.Obsidian.colors.textSecondary
                 )
             }
         }

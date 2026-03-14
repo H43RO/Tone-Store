@@ -32,7 +32,6 @@ import com.haero.tonestore.ui.designsystem.Obsidian
 
 /**
  * SortFilterBar - Obsidian 스타일 정렬 옵션 바
- * (그리드/리스트 뷰 토글 제거됨)
  */
 @Composable
 fun SortFilterBar(
@@ -53,12 +52,12 @@ fun SortFilterBar(
         Box {
             Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(Obsidian.radius.button))
+                    .clip(RoundedCornerShape(999.dp))
                     .background(Obsidian.colors.surfaceElevated)
                     .border(
                         1.dp,
                         Obsidian.colors.borderSubtle,
-                        RoundedCornerShape(Obsidian.radius.button)
+                        RoundedCornerShape(999.dp)
                     )
                     .clickable { sortExpanded = !sortExpanded }
                     .padding(horizontal = 14.dp, vertical = 8.dp),
@@ -86,14 +85,14 @@ fun SortFilterBar(
                 onDismissRequest = { sortExpanded = false },
                 modifier = Modifier
                     .background(Obsidian.colors.surfaceElevated)
-                    .border(1.dp, Obsidian.colors.border, RoundedCornerShape(4.dp))
+                    .border(1.dp, Obsidian.colors.borderSubtle, RoundedCornerShape(Obsidian.radius.sm))
             ) {
                 DropdownMenuItem(
                     text = {
                         Text(
                             stringResource(R.string.sort_favorites_first),
                             style = Obsidian.typography.bodyMedium,
-                            color = if (sortOption == SortOption.FAVORITES_FIRST) Obsidian.colors.primary else Obsidian.colors.textPrimary
+                            color = if (sortOption == SortOption.FAVORITES_FIRST) Obsidian.colors.primaryLight else Obsidian.colors.textPrimary
                         )
                     },
                     onClick = {
@@ -106,7 +105,7 @@ fun SortFilterBar(
                         Text(
                             stringResource(R.string.sort_date_first),
                             style = Obsidian.typography.bodyMedium,
-                            color = if (sortOption == SortOption.DATE_FIRST) Obsidian.colors.primary else Obsidian.colors.textPrimary
+                            color = if (sortOption == SortOption.DATE_FIRST) Obsidian.colors.primaryLight else Obsidian.colors.textPrimary
                         )
                     },
                     onClick = {

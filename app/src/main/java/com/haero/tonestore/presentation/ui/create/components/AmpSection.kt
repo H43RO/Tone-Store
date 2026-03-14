@@ -1,8 +1,6 @@
 package com.haero.tonestore.presentation.ui.create.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -18,7 +16,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.haero.tonestore.R
@@ -26,6 +23,7 @@ import com.haero.tonestore.domain.model.AmpSetting
 import com.haero.tonestore.presentation.ui.components.RotaryKnob
 import com.haero.tonestore.presentation.ui.components.SectionHeader
 import com.haero.tonestore.ui.designsystem.Obsidian
+import com.haero.tonestore.ui.designsystem.ObsidianSurface
 import com.haero.tonestore.ui.designsystem.ObsidianTextField
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -64,28 +62,25 @@ fun AmpSection(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
             } else if (!ampSetting.ampModel.isNullOrBlank()) {
                 Text(
                     text = ampSetting.ampModel,
-                    style = Obsidian.typography.titleMedium,
+                    style = Obsidian.typography.headlineMedium,
                     color = Obsidian.colors.textPrimary
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(Obsidian.radius.card))
-                    .background(Obsidian.colors.surfaceHighlight)
-                    .padding(16.dp)
+            ObsidianSurface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(Obsidian.radius.lg)
             ) {
                 FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(Obsidian.spacing.lg),
                     maxItemsInEachRow = 4,
                     horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     RotaryKnob(
                         value = ampSetting.gain,
@@ -145,7 +140,7 @@ fun AmpSection(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

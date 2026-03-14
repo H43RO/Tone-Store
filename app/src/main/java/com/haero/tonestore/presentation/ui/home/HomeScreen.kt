@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -24,7 +23,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -48,9 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.haero.tonestore.R
@@ -64,6 +60,7 @@ import com.haero.tonestore.ui.designsystem.ObsidianButton
 import com.haero.tonestore.ui.designsystem.ObsidianLoadingIndicator
 import com.haero.tonestore.ui.designsystem.ObsidianOutlinedButton
 import com.haero.tonestore.ui.designsystem.ObsidianSearchField
+import com.haero.tonestore.ui.designsystem.ObsidianTopBar
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -119,18 +116,19 @@ fun HomeScreen(
         Box(modifier = Modifier.fillMaxSize()) {
             // 메인 콘텐츠 Column
             Column(modifier = Modifier.fillMaxSize()) {
-                ObsidianHomeHeader(
-                    totalCount = state.toneSettings.size
+                ObsidianTopBar(
+                    title = stringResource(R.string.app_name),
+                    subtitle = stringResource(R.string.tones_saved_count, state.toneSettings.size),
+                    modifier = Modifier.statusBarsPadding()
                 )
 
                 var sortExpanded by remember { mutableStateOf(false) }
 
-                Spacer(Modifier.height(16.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = Obsidian.spacing.screenPadding)
-                        .padding(vertical = Obsidian.spacing.md),
+                        .padding(bottom = Obsidian.spacing.md),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     ObsidianSearchField(
@@ -149,12 +147,12 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .background(
                                         color = Obsidian.colors.surfaceElevated,
-                                        shape = RoundedCornerShape(Obsidian.radius.md)
+                                        shape = RoundedCornerShape(Obsidian.radius.full)
                                     )
                                     .border(
                                         width = 1.dp,
                                         color = Obsidian.colors.borderSubtle,
-                                        shape = RoundedCornerShape(Obsidian.radius.md)
+                                        shape = RoundedCornerShape(Obsidian.radius.full)
                                     )
                                     .size(48.dp)
                             ) {
@@ -269,35 +267,7 @@ fun HomeScreen(
     }
 }
 
-@Composable
-private fun ObsidianHomeHeader(
-    totalCount: Int,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .statusBarsPadding()
-            .padding(horizontal = Obsidian.spacing.screenPadding)
-            .padding(top = Obsidian.spacing.lg)
-    ) {
-        // Title & Count
-        Column {
-            Text(
-                text = stringResource(R.string.app_name),
-                style = Obsidian.typography.displaySmall,
-                color = Obsidian.colors.textPrimary
-            )
-            if (totalCount > 0) {
-                Text(
-                    text = stringResource(R.string.tones_saved_count, totalCount),
-                    style = Obsidian.typography.bodySmall,
-                    color = Obsidian.colors.textSecondary
-                )
-            }
-        }
-    }
-}
+// Removed ObsidianHomeHeader
 
 @Composable
 private fun ObsidianEmptyToneState(
@@ -313,56 +283,20 @@ private fun ObsidianEmptyToneState(
             ),
         modifier = modifier
     ) {
-        Column(
-            modifier = Modifier.padding(Obsidian.spacing.xxxl),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .background(Obsidian.colors.primaryMuted)
-                    .border(1.dp, Obsidian.colors.primary.copy(alpha = 0.3f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.MusicNote,
-                    contentDescription = null,
-                    tint = Obsidian.colors.primary,
-                    modifier = Modifier.size(48.dp)
-                )
+        com.haero.tonestore.ui.designsystem.ObsidianEmptyState(
+            icon = Icons.Rounded.MusicNote,
+            title = stringResource(R.string.empty_state_title_v2),
+            description = stringResource(R.string.empty_state_subtitle_v2),
+            action = {
+                ObsidianButton(
+                    onClick = onCreateClick,
+                    icon = Icons.Rounded.Add,
+                    modifier = Modifier.fillMaxWidth(0.7f)
+                ) {
+                    Text(stringResource(R.string.add_first_tone))
+                }
             }
-
-            Spacer(modifier = Modifier.height(Obsidian.spacing.xxl))
-
-            Text(
-                text = stringResource(R.string.empty_state_title_v2),
-                style = Obsidian.typography.headlineMedium,
-                color = Obsidian.colors.textPrimary
-            )
-
-            Spacer(modifier = Modifier.height(Obsidian.spacing.sm))
-
-            Text(
-                text = stringResource(R.string.empty_state_subtitle_v2),
-                style = Obsidian.typography.bodyMedium,
-                color = Obsidian.colors.textSecondary,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(Obsidian.spacing.xxl))
-
-            ObsidianButton(
-                onClick = onCreateClick,
-                icon = Icons.Rounded.Add,
-                modifier = Modifier.fillMaxWidth(0.7f)
-            ) {
-                Text(stringResource(R.string.add_first_tone))
-            }
-
-            Spacer(Modifier.height(64.dp))
-        }
+        )
     }
 }
 
@@ -380,50 +314,19 @@ private fun ObsidianEmptySearchState(
             ),
         modifier = modifier
     ) {
-        Column(
-            modifier = Modifier.padding(Obsidian.spacing.xxxl),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape)
-                    .background(Obsidian.colors.surfaceHighlight),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.SearchOff,
-                    contentDescription = null,
-                    tint = Obsidian.colors.textMuted,
-                    modifier = Modifier.size(36.dp)
-                )
+        com.haero.tonestore.ui.designsystem.ObsidianEmptyState(
+            icon = Icons.Outlined.SearchOff,
+            title = stringResource(R.string.no_results_found),
+            description = stringResource(R.string.empty_search_subtitle_v2),
+            action = {
+                ObsidianOutlinedButton(
+                    onClick = onClearSearch,
+                    icon = Icons.Rounded.Close
+                ) {
+                    Text(stringResource(R.string.clear_search_button))
+                }
             }
-
-            Spacer(modifier = Modifier.height(Obsidian.spacing.xl))
-
-            Text(
-                text = stringResource(R.string.no_results_found),
-                style = Obsidian.typography.headlineSmall,
-                color = Obsidian.colors.textPrimary
-            )
-
-            Spacer(modifier = Modifier.height(Obsidian.spacing.xs))
-
-            Text(
-                text = stringResource(R.string.empty_search_subtitle_v2),
-                style = Obsidian.typography.bodyMedium,
-                color = Obsidian.colors.textSecondary
-            )
-
-            Spacer(modifier = Modifier.height(Obsidian.spacing.xl))
-
-            ObsidianOutlinedButton(
-                onClick = onClearSearch,
-                icon = Icons.Rounded.Close
-            ) {
-                Text(stringResource(R.string.clear_search_button))
-            }
-        }
+        )
     }
 }
 
@@ -432,54 +335,20 @@ private fun ObsidianLoginRequiredState(
     onLoginClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier.padding(Obsidian.spacing.xxxl),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-                .background(Obsidian.colors.primaryMuted)
-                .border(1.dp, Obsidian.colors.primary.copy(alpha = 0.4f), CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.Person,
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = Obsidian.colors.primary
-            )
+    com.haero.tonestore.ui.designsystem.ObsidianEmptyState(
+        icon = Icons.Rounded.Person,
+        title = stringResource(R.string.login_required),
+        description = stringResource(R.string.login_required_tone_message),
+        modifier = modifier,
+        action = {
+            ObsidianButton(
+                onClick = onLoginClick,
+                modifier = Modifier.fillMaxWidth(0.6f)
+            ) {
+                Text(stringResource(R.string.login_button))
+            }
         }
-
-        Spacer(modifier = Modifier.height(Obsidian.spacing.xxl))
-
-        Text(
-            text = stringResource(R.string.login_required),
-            style = Obsidian.typography.headlineMedium,
-            textAlign = TextAlign.Center,
-            color = Obsidian.colors.textPrimary
-        )
-
-        Spacer(modifier = Modifier.height(Obsidian.spacing.sm))
-
-        Text(
-            text = stringResource(R.string.login_required_tone_message),
-            style = Obsidian.typography.bodyMedium,
-            color = Obsidian.colors.textSecondary,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(Obsidian.spacing.xxl))
-
-        ObsidianButton(
-            onClick = onLoginClick,
-            modifier = Modifier.fillMaxWidth(0.6f)
-        ) {
-            Text(stringResource(R.string.login_button))
-        }
-    }
+    )
 }
 
 @Composable

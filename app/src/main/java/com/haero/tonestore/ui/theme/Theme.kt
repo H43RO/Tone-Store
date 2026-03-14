@@ -14,7 +14,7 @@ import com.haero.tonestore.ui.designsystem.ObsidianColors
 import com.haero.tonestore.ui.designsystem.ObsidianThemeData
 
 /**
- * ToneStore Theme - Obsidian Copper
+ * ToneStore Theme - Slate Studio
  */
 
 private val DarkColorScheme = darkColorScheme(

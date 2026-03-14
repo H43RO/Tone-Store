@@ -23,37 +23,37 @@ import androidx.compose.ui.unit.sp
 // ============================================================
 
 object ObsidianColors {
-    // Background (깊은 다크)
-    val bgPrimary = Color(0xFF0C0C0E)
-    val bgSecondary = Color(0xFF141416)
-    val bgTertiary = Color(0xFF1A1A1F)
+    // Background (Rich dark with blue undertones)
+    val bgPrimary = Color(0xFF0A0A0F)
+    val bgSecondary = Color(0xFF0F0F13)
+    val bgTertiary = Color(0xFF131318)
 
-    // Surface (카드, 컨테이너)
-    val surface = Color(0xFF1C1C21)
-    val surfaceElevated = Color(0xFF232328)
-    val surfaceHighlight = Color(0xFF2A2A30)
+    // Surface (Subtle Blue-tint Dark)
+    val surface = Color(0xFF16161D)
+    val surfaceElevated = Color(0xFF1C1C24)
+    val surfaceHighlight = Color(0xFF22222B)
 
     // Border
-    val border = Color(0xFF2A2A30)
-    val borderSubtle = Color(0xFF222226)
-    val borderFocus = Color(0xFFE88A3C)
+    val border = Color(0xFF262630)
+    val borderSubtle = Color(0xFF1C1C24)
+    val borderFocus = Color(0xFF818CF8) // Electric Indigo
 
-    // Primary (Tangerine 계열 - Amber와 Copper 사이 밝은 톤)
-    val primary = Color(0xFFE88A3C) // 메인 탱저린 오렌지
-    val primaryLight = Color(0xFFF5A54E) // 밝은 앰버 오렌지
-    val primaryLighter = Color(0xFFFFBB70) // 더 밝은 피치 오렌지
-    val primaryDark = Color(0xFFD4752E) // 약간 어두운 오렌지
-    val primaryMuted = Color(0xFFE88A3C).copy(alpha = 0.15f)
+    // Primary (Electric Indigo)
+    val primary = Color(0xFF818CF8)
+    val primaryLight = Color(0xFFA5B4FC)
+    val primaryLighter = Color(0xFFC7D2FE)
+    val primaryDark = Color(0xFF6366F1)
+    val primaryMuted = Color(0xFF818CF8).copy(alpha = 0.15f)
 
-    // Secondary (따뜻한 보조 색상)
-    val secondary = Color(0xFFC9956A)
-    val secondaryLight = Color(0xFFDAAA80)
+    // Secondary (Warm Amber)
+    val secondary = Color(0xFFF59E0B)
+    val secondaryLight = Color(0xFFFBBF24)
 
     // Text
-    val textPrimary = Color(0xFFF4F4F5)
-    val textSecondary = Color(0xFFA1A1AA)
-    val textMuted = Color(0xFF52525B)
-    val textDisabled = Color(0xFF3F3F46)
+    val textPrimary = Color(0xFFF8FAFC)
+    val textSecondary = Color(0xFF94A3B8)
+    val textMuted = Color(0xFF64748B)
+    val textDisabled = Color(0xFF334155)
 
     // Semantic Colors
     val success = Color(0xFF10B981)
@@ -66,37 +66,37 @@ object ObsidianColors {
     val infoMuted = Color(0xFF3B82F6).copy(alpha = 0.15f)
 
     // Special
-    val favorite = Color(0xFFB91C1C)
-    val favoriteMuted = Color(0xFFB91C1C).copy(alpha = 0.15f)
+    val favorite = Color(0xFFEF4444)
+    val favoriteMuted = Color(0xFFEF4444).copy(alpha = 0.15f)
 
-    // Pedal Type Colors (조화롭게 조정된 버전)
+    // Pedal Type Colors (Adjusted to fit Slate Studio)
     object Pedal {
-        val overdrive = Color(0xFF27AE60) // 녹색
-        val distortion = Color(0xFFE74C3C) // 빨강
-        val fuzz = Color(0xFFE67E22) // 주황
-        val boost = Color(0xFFF1C40F) // 노랑
-        val compressor = Color(0xFF9B59B6) // 보라
-        val chorus = Color(0xFF3498DB) // 파랑
-        val flanger = Color(0xFF1ABC9C) // 청록
-        val phaser = Color(0xFFE91E63) // 핑크
-        val tremolo = Color(0xFF00BCD4) // 시안
-        val vibrato = Color(0xFF8BC34A) // 연두
-        val delay = Color(0xFF673AB7) // 딥퍼플
-        val reverb = Color(0xFF2196F3) // 블루
-        val looper = Color(0xFF795548) // 갈색
-        val eq = Color(0xFF607D8B) // 그레이블루
-        val noisegate = Color(0xFF455A64) // 다크그레이
-        val tuner = Color(0xFF78909C) // 라이트그레이
-        val volumepedal = Color(0xFF37474F) // 차콜
-        val wahwah = Color(0xFFFF5722) // 딥오렌지
-        val pitchshifter = Color(0xFF9C27B0) // 퍼플
-        val octave = Color(0xFF00897B) // 틸
-        val harmonizer = Color(0xFFAB47BC) // 라이트퍼플
-        val synth = Color(0xFF7C4DFF) // 딥퍼플
-        val filter = Color(0xFFFF4081) // 핑크
-        val modulation = Color(0xFF26A69A) // 틸
-        val expression = Color(0xFF546E7A) // 블루그레이
-        val other = Color(0xFF757575) // 그레이
+        val overdrive = Color(0xFF10B981) // Emerald
+        val distortion = Color(0xFFEF4444) // Red
+        val fuzz = Color(0xFFF97316) // Orange
+        val boost = Color(0xFFEAB308) // Yellow
+        val compressor = Color(0xFF8B5CF6) // Violet
+        val chorus = Color(0xFF3B82F6) // Blue
+        val flanger = Color(0xFF14B8A6) // Teal
+        val phaser = Color(0xFFEC4899) // Pink
+        val tremolo = Color(0xFF06B6D4) // Cyan
+        val vibrato = Color(0xFF84CC16) // Lime
+        val delay = Color(0xFF6366F1) // Indigo
+        val reverb = Color(0xFF0EA5E9) // Sky
+        val looper = Color(0xFFA8A29E) // Stone
+        val eq = Color(0xFF64748B) // Slate
+        val noisegate = Color(0xFF334155) // Dark Slate
+        val tuner = Color(0xFF94A3B8) // Light Slate
+        val volumepedal = Color(0xFF0F172A) // Very Dark Slate
+        val wahwah = Color(0xFFF43F5E) // Rose
+        val pitchshifter = Color(0xFFD946EF) // Fuchsia
+        val octave = Color(0xFF0D9488) // Dark Teal
+        val harmonizer = Color(0xFFC026D3) // Dark Fuchsia
+        val synth = Color(0xFF7C3AED) // Dark Violet
+        val filter = Color(0xFFBE185D) // Dark Pink
+        val modulation = Color(0xFF0F766E) // Very Dark Teal
+        val expression = Color(0xFF475569) // Mid Slate
+        val other = Color(0xFF71717A) // Zinc
     }
 }
 
@@ -106,10 +106,10 @@ object ObsidianColors {
 
 object ObsidianSpacing {
     val xs = 4.dp
-    val sm = 8.dp
-    val md = 12.dp
-    val lg = 16.dp
-    val xl = 20.dp
+    val sm = 6.dp
+    val md = 8.dp
+    val lg = 12.dp
+    val xl = 16.dp
     val xxl = 24.dp
     val xxxl = 32.dp
 
@@ -135,11 +135,11 @@ object ObsidianRadius {
     val full = 999.dp // For circular shapes
 
     // Component specific
-    val card = 16.dp
-    val button = 12.dp
-    val input = 12.dp
-    val chip = 8.dp
-    val bottomNav = 20.dp
+    val card = 20.dp
+    val button = 999.dp
+    val input = 16.dp
+    val chip = 999.dp
+    val bottomNav = 999.dp
     val dialog = 24.dp
 }
 
@@ -213,51 +213,51 @@ object ObsidianTypography {
     )
 
     val titleMedium = TextStyle(
-        fontSize = 14.sp,
+        fontSize = 15.sp, // Increased
         fontWeight = FontWeight.Medium,
         lineHeight = 20.sp
     )
 
     val titleSmall = TextStyle(
-        fontSize = 13.sp,
+        fontSize = 14.sp, // Increased
         fontWeight = FontWeight.Medium,
         lineHeight = 18.sp
     )
 
     // Body
     val bodyLarge = TextStyle(
-        fontSize = 14.sp,
+        fontSize = 15.sp, // Increased
+        fontWeight = FontWeight.Normal,
+        lineHeight = 22.sp
+    )
+
+    val bodyMedium = TextStyle(
+        fontSize = 14.sp, // Increased
         fontWeight = FontWeight.Normal,
         lineHeight = 20.sp
     )
 
-    val bodyMedium = TextStyle(
-        fontSize = 13.sp,
+    val bodySmall = TextStyle(
+        fontSize = 13.sp, // Increased
         fontWeight = FontWeight.Normal,
         lineHeight = 18.sp
-    )
-
-    val bodySmall = TextStyle(
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Normal,
-        lineHeight = 16.sp
     )
 
     // Label
     val labelLarge = TextStyle(
-        fontSize = 13.sp,
+        fontSize = 14.sp, // Increased
         fontWeight = FontWeight.SemiBold,
-        lineHeight = 18.sp
+        lineHeight = 20.sp
     )
 
     val labelMedium = TextStyle(
-        fontSize = 11.sp,
+        fontSize = 12.sp, // Increased
         fontWeight = FontWeight.SemiBold,
         lineHeight = 16.sp
     )
 
     val labelSmall = TextStyle(
-        fontSize = 10.sp,
+        fontSize = 11.sp, // Increased
         fontWeight = FontWeight.SemiBold,
         lineHeight = 14.sp
     )
@@ -312,7 +312,11 @@ data class ObsidianColorsData(
     val info: Color = ObsidianColors.info,
     val infoMuted: Color = ObsidianColors.infoMuted,
     val favorite: Color = ObsidianColors.favorite,
-    val favoriteMuted: Color = ObsidianColors.favoriteMuted
+    val favoriteMuted: Color = ObsidianColors.favoriteMuted,
+    val pedalDistortion: Color = ObsidianColors.Pedal.distortion,
+    val pedalOverdrive: Color = ObsidianColors.Pedal.overdrive,
+    val pedalDelay: Color = ObsidianColors.Pedal.delay,
+    val pedalReverb: Color = ObsidianColors.Pedal.reverb
 )
 
 data class ObsidianSpacingData(

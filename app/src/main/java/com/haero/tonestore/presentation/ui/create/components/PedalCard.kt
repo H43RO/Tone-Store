@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -19,11 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Power
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,12 +30,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.haero.tonestore.domain.model.Pedal
 import com.haero.tonestore.domain.model.PedalType
 import com.haero.tonestore.presentation.ui.components.PedalColorUtils
 import com.haero.tonestore.presentation.ui.components.RotaryKnob
+import com.haero.tonestore.ui.designsystem.Obsidian
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -53,8 +51,8 @@ fun PedalCard(
         Color(pedal.color)
     } else {
         when (pedal.type) {
-            PedalType.PRESET -> MaterialTheme.colorScheme.primaryContainer
-            else -> MaterialTheme.colorScheme.secondaryContainer
+            PedalType.PRESET -> Obsidian.colors.primary.copy(alpha = 0.6f)
+            else -> Obsidian.colors.pedalDistortion
         }
     }
 
@@ -80,7 +78,7 @@ fun PedalCard(
     val contentColor = if (pedal.color != null) {
         if (isLightBackground) Color.Black else Color.White
     } else {
-        MaterialTheme.colorScheme.onSurface
+        Color.White
     }
 
     val adjustedContentColor = if (pedal.isEnabled) {
@@ -90,130 +88,123 @@ fun PedalCard(
     }
 
     val borderColor = if (pedal.isEnabled) {
-        backgroundColor.copy(alpha = 0.3f)
-    } else {
-        backgroundColor.copy(alpha = 0.15f)
-    }
-
-    val shadowElevation = if (pedal.isEnabled) 12.dp else 6.dp
-    val spotColor = if (pedal.isEnabled) {
         backgroundColor.copy(alpha = 0.5f)
     } else {
-        backgroundColor.copy(alpha = 0.25f)
+        backgroundColor.copy(alpha = 0.2f)
     }
 
-    Card(
+    Box(
         modifier = modifier
             .padding(4.dp)
             .shadow(
-                elevation = shadowElevation,
-                shape = RoundedCornerShape(12.dp),
-                spotColor = spotColor
-            ),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                elevation = if (pedal.isEnabled) 16.dp else 4.dp,
+                shape = RoundedCornerShape(16.dp),
+                spotColor = if (pedal.isEnabled) backgroundColor.copy(alpha = 0.6f) else Color.Transparent
+            )
+            .clip(RoundedCornerShape(16.dp))
+            .background(adjustedGradient)
+            .border(1.dp, borderColor, RoundedCornerShape(16.dp))
+            .padding(16.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(adjustedGradient)
-                .border(2.dp, borderColor, RoundedCornerShape(12.dp))
-                .padding(12.dp)
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = pedal.name,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = adjustedContentColor
-                    )
-
-                    if (isEditable) {
-                        IconButton(
-                            onClick = onRemove,
-                            modifier = Modifier.size(24.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "삭제",
-                                tint = if (isLightBackground) {
-                                    Color(0xFFB71C1C)
-                                } else {
-                                    Color(0xFFFF8A80)
-                                },
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
-                }
-
-                Spacer(Modifier.weight(1f))
-
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    pedal.knobs.forEachIndexed { index, knob ->
-                        RotaryKnob(
-                            value = knob.value,
-                            onValueChange = { newValue ->
-                                if (isEditable) onKnobChange(index, newValue)
-                            },
-                            label = knob.name,
-                            size = 56.dp,
-                            enabled = pedal.isEnabled && isEditable,
-                            modifier = Modifier.padding(horizontal = 4.dp),
-                            labelColor = adjustedContentColor,
-                            isPedalKnob = true
-                        )
-                    }
-                }
-
-                Spacer(Modifier.weight(1f))
+                Text(
+                    text = pedal.name,
+                    style = Obsidian.typography.titleMedium,
+                    color = adjustedContentColor
+                )
 
                 if (isEditable) {
-                    val powerButtonColor = if (pedal.isEnabled) {
-                        PedalColorUtils.calculateBorderColor(backgroundColor)
-                    } else {
-                        contentColor.copy(alpha = 0.2f)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .padding(top = 12.dp)
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(powerButtonColor)
-                            .clickable { onToggleEnabled() },
-                        contentAlignment = Alignment.Center
+                    IconButton(
+                        onClick = onRemove,
+                        modifier = Modifier.size(24.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Power,
-                            contentDescription = if (pedal.isEnabled) "끄기" else "켜기",
-                            tint = if (pedal.isEnabled) {
-                                if (PedalColorUtils.isLightColor(powerButtonColor)) {
-                                    Color.Black
-                                } else {
-                                    Color.White
-                                }
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "삭제",
+                            tint = if (isLightBackground) {
+                                Color(0xFFB71C1C)
                             } else {
-                                contentColor.copy(alpha = 0.5f)
-                            },
+                                Color(0xFFFF8A80)
+                            }.copy(alpha = 0.8f),
                             modifier = Modifier.size(20.dp)
                         )
                     }
+                }
+            }
+
+            Spacer(Modifier.weight(1f))
+
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp, bottom = 12.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                pedal.knobs.forEachIndexed { index, knob ->
+                    RotaryKnob(
+                        value = knob.value,
+                        onValueChange = { newValue ->
+                            if (isEditable) onKnobChange(index, newValue)
+                        },
+                        label = knob.name,
+                        size = 56.dp,
+                        enabled = pedal.isEnabled && isEditable,
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                        labelColor = adjustedContentColor,
+                        isPedalKnob = true
+                    )
+                }
+            }
+
+            Spacer(Modifier.weight(1f))
+
+            if (isEditable) {
+                // Footswitch (Metallic Power Button)
+                Box(
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(
+                            Brush.radialGradient(
+                                colors = listOf(
+                                    Color.White.copy(alpha = 0.8f),
+                                    Color.Gray
+                                )
+                            )
+                        )
+                        .border(2.dp, Color.DarkGray, CircleShape)
+                        .clickable { onToggleEnabled() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Indicator LED above it (simulated)
+                    val ledColor = if (pedal.isEnabled) Color.Red else Color.Black
+                    val ledGlow = if (pedal.isEnabled) Color.Red.copy(alpha = 0.6f) else Color.Transparent
+
+                    Box(
+                        modifier = Modifier
+                            .offset(y = (-32).dp)
+                            .size(8.dp)
+                            .shadow(8.dp, CircleShape, spotColor = ledGlow)
+                            .clip(CircleShape)
+                            .background(ledColor)
+                    )
+
+                    Icon(
+                        imageVector = Icons.Default.Power,
+                        contentDescription = if (pedal.isEnabled) "끄기" else "켜기",
+                        tint = Color.DarkGray,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }
